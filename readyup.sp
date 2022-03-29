@@ -783,6 +783,7 @@ void PrintCmd()
     int iTotalBonus = maxDamageBonus + maxHealthBonu + maxPillsBonus + iMaxDistance;
     int iScoreDifference = L4D2Direct_GetVSCampaignScore(L4D2_AreTeamsFlipped()) - L4D2Direct_GetVSCampaignScore(!L4D2_AreTeamsFlipped());
     char curmap[64];
+	int iPassTime = RoundToFloor(GetGameTime() - fStartTimestamp);
 	GetCurrentMap(curmap,sizeof(curmap));
 	if (iScoreDifference < 0)
 	{
@@ -794,12 +795,22 @@ void PrintCmd()
 		case 1: FormatEx(sCmd, sizeof(sCmd), "♞<Difference: %d>", iScoreDifference);
 		case 2: FormatEx(sCmd, sizeof(sCmd), "♞<Bonus percent: Dist. - %.0f%% | HB - %.0f%% | DB&PB - %.0f%%>", L4D2Util_IntToPercentFloat(iMaxDistance,iTotalBonus), L4D2Util_IntToPercentFloat(maxHealthBonu,iTotalBonus),  L4D2Util_IntToPercentFloat(maxDamageBonus + maxPillsBonus, iTotalBonus));
 		case 3: FormatEx(sCmd, sizeof(sCmd), "♞<Current map: %s>",curmap);
-		case 4: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !setscores [suvs] [inf]>");
-		case 5: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !voteboss [tank] [witch]>");
+		case 4: 		{
+			FormatTime(sCmd, sizeof(sCmd), "♞<%m/%d/%Y - %I:%M%p");
+	        Format(sCmd, sizeof(sCmd), "%s [%02d:%02d]>", sCmd, iPassTime / 60, iPassTime % 60);
+		}
+		case 5: 		{
+			FormatTime(sCmd, sizeof(sCmd), "♞<%m/%d/%Y - %I:%M%p");
+	        Format(sCmd, sizeof(sCmd), "%s [%02d:%02d]>", sCmd, iPassTime / 60, iPassTime % 60);
+		}
 		case 6: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !dance>");
 		case 7: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !return>");
-		case 8: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !slots [MAX player num]>");
-		case 9: FormatEx(sCmd, sizeof(sCmd), "♞<Good luck & Have Fun :D>");
+		case 8: FormatEx(sCmd, sizeof(sCmd), "♞<Good luck & Have Fun :D>");
+		case 9:		
+		{
+			FormatTime(sCmd, sizeof(sCmd), "♞<%m/%d/%Y - %I:%M%p");
+	        Format(sCmd, sizeof(sCmd), "%s [%02d:%02d]>", sCmd, iPassTime / 60, iPassTime % 60);
+		}
 	}
 }
 
@@ -820,16 +831,11 @@ void UpdatePanel()
 	char cfgName[32];
 	PrintCmd();
 
-	int iPassTime = RoundToFloor(GetGameTime() - fStartTimestamp);
-
 	ServerNamer.GetString(ServerName, sizeof(ServerName));
 	
 	l4d_ready_cfg_name.GetString(cfgName, sizeof(cfgName));
 	Format(ServerBuffer, sizeof(ServerBuffer), "♞<[%s] - [%d/%d]@%s | %s>", ServerName, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue, cfgName, (iIncondHalfOfRound) ? "2nd" : "1st");
 	menuPanel.DrawText(ServerBuffer);
-	
-	FormatTime(ServerBuffer, sizeof(ServerBuffer), "♞<%m/%d/%Y - %I:%M%p");
-	Format(ServerBuffer, sizeof(ServerBuffer), "%s [%02d:%02d]>", ServerBuffer, iPassTime / 60, iPassTime % 60);
 	
 	//menuPanel.DrawText(" ");
 	//menuPanel.DrawText("▸ Commands:");
@@ -839,6 +845,7 @@ void UpdatePanel()
     int maxPillsBonus	= SMPlus_GetMaxPillsBonus();
     int iMaxDistance = L4D_GetVersusMaxCompletionScore() / 4 * iSurvivorLimit;
     int iTotalBonus = maxDamageBonus + maxHealthBonu + maxPillsBonus + iMaxDistance;
+	
 	Format(ServerBuffer, sizeof(ServerBuffer), "♞<MAX:%d | Distance:%d | HB:%d | DB:%d | PB:%d>", iTotalBonus, iMaxDistance, maxHealthBonu, maxDamageBonus, maxPillsBonus);
 	menuPanel.DrawText(ServerBuffer);
     menuPanel.DrawText(sCmd);
