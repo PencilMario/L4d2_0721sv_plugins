@@ -1,5 +1,5 @@
-# L4D2_0721SV_PLUGINS       
-装一些我自己改的适配readyup的插件:|
+# L4D2_0721SV_PLUGINS         
+##### 装一些我自己改的适配readyup的插件:|
 ------    
 ### 插件列表 Plugins List
 **l4d_climb.smx** 生还爬墙(不开特感, 防止影响平衡)    
