@@ -13,3 +13,4 @@
 **enhancedsprays.smx** 没改 只是编译了放在这 允许特感灵魂/旁观喷漆 喷漆距离和CD      
 >喷漆CD: *decalfrequency \<s\>*       
 >喷漆距离: *sm_enhancedsprays_distance \<def:115\>*
+**l4d_bunnyhop.sp** 连跳练习
