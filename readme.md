@@ -1,6 +1,4 @@
-# L4D2_0721SV_PLUGINS
-
-## 介绍 Introduction
+# L4D2_0721SV_PLUGINS       
 装一些我自己改的适配readyup的插件:|
 ------    
 ### 插件列表 Plugins List
