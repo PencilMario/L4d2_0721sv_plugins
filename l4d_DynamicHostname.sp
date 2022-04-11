@@ -5,6 +5,7 @@
 #include <sdktools>
 #include <readyup>
 #include <l4d2util>
+#include <left4dhooks>
 
 #define PLUGIN_VERSION "1.6"
 
@@ -14,7 +15,7 @@
 
 ConVar g_hHostName, g_hReadyUp, l4d_config_name;
 char g_sDefaultN[68];
-
+bool iIncondHalfOfRound;
 public Plugin myinfo = 
 {
 	name = "L4D Dynamic中文伺服器名",
@@ -40,6 +41,7 @@ public Action RoundEnd_Event(Event event, const char[] name, bool dontBroadcast)
 {
     if(!iIncondHalfOfRound)//第一回合結束
 		iIncondHalfOfRound = true;
+	ChangeServerName();
 }
 
 public void OnMapStart()
@@ -65,7 +67,14 @@ public void OnConfigsExecuted()
 	}
 	
 }
-
+public void OnRoundIsLive()
+{
+    ChangeServerNametoStatus();
+}
+public void OnReadyUpInitiate()
+{
+    ChangeServerName();
+}
 void ChangeServerNametoStatus(char sReadyUpCfgName[] = "")
 {
 

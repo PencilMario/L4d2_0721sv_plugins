@@ -15,6 +15,8 @@
 **l4d_bunnyhop.smx** 连跳练习提示音
 **HitStatisticsLikeDianDian.smx**  类似于点点服的被控统计    
 **connect_information.smx** 连接提示
+**l4d_DynamicHostname.smx** 中文服务器名称插件 但是当游戏开始后服名会显示配置和比分    
+>修改服名在*addons/sourcemod/configs/hostname/server_hostname.txt*
 
 ------  
 ### 额外链接 Extra Link
