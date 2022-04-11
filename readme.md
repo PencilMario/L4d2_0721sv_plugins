@@ -1,5 +1,5 @@
-# L4D2_0721SV_PLUGINS         
-##### 装一些我自己改的适配readyup的插件:|
+# L4D2_0721SV_PLUGINS          
+装一些我自己找的用于自己服插件:|
 ------    
 ### 插件列表 Plugins List
 **l4d_climb.smx** 生还爬墙(不开特感, 防止影响平衡)    
@@ -12,4 +12,11 @@
 >喷漆CD: *decalfrequency \<s\>*       
 >喷漆距离: *sm_enhancedsprays_distance \<def:115\>*    
 
-**l4d_bunnyhop.sp** 连跳练习
+**l4d_bunnyhop.smx** 连跳练习提示音
+**HitStatisticsLikeDianDian.smx**  类似于点点服的被控统计    
+**connect_information.smx** 连接提示
+
+------  
+### 额外链接 Extra Link
+[MoYu_Server_Stupid_Plugins](https://github.com/Target5150/MoYu_Server_Stupid_Plugins)   
+[L4D2-HoongDou-Project](https://github.com/HoongDou/L4D2-HoongDou-Project)
