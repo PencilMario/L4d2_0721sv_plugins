@@ -17,7 +17,7 @@ Age=1417493576
 [D:\sourcemod_1.10_Compiler\sm1.10 scripting\enhancedsprays.sp]
 Age=1417493896
 [D:\GithubKu\L4d2_0721sv_plugins\readyup.sp]
-Age=1417503991
+Age=1418554474
 [D:\GithubKu\L4d2_0721sv_plugins\saferoom_cola.sp]
 Age=1417505106
 [D:\GithubKu\L4d2_0721sv_plugins\l4d2_uav.sp]
@@ -33,4 +33,8 @@ Age=1418434715
 [D:\GithubKu\L4d2_0721sv_plugins\l4d_predict_tank_glow.sp]
 Age=1418435945
 [D:\GithubKu\L4d2_0721sv_plugins\l4d_DynamicHostname.sp]
-Age=1418476627
+Age=1418489116
+[D:\GithubKu\L4d2_0721sv_plugins\l4d2_StatusSvName.sp]
+Age=1418506822
+[D:\GithubKu\L4d2_0721sv_plugins\l4d_svname.sp]
+Age=1418554707

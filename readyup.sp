@@ -289,7 +289,7 @@ void FillServerNamer()
 	char buffer[64];
 	l4d_ready_server_cvar.GetString(buffer, sizeof buffer);
 	if ((ServerNamer = FindConVar(buffer)) == null)
-		ServerNamer = FindConVar("hostname");
+		ServerNamer = FindConVar("sp_DefaultName");
 }
 
 void FindCasterSystem()
@@ -834,7 +834,7 @@ void UpdatePanel()
 	ServerNamer.GetString(ServerName, sizeof(ServerName));
 	
 	l4d_ready_cfg_name.GetString(cfgName, sizeof(cfgName));
-	Format(ServerBuffer, sizeof(ServerBuffer), "♞<[%s] - [%d/%d]@%s | %s>", ServerName, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue, cfgName, (iIncondHalfOfRound) ? "2nd" : "1st");
+	Format(ServerBuffer, sizeof(ServerBuffer), "♞<[%s] - [%d/%d]@%s | %s>", ServerName, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue, cfgName, (iIncondHalfOfRound) ? "R#2" : "R#1");
 	menuPanel.DrawText(ServerBuffer);
 	
 	//menuPanel.DrawText(" ");

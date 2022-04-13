@@ -8,15 +8,15 @@
 
 **l4d_laser_sp.smx** 开局显示弹道     
 **readyup.smx** 自改ready界面     
-**enhancedsprays.smx** 没改 只是编译了放在这 允许特感灵魂/旁观喷漆 喷漆距离和CD      
+**enhancedsprays.smx** 允许特感灵魂/旁观喷漆 喷漆距离和CD      
 >喷漆CD: *decalfrequency \<s\>*       
 >喷漆距离: *sm_enhancedsprays_distance \<def:115\>*    
 
-**l4d_bunnyhop.smx** 连跳练习提示音
-**HitStatisticsLikeDianDian.smx**  类似于点点服的被控统计    
-**connect_information.smx** 连接提示
-**l4d_DynamicHostname.smx** 中文服务器名称插件 但是当游戏开始后服名会显示配置和比分    
->修改服名在*addons/sourcemod/configs/hostname/server_hostname.txt*
+**l4d_bunnyhop.smx** 连跳练习提示音 
+**HitStatisticsLikeDianDian.smx**  类似于点点服的特感统计             
+**l4d_DynamicHostname.smx** 中文服务器名称插件      
+>修改服名在*addons/sourcemod/configs/hostname/server_hostname.txt*    
+**l4d_svname.smx** 服名显示配置和得分 只兼容本仓库spechud pause readyup, 单用会让这三个不显示服务器名字.
 
 ------  
 ### 额外链接 Extra Link
