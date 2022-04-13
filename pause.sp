@@ -594,31 +594,31 @@ void UpdatePanel()
 	char info[512];
 	serverNamerCvar.GetString(info, sizeof(info));
 	
-	Format(info, sizeof(info), "▸ Server: %s\n▸ Slots: %d/%d", info, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue);
+	Format(info, sizeof(info), "♞<[%s] - [%d/%d]>", info, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue);
 	menuPanel.DrawText(info);
 	
-	FormatTime(info, sizeof(info), "▸ %m/%d/%Y - %I:%M%p");
+	FormatTime(info, sizeof(info), "♞<%m/%d/%Y - %I:%M%p>");
 	menuPanel.DrawText(info);
 	
 	menuPanel.DrawText(" ");
-	menuPanel.DrawText("▸ Ready Status");
+	menuPanel.DrawText("♞<--Ready Status-->");
 
 	if (adminPause)
 	{
-		menuPanel.DrawText("->1. Require Admin to Unpause");
-		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->2. Survivors: [√]" : "->2. Survivors: [X]");
-		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->3. Infected: [√]" : "->3. Infected: [X]");
+		menuPanel.DrawText("<!!Require Admin to Unpause!!>");
+		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->1. Survivors: ★" : "->1. Survivors: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->2. Infected: ★" : "->2. Infected: ☆");
 	}
 	else if (initiatorReadyCvar.BoolValue)
 	{
-		menuPanel.DrawText(initiatorReady ? "->1. Initiator: [√]" : "->1. Initiator: [X]");
-		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->2. Survivors: [√]" : "->2. Survivors: [X]");
-		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->3. Infected: [√]" : "->3. Infected: [X]");
+		menuPanel.DrawText(initiatorReady ? "->1. Initiator: ★" : "->1. Initiator: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->2. Survivors: ★" : "->2. Survivors: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->3. Infected: ★" : "->3. Infected: ☆");
 	} 
 	else
 	{
-		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->1. Survivors: [√]" : "->1. Survivors: [X]");
-		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->2. Infected: [√]" : "->2. Infected: [X]");
+		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->1. Survivors: ★" : "->1. Survivors: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->2. Infected: ★" : "->2. Infected: ☆");
 	}
 
 	menuPanel.DrawText(" ");
@@ -633,17 +633,17 @@ void UpdatePanel()
 
 	if (adminPause)
 	{
-		Format(info, sizeof(info), "▸ Force Pause -> %s (Admin)", strlen(name) ? name : initiatorName);
+		Format(info, sizeof(info), "♥ - Force Pause -> %s (Admin)", strlen(name) ? name : initiatorName);
 	}
 	else
 	{
-		Format(info, sizeof(info), "▸ Initiator -> %s (%s)", strlen(name) ? name : initiatorName, L4D2_TeamName[pauseTeam]);
+		Format(info, sizeof(info), "♥ - Initiator -> %s (%s)", strlen(name) ? name : initiatorName, L4D2_TeamName[pauseTeam]);
 	}
 	
 	menuPanel.DrawText(info);
 		
 	int duration = RoundToNearest(GetEngineTime() - pauseTime);
-	FormatEx(info, sizeof(info), "▸ Duration: %02d:%02d", duration / 60, duration % 60);
+	FormatEx(info, sizeof(info), "♞<Duration: %02d:%02d>", duration / 60, duration % 60);
 	menuPanel.DrawText(info);
 	
 	for (int client = 1; client <= MaxClients; client++)
