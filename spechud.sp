@@ -194,7 +194,7 @@ void FillServerNamer()
 	
 	if (convar == null)
 	{
-		convar = FindConVar("sp_DefaultName");
+		convar = FindConVar("sp_hostname");
 	}
 	
 	if (hServerNamer == null)
@@ -652,7 +652,7 @@ void FillHeaderInfo(Panel &hSpecHud)
 		iTickrate = RoundToNearest(1.0 / GetTickInterval());
 	
 	static char buf[64];
-	Format(buf, sizeof(buf), "<[%s] - [%i/%i | %iT]>", sHostname, GetRealClientCount(), iMaxPlayers, iTickrate);
+	Format(buf, sizeof(buf), "♞<[%s] - [%i/%i | %iT]>", sHostname, GetRealClientCount(), iMaxPlayers, iTickrate);
 	DrawPanelText(hSpecHud, buf);
 }
 

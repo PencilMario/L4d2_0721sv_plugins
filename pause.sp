@@ -162,7 +162,7 @@ void FindServerNamer()
 	
 	if (serverNamerCvar == null)
 	{
-		serverNamerCvar = FindConVar("sp_DefaultName");
+		serverNamerCvar = FindConVar("sp_hostname");
 	}
 }
 
@@ -594,7 +594,7 @@ void UpdatePanel()
 	char info[512];
 	serverNamerCvar.GetString(info, sizeof(info));
 	
-	Format(info, sizeof(info), "♞<[%s] - [%d/%d]>", info, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue);
+	Format(info, sizeof(info), "♞<[%s] - [%d/%d] - %s>", info, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue, adminPause ? "Force Pause":"Paused by Player");
 	menuPanel.DrawText(info);
 	
 	FormatTime(info, sizeof(info), "♞<%m/%d/%Y - %I:%M%p>");
@@ -633,11 +633,11 @@ void UpdatePanel()
 
 	if (adminPause)
 	{
-		Format(info, sizeof(info), "♥ - Force Pause -> %s (Admin)", strlen(name) ? name : initiatorName);
+		Format(info, sizeof(info), "♞<--Force Pause by %s (Admin)-->", strlen(name) ? name : initiatorName);
 	}
 	else
 	{
-		Format(info, sizeof(info), "♥ - Initiator -> %s (%s)", strlen(name) ? name : initiatorName, L4D2_TeamName[pauseTeam]);
+		Format(info, sizeof(info), "♞<--Initiator: %s (%s)-->", strlen(name) ? name : initiatorName, L4D2_TeamName[pauseTeam]);
 	}
 	
 	menuPanel.DrawText(info);
