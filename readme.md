@@ -1,4 +1,5 @@
 # L4D2_0721SV_PLUGINS          
+
 装一些我自己找的用于自己服插件:|
 ------    
 ### 插件列表 Plugins List
@@ -16,11 +17,15 @@
 **HitStatisticsLikeDianDian.smx**  类似于点点服的特感统计             
 **l4d_DynamicHostname.smx** 中文服务器名称插件      
 >修改服名在*addons/sourcemod/configs/hostname/server_hostname.txt*     
+
 **l4d_svname.smx** 服名显示配置和得分 只兼容本仓库spechud pause readyup, 不兼容zonemod对应插件, 会导致闪退。    
 >spechud pause readyup 显示的服务器名称写死在readyup的cvar **sp_hostname** 不能直接修改 会导致服务器崩溃 需要代码里改之后手动编译。       
 >用着极度麻烦 :) shit code        
 
 ------  
+### 如何编译 Complied     
+直接下载代码, 将.sp文件拖到complie.exe即可。
+
 ### 额外链接 Extra Link
 [MoYu_Server_Stupid_Plugins](https://github.com/Target5150/MoYu_Server_Stupid_Plugins)   
 [L4D2-HoongDou-Project](https://github.com/HoongDou/L4D2-HoongDou-Project)
