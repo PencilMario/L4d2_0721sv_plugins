@@ -20,8 +20,11 @@
 
 **l4d_svname.smx** 服名显示配置和得分 只兼容本仓库spechud pause readyup, 不兼容zonemod对应插件, 会导致闪退。    
 >spechud pause readyup 显示的服务器名称写死在readyup的cvar **sp_hostname** 不能直接修改 会导致服务器崩溃 需要代码里改之后手动编译。       
->用着极度麻烦 :) shit code        
+>用着极度麻烦 🤡 shit code          
 
+**Plugins/MusicMapStart** 在对局开始时播放音乐 回合开始时自动停止
+>需要设置content服务器为0721服务器 域名不公开
+>如果不设置 会导致无法进服
 ------  
 ### 如何编译 Complied     
 直接下载代码, 将.sp文件拖到complie.exe即可。
