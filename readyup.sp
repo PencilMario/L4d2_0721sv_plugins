@@ -769,7 +769,7 @@ public Action MenuCmd_Timer(Handle timer)
 {
 	if (inReadyUp)
 	{
-		iCmd > 9 ? (iCmd = 1) : (iCmd += 1);
+		iCmd > 14 ? (iCmd = 1) : (iCmd += 1);
 		return Plugin_Continue;
 	}
 	return Plugin_Stop;
@@ -795,20 +795,17 @@ void PrintCmd()
 	switch (iCmd)
 	{
 		case 1: FormatEx(sCmd, sizeof(sCmd), "♞<Difference: %d>", iScoreDifference);
-		case 2: FormatEx(sCmd, sizeof(sCmd), "♞<Bonus percent: Dist. - %.0f%% | HB - %.0f%% | DB&PB - %.0f%%>", L4D2Util_IntToPercentFloat(iMaxDistance,iTotalBonus), L4D2Util_IntToPercentFloat(maxHealthBonu,iTotalBonus),  L4D2Util_IntToPercentFloat(maxDamageBonus + maxPillsBonus, iTotalBonus));
-		case 3: FormatEx(sCmd, sizeof(sCmd), "♞<Current map: %s>",curmap);
-		case 4: 		{
-			FormatTime(sCmd, sizeof(sCmd), "♞<%m/%d/%Y - %I:%M%p");
-	        Format(sCmd, sizeof(sCmd), "%s [%02d:%02d]>", sCmd, iPassTime / 60, iPassTime % 60);
-		}
-		case 5: 		{
-			FormatTime(sCmd, sizeof(sCmd), "♞<%m/%d/%Y - %I:%M%p");
-	        Format(sCmd, sizeof(sCmd), "%s [%02d:%02d]>", sCmd, iPassTime / 60, iPassTime % 60);
-		}
+		case 2: FormatEx(sCmd, sizeof(sCmd), "♞<Current map: %s>", curmap);
+
+        case 5: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !strike>");
 		case 6: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !dance>");
 		case 7: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !return>");
-		case 8: FormatEx(sCmd, sizeof(sCmd), "♞<Good luck & Have Fun :D>");
-		case 9:		
+		case 8: FormatEx(sCmd, sizeof(sCmd), "♞<CMD: !music>");
+
+		case 11: FormatEx(sCmd, sizeof(sCmd), "♞<Good luck & Have Fun :D>");
+
+
+		default:
 		{
 			FormatTime(sCmd, sizeof(sCmd), "♞<%m/%d/%Y - %I:%M%p");
 	        Format(sCmd, sizeof(sCmd), "%s [%02d:%02d]>", sCmd, iPassTime / 60, iPassTime % 60);

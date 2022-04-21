@@ -24,7 +24,9 @@
 
 **Plugins/MusicMapStart** 在对局开始时播放音乐 回合开始时自动停止
 >需要设置content服务器为0721服务器 域名不公开
->如果不设置 会导致无法进服
+>如果不设置 会导致无法进服     
+
+**l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 Just fun
 ------  
 ### 如何编译 Complied     
 直接下载代码, 将.sp文件拖到complie.exe即可。
