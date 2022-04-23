@@ -13,7 +13,7 @@
 >喷漆CD: *decalfrequency \<s\>*       
 >喷漆距离: *sm_enhancedsprays_distance \<def:115\>*    
 
-**l4d_bunnyhop.smx** 连跳练习提示音 
+**l4d_bunnyhop.smx** 给你连跳插件你也跳不出220
 **HitStatisticsLikeDianDian.smx**  类似于点点服的特感统计             
 **l4d_DynamicHostname.smx** 中文服务器名称插件      
 >修改服名在*addons/sourcemod/configs/hostname/server_hostname.txt*     
@@ -27,7 +27,7 @@
 >具体的设置方法可以查看[原网站](https://forums.alliedmods.net/showthread.php?p=2645342)
 
 
-**l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 Just fun
+**l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 !strike 特感也能玩
 
 ------  
 ### 设置fastdownload服务器 Set fastdl server

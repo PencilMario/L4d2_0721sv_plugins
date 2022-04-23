@@ -71,7 +71,7 @@ public void OnRoundIsLive()
 
 public void OnReadyUpInitiate()
 {
-    PluginEnabed.IntValue = 2;
+    PluginEnabed.IntValue = 1;
 }
 
 public ConVar_Delay(Handle:convar, const String:oldValue[], const String:newValue[])

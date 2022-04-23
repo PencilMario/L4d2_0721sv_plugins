@@ -175,8 +175,11 @@ public void OnReadyUpInitiate()
 
 public Action:Msg(Handle:timer, any:data)
 {
-	PrintToChatAll("\x03Press\x04 Shift + Space\x03 to hunter jump");
-  	return Plugin_Continue;
+	if (HtEnable.IntValue == 1)
+    {
+    	PrintToChatAll("\x03a按下\x04Shift+空格\x03做个Hunter, 输入!fyzb启用/禁用");
+    }  	
+    return Plugin_Continue;
 }
 public Action:Command_FYZB(client, args)
 {
