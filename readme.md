@@ -29,7 +29,7 @@
 
 **l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 !strike 特感也能玩     
 **l4d2_server_ragdoll.sp** 死亡生还布娃娃
-> sm_side_dolls_invisible_body 1 隐藏默认尸体
+> 隐藏默认尸体 *sm_side_dolls_invisible_body 1*
 
 
 ------  
