@@ -177,7 +177,7 @@ public Action:Msg(Handle:timer, any:data)
 {
 	if (HtEnable.IntValue == 1)
     {
-    	PrintToChatAll("\x03a按下\x04Shift+空格\x03做个Hunter, 输入!fyzb启用/禁用");
+    	PrintToChatAll("\x03按下\x04Shift+空格\x03做个Hunter, 输入!fyzb启用/禁用");
     }  	
     return Plugin_Continue;
 }

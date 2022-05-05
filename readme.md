@@ -1,6 +1,6 @@
-# L4D2_0721SV_PLUGINS          
+# L4D2_0721SV_PLUGINS              
+装一些我自己找的用于自己服插件
 
-装一些我自己找的用于自己服插件:|
 ------    
 ### 插件列表 Plugins List
 **l4d_climb.smx** 生还爬墙(不开特感, 防止影响平衡)    
@@ -27,7 +27,10 @@
 >具体的设置方法可以查看[原网站](https://forums.alliedmods.net/showthread.php?p=2645342)
 
 
-**l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 !strike 特感也能玩
+**l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 !strike 特感也能玩     
+**l4d2_server_ragdoll.sp** 死亡生还布娃娃
+> sm_side_dolls_invisible_body 1 隐藏默认尸体
+
 
 ------  
 ### 设置fastdownload服务器 Set fastdl server
@@ -45,5 +48,7 @@ sv_downloadurl "http://你自己所创建的fastdl服务器(网站)"
 直接下载代码, 将.sp文件拖到complie.exe即可。
 
 ### 额外链接 Extra Link
+[rl4d2l-plugins](https://github.com/devilesk/rl4d2l-plugins)
+[L4D2-Plugins](https://github.com/fbef0102/L4D2-Plugins)
 [MoYu_Server_Stupid_Plugins](https://github.com/Target5150/MoYu_Server_Stupid_Plugins)   
 [L4D2-HoongDou-Project](https://github.com/HoongDou/L4D2-HoongDou-Project)
