@@ -18,18 +18,22 @@
 **l4d_DynamicHostname.smx** 中文服务器名称插件      
 >修改服名在*addons/sourcemod/configs/hostname/server_hostname.txt*     
 
-**l4d_svname.smx** 服名显示配置和得分 只兼容本仓库spechud pause readyup, 不兼容zonemod对应插件, 会导致闪退。    
+**l4d_svname.smx** 服名显示配置和得分 只兼容本仓库spechud pause readyup, 不兼容zonemod对应插件, 会导致闪退, 名称也写死在代码里。    
 >spechud pause readyup 显示的服务器名称写死在readyup的cvar **sp_hostname** 不能直接修改 会导致服务器崩溃 需要代码里改之后手动编译。       
->用着极度麻烦 🤡 shit code          
+>另外我稍微改了一点这三个插件的显示风格:)
+>用着极度麻烦 🤡 shit code   
+>带vanlia前缀的为不适配**l4d_svname**的插件 其余与适配版本没有区别
+
+
+**l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 !strike 特感也能玩     
+**l4d2_server_ragdoll.sp** 死亡生还布娃娃
+> 隐藏默认尸体 *sm_side_dolls_invisible_body 1*
 
 **Plugins/MusicMapStart** 在对局开始时播放音乐 回合开始时自动停止
 >需要设置fastdl服务器 如果不设置 会导致无法进服     
 >具体的设置方法可以查看[原网站](https://forums.alliedmods.net/showthread.php?p=2645342)
 
 
-**l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 !strike 特感也能玩     
-**l4d2_server_ragdoll.sp** 死亡生还布娃娃
-> 隐藏默认尸体 *sm_side_dolls_invisible_body 1*
 
 
 ------  
