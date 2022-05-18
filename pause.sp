@@ -181,7 +181,7 @@ public void OnClientPutInServer(int client)
 	{
 		if (!IsFakeClient(client))
 		{
-			CPrintToChatAll("{default}[{green}!{default}] {olive}%N {default}has fully loaded", client);
+			CPrintToChatAll("{default}[{green}!{default}] {olive}%N {default}加载完成", client);
 		}
 	}
 }
@@ -242,7 +242,7 @@ public Action Pause_Cmd(int client, int args)
 		pauseTeam = GetClientTeam(client);
 		GetClientName(client, initiatorName, sizeof(initiatorName));
 		
-		CPrintToChatAll("{default}[{green}!{default}] {olive}%N {blue}Paused{default}.", client);
+		CPrintToChatAll("{default}[{green}!{default}] {olive}%N {blue}暂停了{default}.", client);
 		
 		pauseDelay = pauseDelayCvar.IntValue;
 		if (pauseDelay == 0)
@@ -262,13 +262,13 @@ public Action PauseDelay_Timer(Handle timer)
 {
 	if (pauseDelay == 0)
 	{
-		CPrintToChatAll("{default}[{green}!{default}] {red}PAUSED");
+		CPrintToChatAll("{default}[{green}!{default}] {red}暂停了");
 		AttemptPause();
 		return Plugin_Stop;
 	}
 	else
 	{
-		CPrintToChatAll("{default}[{green}!{default}] {blue}Pausing in{default}: {olive}%d", pauseDelay);
+		CPrintToChatAll("{default}[{green}!{default}] {blue}即将暂停{default}: {olive}%d", pauseDelay);
 		pauseDelay--;
 	}
 	return Plugin_Continue;
@@ -300,11 +300,11 @@ public Action Unpause_Cmd(int client, int args)
 			{
 				case L4D2Team_Survivor:
 				{
-					CPrintToChatAll("{default}[{green}!{default}] {olive}%N %s{default}marked {blue}%s {default}ready.", client, (initiatorReady && client == initiator) ? "{default}as {green}Initiator " : "", L4D2_TeamName[clientTeam]);
+					CPrintToChatAll("{default}[{green}!{default}] {olive}%N %s{default}表示 {blue}%s {default}准备完毕.", client, (initiatorReady && client == initiator) ? "{default}作为{green}发起者 " : "", L4D2_TeamName[clientTeam]);
 				}
 				case L4D2Team_Infected:
 				{
-					CPrintToChatAll("{default}[{green}!{default}] {olive}%N %s{default}marked {red}%s {default}ready.", client, (initiatorReady && client == initiator) ? "{default}as {green}Initiator " : "", L4D2_TeamName[clientTeam]);					
+					CPrintToChatAll("{default}[{green}!{default}] {olive}%N %s{default}表示 {red}%s {default}准备完毕.", client, (initiatorReady && client == initiator) ? "{default}作为 {green}发起者 " : "", L4D2_TeamName[clientTeam]);					
 				}
 			}
 		}
@@ -315,7 +315,7 @@ public Action Unpause_Cmd(int client, int args)
 				initiatorReady = true;
 				if (teamReady[clientTeam])
 				{
-					CPrintToChatAll("{default}[{green}!{default}] {olive}%N {default}marked {green}Initiator {default}ready.", client);
+					CPrintToChatAll("{default}[{green}!{default}] {olive}%N {default}表示 {green}发起者 {default}准备完毕.", client);
 				}
 			}
 		}
@@ -328,7 +328,7 @@ public Action Unpause_Cmd(int client, int args)
 			}
 			else
 			{
-				CPrintToChatAll("{default}[{green}!{default}] {olive}Teams {default}are ready. Wait for {blue}Admin {default}to {green}confirm{default}.");
+				CPrintToChatAll("{default}[{green}!{default}] {olive}所有队伍{default}准备完毕. 请等待{blue}管理员{default}进行{green}确认{default}.");
 			}
 		}
 	}
@@ -348,11 +348,11 @@ public Action Unready_Cmd(int client, int args)
 			{
 				case L4D2Team_Survivor:
 				{
-					CPrintToChatAll("{default}[{green}!{default}] {olive}%N %s{default}marked {blue}%s {default}not ready.", client, (initiatorReady && client == initiator) ? "{default}as {green}Initiator " : "", L4D2_TeamName[clientTeam]);
+					CPrintToChatAll("{default}[{green}!{default}] {olive}%N %s{default}表示 {blue}%s {default}未准备好.", client, (initiatorReady && client == initiator) ? "{default}作为 {green}发起者 " : "", L4D2_TeamName[clientTeam]);
 				}
 				case L4D2Team_Infected:
 				{
-					CPrintToChatAll("{default}[{green}!{default}] {olive}%N %s{default}marked {red}%s {default}not ready.", client, (initiatorReady && client == initiator) ? "{default}as {green}Initiator " : "", L4D2_TeamName[clientTeam]);
+					CPrintToChatAll("{default}[{green}!{default}] {olive}%N %s{default}表示 {red}%s {default}未准备好", client, (initiatorReady && client == initiator) ? "{default}作为 {green}发起者 " : "", L4D2_TeamName[clientTeam]);
 				}
 			}
 		}
@@ -363,7 +363,7 @@ public Action Unready_Cmd(int client, int args)
 				initiatorReady = false;
 				if (!teamReady[clientTeam])
 				{
-					CPrintToChatAll("{default}[{green}!{default}] {olive}%N {default}marked {green}Initiator {default}not ready.", client);
+					CPrintToChatAll("{default}[{green}!{default}] {olive}%N {default}表示 {green}发起者 {default}未准备好", client);
 				}
 			}
 		}
@@ -383,7 +383,7 @@ public Action ForceUnpause_Cmd(int client, int args)
 	if (isPaused)
 	{
 		adminPause = true;
-		CPrintToChatAll("{default}[{green}!{default}] A {green}force unpause {default}is issued by {blue}Admin {default}({olive}%N{default})", client);
+		CPrintToChatAll("{default}[{green}!{default}] {blue}管理员{default}({olive}%N{default})取消了{green}强制暂停", client);
 		InitiateLiveCountdown();
 	}
 
@@ -411,7 +411,7 @@ bool AddPauseCount(int client)
 
 	if (pauseCount >= pauseLimitCvar.IntValue)
 	{
-		CPrintToChat(client, "{blue}[{green}!{blue}] {default}You have reached your pause limit.");
+		CPrintToChat(client, "{blue}[{green}!{blue}] {default}你已耗尽暂停次数!");
 		return false;
 	}
 
@@ -431,7 +431,7 @@ void AttemptPause()
 		}
 		else
 		{
-			CPrintToChatAll("{default}[{green}!{default}] {red}Pause has been delayed due to a pick-up in progress!");
+			CPrintToChatAll("{default}[{green}!{default}] {red}暂停将推迟到扶人结束!");
 			deferredPauseTimer = CreateTimer(0.1, DeferredPause_Timer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
@@ -485,7 +485,7 @@ void Pause()
 				{
 					buttons &= ~IN_ATTACK;
 					SetClientButtons(client, buttons);
-					CPrintToChat(client, "{default}[{green}!{default}] {default}Your {red}Spawn {default}has been prevented because of the Pause");
+					CPrintToChat(client, "{default}[{green}!{default}] {default}你的{red}复活{default}因为暂停被阻止了");
 				}
 			}
 			
@@ -558,7 +558,7 @@ public Action Show_Cmd(int client, int args)
 	if (isPaused)
 	{
 		hiddenPanel[client] = false;
-		CPrintToChat(client, "[{olive}Pause{default}] Panel is now {blue}on{default}.");
+		CPrintToChat(client, "[{olive}Pause{default}] 面板已{blue}打开{default}.");
 	}
 
 	return Plugin_Handled;
@@ -569,7 +569,7 @@ public Action Hide_Cmd(int client, int args)
 	if (isPaused)
 	{
 		hiddenPanel[client] = true;
-		CPrintToChat(client, "[{olive}Pause{default}] Panel is now {red}off{default}.");
+		CPrintToChat(client, "[{olive}Pause{default}] 面板已{red}关闭{default}.");
 	}
 
 	return Plugin_Handled;
@@ -668,7 +668,7 @@ void InitiateLiveCountdown()
 {
 	if (readyCountdownTimer == null)
 	{
-		CPrintToChatAll("{default}[{green}!{default}] Say {olive}!unready {default}to cancel");
+		CPrintToChatAll("{default}[{green}!{default}] 在聊天栏输入 {olive}!unready {default}取消");
 		readyDelay = l4d_ready_delay.IntValue;
 		readyCountdownTimer = CreateTimer(1.0, ReadyCountdownDelay_Timer, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
@@ -679,12 +679,12 @@ public Action ReadyCountdownDelay_Timer(Handle timer)
 	if (readyDelay == 0)
 	{
 		Unpause();
-		PrintHintTextToAll("Game is live!");
+		PrintHintTextToAll("游戏继续!");
 		return Plugin_Stop;
 	}
 	else
 	{
-		CPrintToChatAll("{default}[{green}!{default}] {blue}Live in{default}: {olive}%d{default}...", readyDelay);
+		CPrintToChatAll("{default}[{green}!{default}] {blue}准备开始{default}: {olive}%d{default}...", readyDelay);
 		readyDelay--;
 	}
 	return Plugin_Continue;
@@ -704,7 +704,7 @@ void CancelFullReady(int client)
 	if (readyCountdownTimer != null && !adminPause)
 	{
 		delete readyCountdownTimer;
-		CPrintToChatAll("{default}[{green}!{default}] {olive}%N {default}cancelled the countdown!", client);
+		CPrintToChatAll("{default}[{green}!{default}] {olive}%N {default}取消了倒计时!", client);
 	}
 }
 
@@ -758,13 +758,13 @@ public Action Callvote_Callback(int client, char[] command, int argc)
 {
 	if (GetClientTeam(client) == L4D2Team_Spectator)
 	{
-		CPrintToChat(client, "{blue}[{green}!{blue}] {default}You're unable to call votes as a spectator.");
+		CPrintToChat(client, "{blue}[{green}!{blue}] {default}旁观不允许投票.");
 		return Plugin_Handled;
 	}
 
 	if (SpecTimer[client])
 	{
-		CPrintToChat(client, "{blue}[{green}!{blue}] {default}You've just switched Teams, you are unable to vote for a few seconds.");
+		CPrintToChat(client, "{blue}[{green}!{blue}] {default}你刚刚换了队伍, 暂时无法投票.");
 		return Plugin_Handled;
 	}
 	
@@ -815,7 +815,7 @@ public Action Callvote_Callback(int client, char[] command, int argc)
 		return Plugin_Continue;
 	}
 	
-	CPrintToChat(client, "{blue}[{green}!{blue}] {default}You may not kick Admins.", target);
+	CPrintToChat(client, "{blue}[{green}!{blue}] {default}你不能踢出管理员.", target);
 	return Plugin_Handled;
 }
 
