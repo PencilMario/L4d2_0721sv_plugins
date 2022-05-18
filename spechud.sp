@@ -858,9 +858,10 @@ void FillScoreInfo(Panel &hSpecHud)
 				int healthBonus	= SMPlus_GetHealthBonus(),	maxHealthBonus	= SMPlus_GetMaxHealthBonus();
 				int damageBonus	= SMPlus_GetDamageBonus(),	maxDamageBonus	= SMPlus_GetMaxDamageBonus();
 				int pillsBonus	= SMPlus_GetPillsBonus(),	maxPillsBonus	= SMPlus_GetMaxPillsBonus();
-				
-				int totalBonus		= healthBonus		+ damageBonus		+ pillsBonus   +GetVersusProgressDistance(L4D2_AreTeamsFlipped());
-				int maxTotalBonus	= maxHealthBonus	+ maxDamageBonus	+ maxPillsBonus;
+				int maxDistanceBonus = L4D_GetVersusMaxCompletionScore() / 4 * iSurvivorLimit;
+
+				int totalBonus		= healthBonus		+ damageBonus		+ pillsBonus 	+ GetVersusProgressDistance(L4D2_AreTeamsFlipped());
+				int maxTotalBonus	= maxHealthBonus	+ maxDamageBonus	+ maxPillsBonus + maxDistanceBonus;
 				
 				DrawPanelText(hSpecHud, " ");
 				
@@ -870,16 +871,16 @@ void FillScoreInfo(Panel &hSpecHud)
 				
 				FormatEx(	info,
 							sizeof(info),
-							"♞<HB: %.0f%% | DB: %.0f%% | PB: %i(%i)>",
+							"♞<HB: %.0f%% | DB: %.0f%% | PB: %i(%i%)>",
 							L4D2Util_IntToPercentFloat(healthBonus, maxHealthBonus),
 							L4D2Util_IntToPercentFloat(damageBonus, maxDamageBonus),
-							pillsBonus, 4*(pillsBonus/maxPillsBonus));
+							pillsBonus, L4D2Util_IntToPercentFloat(damageBonus, maxDamageBonus));
 				DrawPanelText(hSpecHud, info);
 				
 				FormatEx(info, sizeof(info), "♞<Total Score: %i>", totalBonus);
 				DrawPanelText(hSpecHud, info);
 				
-				FormatEx(info, sizeof(info), "♞<Bonus Percent:%.1f%%>", L4D2Util_IntToPercentFloat(totalBonus, maxTotalBonus));
+				FormatEx(info, sizeof(info), "♞<Point Percent:%.1f%%>", L4D2Util_IntToPercentFloat(totalBonus, maxTotalBonus));
 				//if (InSecondHalfOfRound())
 				//{
 				//	Format(info, sizeof(info), "%s | R#1: %i <%.1f%%>", info, iFirstHalfScore, L4D2Util_IntToPercentFloat(iFirstHalfScore, L4D_GetVersusMaxCompletionScore() + maxTotalBonus));

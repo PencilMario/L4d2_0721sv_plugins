@@ -68,6 +68,10 @@ public void OnReadyUpInitiate()
 	HostNameChange();
 }
 
+public void OnConfigsExecuted()
+{
+	GetFileHostname();
+}
 stock int GetSeriousClientCount(bool inGame = false)
 {
 	int clients = 0;
@@ -86,14 +90,33 @@ stock int GetSeriousClientCount(bool inGame = false)
 	
 	return clients;
 }
+void GetFileHostname()
+{
+	char sPath[PLATFORM_MAX_PATH];
+    BuildPath(Path_SM, sPath, sizeof(sPath),"configs/hostname/server_hostname.txt");//檔案路徑設定
+
+	Handle file = OpenFile(sPath, "r");//讀取檔案
+    if(file == INVALID_HANDLE)
+	{
+		LogMessage("file configs/hostname/server_hostname.txt doesn't exist!");
+		return;
+	}
+
+	char readData[256];
+    if(!IsEndOfFile(file) && ReadFileLine(file, readData, sizeof(readData)))//讀一行
+    {
+		Format(g_sDefultName, sizeof(g_sDefultName), "%s", readData);
+	}
+}
 
 HostNameChange()
 {
     getConfigName = FindConVar("l4d_ready_cfg_name");
+	int iGameMode = L4D_GetGameModeType()
 	if(getConfigName != null)
 	{
         getConfigName.GetString(g_sConfigName, sizeof(g_sConfigName));
-		if(g_sConfigName[0] != '\0')
+		if(iGameMode == 4)
 		{
 			if(GetSeriousClientCount() == 0)
 			{
@@ -101,7 +124,9 @@ HostNameChange()
 				SetConVarString(g_hHostName, g_sNewName, false, false);
 				return
 			}
-		    Format(g_sNewName, sizeof(g_sNewName), "[%s] %s - %d:%d R#%s-%s",
+			if(g_sConfigName[0] != '\0')
+			{
+			    Format(g_sNewName, sizeof(g_sNewName), "[%s] %s - %d:%d R#%s-%s",
 			    g_sConfigName, 
 				g_sDefultName, 
 				L4D2Direct_GetVSCampaignScore(L4D2_AreTeamsFlipped()),
@@ -109,6 +134,7 @@ HostNameChange()
                 (isFirstRound) ? "1" : "2",
 				(isLive) ? "Live" : "Unready"
 				);
+			}		
 		}
 		else
 		{
