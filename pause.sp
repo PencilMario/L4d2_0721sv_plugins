@@ -281,7 +281,7 @@ public Action ForcePause_Cmd(int client, int args)
 		adminPause = true;
 		initiatorId = GetClientUserId(client);
 		GetClientName(client, initiatorName, sizeof(initiatorName));
-		CPrintToChatAll("{default}[{green}!{default}] A {green}force pause {default}is issued by {blue}Admin {default}({olive}%N{default})", client);
+		CPrintToChatAll("{default}[{green}!{default}] {blue}管理员{default}发起了{green}强制暂停{default}({olive}%N{default})", client);
 		Pause();
 	}
 
