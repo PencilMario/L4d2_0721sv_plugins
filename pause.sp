@@ -281,7 +281,7 @@ public Action ForcePause_Cmd(int client, int args)
 		adminPause = true;
 		initiatorId = GetClientUserId(client);
 		GetClientName(client, initiatorName, sizeof(initiatorName));
-		CPrintToChatAll("{default}[{green}!{default}] A {green}force pause {default}is issued by {blue}Admin {default}({olive}%N{default})", client);
+		CPrintToChatAll("{default}[{green}!{default}] {blue}管理员{default}发起了{green}强制暂停{default}({olive}%N{default})", client);
 		Pause();
 	}
 
@@ -594,31 +594,31 @@ void UpdatePanel()
 	char info[512];
 	serverNamerCvar.GetString(info, sizeof(info));
 	
-	Format(info, sizeof(info), "♞<[%s] - [%d/%d] - %s>", info, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue, adminPause ? "Force Pause":"Paused by Player");
+	Format(info, sizeof(info), "♞<[%s] - [%d/%d] - %s>", info, GetSeriousClientCount(), FindConVar("sv_maxplayers").IntValue, adminPause ? "**强制暂停**":"**玩家发起的暂停**");
 	menuPanel.DrawText(info);
 	
 	FormatTime(info, sizeof(info), "♞<%m/%d/%Y - %I:%M%p>");
 	menuPanel.DrawText(info);
 	
 	menuPanel.DrawText(" ");
-	menuPanel.DrawText("♞<--Ready Status-->");
+	menuPanel.DrawText("♞<--准备状态-->");
 
 	if (adminPause)
 	{
-		menuPanel.DrawText("<!!Require Admin to Unpause!!>");
-		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->1. Survivors: ★" : "->1. Survivors: ☆");
-		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->2. Infected: ★" : "->2. Infected: ☆");
+		menuPanel.DrawText("<!!需要管理员解除暂停!!>");
+		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->1. 生还者: ★" : "->1. 生还者: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->2. 感染者: ★" : "->2. 感染者: ☆");
 	}
 	else if (initiatorReadyCvar.BoolValue)
 	{
-		menuPanel.DrawText(initiatorReady ? "->1. Initiator: ★" : "->1. Initiator: ☆");
-		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->2. Survivors: ★" : "->2. Survivors: ☆");
-		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->3. Infected: ★" : "->3. Infected: ☆");
+		menuPanel.DrawText(initiatorReady ? "->1. 发起者: ★" : "->1. 发起者: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->2. 生还者: ★" : "->2. 生还者: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->3. 感染者: ★" : "->3. 感染者: ☆");
 	} 
 	else
 	{
-		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->1. Survivors: ★" : "->1. Survivors: ☆");
-		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->2. Infected: ★" : "->2. Infected: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Survivor] ? "->1. 生还者: ★" : "->1. 生还者: ☆");
+		menuPanel.DrawText(teamReady[L4D2Team_Infected] ? "->2. 感染者: ★" : "->2. 感染者: ☆");
 	}
 
 	menuPanel.DrawText(" ");
@@ -633,17 +633,17 @@ void UpdatePanel()
 
 	if (adminPause)
 	{
-		Format(info, sizeof(info), "♞<--Force Pause by %s (Admin)-->", strlen(name) ? name : initiatorName);
+		Format(info, sizeof(info), "♞<--%s (Admin)发起了强制暂停-->", strlen(name) ? name : initiatorName);
 	}
 	else
 	{
-		Format(info, sizeof(info), "♞<--Initiator: %s (%s)-->", strlen(name) ? name : initiatorName, L4D2_TeamName[pauseTeam]);
+		Format(info, sizeof(info), "♞<--暂停发起者: %s (%s)-->", strlen(name) ? name : initiatorName, L4D2_TeamName[pauseTeam]);
 	}
 	
 	menuPanel.DrawText(info);
 		
 	int duration = RoundToNearest(GetEngineTime() - pauseTime);
-	FormatEx(info, sizeof(info), "♞<Duration: %02d:%02d>", duration / 60, duration % 60);
+	FormatEx(info, sizeof(info), "♞<暂停时间: %02d:%02d>", duration / 60, duration % 60);
 	menuPanel.DrawText(info);
 	
 	for (int client = 1; client <= MaxClients; client++)
