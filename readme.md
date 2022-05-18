@@ -33,7 +33,7 @@
 >需要设置fastdl服务器 如果不设置 会导致无法进服     
 >具体的设置方法可以查看[原网站](https://forums.alliedmods.net/showthread.php?p=2645342)
 
-**l4d_survivor_shove** 推生还:)
+~~**l4d_survivor_shove** 推生还:)~~ 药抗无用
 
 
 ------  
