@@ -11,13 +11,17 @@
 >飞行无敌: *l4d_fyzb_god \<0 | 1\>* 防止出现bug开局后无敌
 
 **l4d_laser_sp.smx** 开局显示弹道
+
 **readyup.smx** 自改ready界面
+
 **enhancedsprays.smx** 允许特感灵魂/旁观喷漆 喷漆距离和CD
 >喷漆CD: *decalfrequency \<s\>*
 >喷漆距离: *sm_enhancedsprays_distance \<def:115\>*
 
 **l4d_bunnyhop.smx** 给你连跳插件你也跳不出220
+
 **HitStatisticsLikeDianDian.smx**  类似于点点服的特感统计
+
 **l4d_DynamicHostname.smx** 中文服务器名称插件
 >修改服名在*addons/sourcemod/configs/hostname/server_hostname.txt*
 
@@ -28,6 +32,7 @@
 >带vanlia前缀的为不适配**l4d_svname**的插件 其余与适配版本没有区别
 
 **l4d2_airstrike.core.smx** 呼叫空袭 但是没有伤害 !strike 特感也能玩
+
 **l4d2_server_ragdoll.sp** 死亡生还布娃娃
 > 隐藏默认尸体 *sm_side_dolls_invisible_body 1*
 
@@ -36,6 +41,7 @@
 **Plugins/MusicMapStart** 在对局开始时播放音乐   
 >需要设置fastdl服务器 如果不设置 会导致无法进服  
 >具体的设置方法可以查看[原网站](https://forums.alliedmods.net/showthread.php?p=2645342)  
+
 **Plugins/beam_follow_classname** 投掷物后添加轨迹 所有人都能看见(所以我没用:)   
 
 ------  
