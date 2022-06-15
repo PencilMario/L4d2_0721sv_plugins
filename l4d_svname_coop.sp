@@ -2,8 +2,7 @@
 #include <l4d2util>
 #include <sdktools>
 #include <left4dhooks>
-#include <readyup>
-
+#include <multicolors>
 
 bool isFirstRound,isLive;
 
@@ -12,20 +11,20 @@ char g_sNewName[128];
 char g_sConfigName[32];
 new Handle:g_hHostName = INVALID_HANDLE;
 
-int killCount
+int g_sRestartCount = 0;
 
 ConVar getConfigName;
 public Plugin:myinfo =
 {
 	name = "动态服务器名称",
 	description = "SP的绝境动态服名",
-	author = "Mengsk",
+	author = "SirP",
 	version = "0.2",
 	url = ""
 }
 
 public void OnPluginStart()
-{											//此处改为你的服务器名
+{
 	Format(g_sDefultName, sizeof(g_sDefultName), "[绝境14特]不要再坐牢了辣");
     Format(g_sNewName, sizeof(g_sNewName), g_sDefultName);
 	g_hHostName = FindConVar("hostname");
@@ -38,7 +37,6 @@ public void OnPluginStart()
 
 public OnMapStart()
 {
-	isFirstRound = true;
 	HostNameChange();
 }
 
@@ -54,44 +52,17 @@ public Action PlayerDisconnect_Event(Handle:event, const String:name[], bool:don
 
 public Action RoundEnd_Event(Event event, const char[] name, bool dontBroadcast)
 {
-	isFirstRound = false;
+	g_sRestartCount++;
     HostNameChange();
+	CPrintToChat("{green}[{red}!{green}] {lightgreen}重启次数 -{default}{olive}%u{default}.", g_sRestartCount);
 }
 
-public void OnRoundIsLive()
-{
-	isLive = true;
-	HostNameChange();
-}
-
-public void OnReadyUpInitiate()
-{
-	isLive = false;
-	HostNameChange();
-}
 
 public void OnConfigsExecuted()
 {
 	GetFileHostname();
 }
-stock int GetSeriousClientCount(bool inGame = false)
-{
-	int clients = 0;
-	
-	for (int i = 1; i <= MaxClients; i++)
-	{
-		if (inGame)
-		{
-			if (IsClientInGame(i) && !IsFakeClient(i)) clients++;
-		}
-		else
-		{
-			if (IsClientConnected(i) && !IsFakeClient(i)) clients++;
-		}
-	}
-	
-	return clients;
-}
+
 void GetFileHostname()
 {
 	char sPath[PLATFORM_MAX_PATH];
@@ -113,27 +84,10 @@ void GetFileHostname()
 
 HostNameChange()
 {
-    getConfigName = FindConVar("l4d_ready_cfg_name");
 	int iGameMode = L4D_GetGameModeType()
-    getConfigName.GetString(g_sConfigName, sizeof(g_sConfigName));
-	if(iGameMode == 4)
-	{
-		if(GetSeriousClientCount() == 0)
-		{
-            Format(g_sNewName, sizeof(g_sNewName), "%s", g_sDefultName);
-			SetConVarString(g_hHostName, g_sNewName, false, false);
-			return
-		}
-		if(g_sConfigName[0] != '\0')
-		{
-		    Format(g_sNewName, sizeof(g_sNewName), "%s - ",
-			g_sDefultName, 
-			);
-		}		
-	}
-	else
-	{
-		Format(g_sNewName, sizeof(g_sNewName), "%s - [..?]", g_sDefultName);
-	}
-	SetConVarString(g_hHostName, g_sNewName, false, false);
+	// [绝境18特]你也来坐牢啊 - 重启:0
+    Format(g_sNewName, sizeof(g_sNewName), "%s - 重启:%s", g_sDefultName, g_sRestartCount);
+	SetConVarString(g_hHostName, g_sNewName, false, false);		
+
+	//SetConVarString(g_hHostName, g_sNewName, false, false);
 }
