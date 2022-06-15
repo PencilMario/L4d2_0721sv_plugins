@@ -54,7 +54,7 @@ public Action RoundEnd_Event(Event event, const char[] name, bool dontBroadcast)
 {
 	g_sRestartCount++;
         HostNameChange();
-	CreateTimer(4.0, delayedMVPPrint)
+	CreateTimer(4.0, PrintRestartCount)
 }
 
 
