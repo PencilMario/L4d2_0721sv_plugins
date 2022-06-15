@@ -31,8 +31,9 @@ public void OnPluginStart()
     g_sRestartCount = 0;
     HookEvent("round_end", RoundEnd_Event, EventHookMode_Pre);
     HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
-	HookEvent("player_connect", PlayerConnect_Event, EventHookMode_Pre);
-	HostNameChange();
+    HookEvent("player_connect", PlayerConnect_Event, EventHookMode_Pre);
+    HostNameChange();
+    RegConsoleCmd("sm_recount", PrintRestartCount, "Prints the current MVP for the survivor team");
 }
 
 public OnMapStart()
