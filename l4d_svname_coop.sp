@@ -11,7 +11,7 @@ char g_sNewName[128];
 char g_sConfigName[32];
 new Handle:g_hHostName = INVALID_HANDLE;
 
-int g_sRestartCount = 0;
+int g_sRestartCount;
 
 ConVar getConfigName;
 public Plugin:myinfo =
@@ -25,10 +25,10 @@ public Plugin:myinfo =
 
 public void OnPluginStart()
 {
-	Format(g_sDefultName, sizeof(g_sDefultName), "[绝境14特]不要再坐牢了辣");
+    Format(g_sDefultName, sizeof(g_sDefultName), "[绝境14特]不要再坐牢了辣");
     Format(g_sNewName, sizeof(g_sNewName), g_sDefultName);
-	g_hHostName = FindConVar("hostname");
-
+    g_hHostName = FindConVar("hostname");
+    g_sRestartCount = 0;
     HookEvent("round_end", RoundEnd_Event, EventHookMode_Pre);
     HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
 	HookEvent("player_connect", PlayerConnect_Event, EventHookMode_Pre);
@@ -53,14 +53,19 @@ public Action PlayerDisconnect_Event(Handle:event, const String:name[], bool:don
 public Action RoundEnd_Event(Event event, const char[] name, bool dontBroadcast)
 {
 	g_sRestartCount++;
-    HostNameChange();
-	CPrintToChat("{green}[{red}!{green}] {lightgreen}重启次数 -{default}{olive}%u{default}.", g_sRestartCount);
+        HostNameChange();
+	CreateTimer(4.0, delayedMVPPrint)
 }
 
 
 public void OnConfigsExecuted()
 {
 	GetFileHostname();
+}
+
+void PrintRestartCount()
+{
+    	CPrintToChatAll("{green}[{red}!{green}] {lightgreen}重启次数 -{default}{olive}%u{default}.", g_sRestartCount);
 }
 
 void GetFileHostname()
