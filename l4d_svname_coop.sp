@@ -66,7 +66,7 @@ public void OnConfigsExecuted()
 
 void PrintRestartCount()
 {
-    	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}重启次数 -{default}{olive}%u{default}.", g_sRestartCount);
+    	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}重启次数 -{default}{olive}%d{default}.", g_sRestartCount);
 }
 
 void GetFileHostname()
@@ -92,7 +92,7 @@ HostNameChange()
 {
 	int iGameMode = L4D_GetGameModeType()
 	// [绝境18特]你也来坐牢啊 - 重启:0
-    Format(g_sNewName, sizeof(g_sNewName), "%s - 重启:%s", g_sDefultName, g_sRestartCount);
+    Format(g_sNewName, sizeof(g_sNewName), "%s - 重启:%", g_sDefultName, g_sRestartCount);
 	SetConVarString(g_hHostName, g_sNewName, false, false);		
 
 	//SetConVarString(g_hHostName, g_sNewName, false, false);
