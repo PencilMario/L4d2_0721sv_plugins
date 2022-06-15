@@ -66,7 +66,7 @@ public void OnConfigsExecuted()
 
 void PrintRestartCount()
 {
-    	CPrintToChatAll("{green}[{red}!{green}] {lightgreen}重启次数 -{default}{olive}%u{default}.", g_sRestartCount);
+    	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}重启次数 -{default}{olive}%u{default}.", g_sRestartCount);
 }
 
 void GetFileHostname()
