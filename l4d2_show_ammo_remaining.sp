@@ -24,6 +24,12 @@ public Action EVENT_WEAPONRELOAD(Handle:event, const String:name[], bool:dontBro
     {
         return Plugin_Continue;
     }
+    if (1100 > bakammo && bakammo > 1000){
+    CPrintToChat(cilent, "{green}[{lightgreen}!{green}] {default}当剩余子弹低于950后将不再提示此信息");
+    }
+    if (bakammo > 950){
+    CPrintToChat(cilent, "{green}[{lightgreen}!{green}] {default}剩余备弹 \x0B> {blue}%d", bakammo);
+    }
 }
 
 int GetWeaponBackupAmmo(int owner, int weapon){
