@@ -36,7 +36,9 @@
 **l4d2_server_ragdoll.sp** 死亡生还布娃娃
 > 隐藏默认尸体 *sm_side_dolls_invisible_body 1*
 
-~~**l4d_survivor_shove** 推生还:)~~ 药抗无用
+~~**l4d_survivor_shove** 推生还:)~~ 药抗无用     
+
+**l4d2_show_ammo_remaining** 当备弹超过950时, 提示备弹量
 
 **Plugins/MusicMapStart** 在对局开始时播放音乐   
 >需要设置fastdl服务器 如果不设置 会导致无法进服  
