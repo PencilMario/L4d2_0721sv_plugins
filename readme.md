@@ -4,9 +4,10 @@
 
 ------
 
-### 插件列表 Plugins List
+## 插件列表 Plugins List
 
 **l4d_climb.smx** 生还爬墙(不开特感, 防止影响平衡)
+
 **l4d_fyzb_en_v20.smx** 生还HT跳(不开特感, 同上)
 >飞行无敌: *l4d_fyzb_god \<0 | 1\>* 防止出现bug开局后无敌
 
@@ -36,15 +37,17 @@
 **l4d2_server_ragdoll.sp** 死亡生还布娃娃
 > 隐藏默认尸体 *sm_side_dolls_invisible_body 1*
 
-~~**l4d_survivor_shove** 推生还:)~~ 药抗无用     
+~~**l4d_survivor_shove** 推生还:)~~ 药抗无用
 
 **l4d2_show_ammo_remaining** 当备弹超过950时, 提示备弹量
 
-**Plugins/MusicMapStart** 在对局开始时播放音乐   
+**Plugins/MusicMapStart** 在对局开始时播放音乐
 >需要设置fastdl服务器 如果不设置 会导致无法进服  
 >具体的设置方法可以查看[原网站](https://forums.alliedmods.net/showthread.php?p=2645342)  
 
-**Plugins/beam_follow_classname** 投掷物后添加轨迹 所有人都能看见(所以我没用:)   
+**Plugins/beam_follow_classname** 投掷物后添加轨迹 所有人都能看见(所以我没用:)
+
+**Plugins/Ast_SiSpawnSystem** Ast药役的刷特相关插件 用于自己多特服  
 
 ------  
 
@@ -54,7 +57,7 @@
 虽然是csgo的, 但原理是一样的, 你可以在自己的求生Linux上搞
 宝塔没有可以现装 装上之后关闭其防火墙即可
 
-```
+```cfg
 //fastdl
 sv_allowupload 1
 sv_allowdownload 1
@@ -68,6 +71,9 @@ sv_downloadurl "http://你自己所创建的fastdl服务器(网站)"
 ### 额外链接 Extra Link
 
 [rl4d2l-plugins](https://github.com/devilesk/rl4d2l-plugins)
+
 [L4D2-Plugins](https://github.com/fbef0102/L4D2-Plugins)
+
 [MoYu_Server_Stupid_Plugins](https://github.com/Target5150/MoYu_Server_Stupid_Plugins)
+
 [L4D2-HoongDou-Project](https://github.com/HoongDou/L4D2-HoongDou-Project)
