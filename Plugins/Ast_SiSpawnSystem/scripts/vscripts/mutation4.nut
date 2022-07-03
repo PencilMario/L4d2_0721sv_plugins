@@ -41,42 +41,51 @@ function update_diff()
 {
     local difficulty = Convars.GetStr("das_fakedifficulty");
     local timer = 15
+    local Si1p = (Convars.GetFloat("sss_1P")).tointeger()
+    local Si2p = (Convars.GetFloat("sss_2P")).tointeger()
+    local Si3p = (Convars.GetFloat("sss_3P")).tointeger()
+    local Si4p = (Convars.GetFloat("sss_4P")).tointeger()
+    local Si1pl = (Convars.GetFloat("sss_1P_Lim")).tointeger()
+    local Si2pl = (Convars.GetFloat("sss_2P_Lim")).tointeger()
+    local Si3pl = (Convars.GetFloat("sss_3P_Lim")).tointeger()
+    local Si4pl = (Convars.GetFloat("sss_4P_Lim")).tointeger()
+
     switch (difficulty){
         case "1":
-            DirectorOptions.HunterLimit = 1
-            DirectorOptions.BoomerLimit = 1
-            DirectorOptions.JockeyLimit = 1
-            DirectorOptions.SmokerLimit = 1
-            DirectorOptions.ChargerLimit = 1
-            DirectorOptions.SpitterLimit = 0
-            MapData.g_nSI = 4
+            DirectorOptions.HunterLimit = Si1pl
+            DirectorOptions.BoomerLimit = Si1pl
+            DirectorOptions.JockeyLimit = Si1pl
+            DirectorOptions.SmokerLimit = Si1pl
+            DirectorOptions.ChargerLimit = Si1pl
+            DirectorOptions.SpitterLimit = Si1pl
+            MapData.g_nSI = Si1p
             break;
         case "2":
-            DirectorOptions.HunterLimit = 2
-            DirectorOptions.BoomerLimit = 1
-            DirectorOptions.JockeyLimit = 2
-            DirectorOptions.SmokerLimit = 2
-            DirectorOptions.ChargerLimit = 2
-            DirectorOptions.SpitterLimit = 1
-            MapData.g_nSI = 9
+            DirectorOptions.HunterLimit = Si2pl
+            DirectorOptions.BoomerLimit = Si2pl
+            DirectorOptions.JockeyLimit = Si2pl
+            DirectorOptions.SmokerLimit = Si2pl
+            DirectorOptions.ChargerLimit = Si2pl
+            DirectorOptions.SpitterLimit = Si2pl
+            MapData.g_nSI = Si2p
             break;
         case "3":
-            DirectorOptions.HunterLimit = 3
-            DirectorOptions.BoomerLimit = 2
-            DirectorOptions.JockeyLimit = 3
-            DirectorOptions.SmokerLimit = 2
-            DirectorOptions.ChargerLimit = 2
-            DirectorOptions.SpitterLimit = 2
-            MapData.g_nSI = 14
+            DirectorOptions.HunterLimit = Si3pl
+            DirectorOptions.BoomerLimit = Si3pl
+            DirectorOptions.JockeyLimit = Si3pl
+            DirectorOptions.SmokerLimit = Si3pl
+            DirectorOptions.ChargerLimit = Si3pl
+            DirectorOptions.SpitterLimit = Si3pl
+            MapData.g_nSI = Si3p
             break;
         case "4":
-            DirectorOptions.HunterLimit = 3
-            DirectorOptions.BoomerLimit = 3
-            DirectorOptions.JockeyLimit = 3
-            DirectorOptions.SmokerLimit = 3
-            DirectorOptions.ChargerLimit = 3
-            DirectorOptions.SpitterLimit = 3
-            MapData.g_nSI = 18
+            DirectorOptions.HunterLimit = Si4pl
+            DirectorOptions.BoomerLimit = Si4pl
+            DirectorOptions.JockeyLimit = Si4pl
+            DirectorOptions.SmokerLimit = Si4pl
+            DirectorOptions.ChargerLimit = Si4pl
+            DirectorOptions.SpitterLimit = Si4pl
+            MapData.g_nSI = Si4p
             break;
         default:
             DirectorOptions.HunterLimit = 1
