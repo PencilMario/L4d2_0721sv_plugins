@@ -55,7 +55,6 @@ public OnMapStart()
 	g_sRestartCount = 0;
 	g_sZuoLaoLevel = 0;
 	g_teamSafeCountTime = 3;
-	PrintZuoLaoStatus();
 }
 public PrintZuoLaoStatus()
 {
@@ -147,6 +146,7 @@ public Action RoundStart_Event(Event event, const String:name[], bool:dontBroadc
 	healtimer = CreateTimer(3.0, Timer_Re_Health, _,TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	GivePill();
 	GiveVomitjar();
+	PrintZuoLaoStatus();
 }
 
 public GivePill(){
