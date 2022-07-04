@@ -34,7 +34,7 @@ public void OnPluginStart()
 	HookEvent("player_hurt", PlayerHure_Event);
 
 	CreateConVar("zl_Plugin_Version", PLUGIN_VERSION, "Anti坐牢插件版本")
-	g_iZuoLaoLv = CreateConVar("zl_Per_Level_Time", "5", "每个坐牢等级的间隔，坐牢等级的计算公式为(重启次数/cvar值)-1", FCVAR_SPONLY|FCVAR_NOTIFY, true, 1);
+	g_iZuoLaoLv = CreateConVar("zl_Per_Level_Time", "4", "每个坐牢等级的间隔，坐牢等级的计算公式为(重启次数/cvar值)-1", FCVAR_SPONLY|FCVAR_NOTIFY, true, 1);
 	g_iZuoLaoHeadShotHpLv = CreateConVar("zl_Headshot_regHp", "1", "启用爆头CI回血所需要的坐牢等级", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZuoLaoRegHp40Lv = CreateConVar("zl_Slow_RegTo40_Level", "2", "启用缓慢回血至40所需的坐牢等级 *当队伍中任何人受伤时，回血会暂停9s", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZuoLaoGivePillLv = CreateConVar("zl_GivePill_Level", "4", "启用开局药所需的坐牢等级", FCVAR_SPONLY|FCVAR_NOTIFY);
@@ -114,6 +114,7 @@ public int GetPlayerHealth(int player){
 }
 
 public void SetPlayerHealth(int player, int health){
+	if (health >= 100) health=100;
 	SetEntProp(player, Prop_Data, "m_iHealth", health);
 }
 
@@ -155,8 +156,11 @@ public GivePill(){
 		SetCommandFlags("give", flags & ~FCVAR_CHEAT);	
 		for (new i = 1; i <= MaxClients; i++)
 		{
-			count++
-			if (IsClientInGame(i) && GetClientTeam(i)==2) FakeClientCommand(i, "give pain_pills");
+			if (IsClientInGame(i) && GetClientTeam(i)==2)
+			{
+				FakeClientCommand(i, "give pain_pills");
+				count++;
+			}
 			if (count == GetConVarInt(g_iZLGivePillCount)) break;
 		}
 		SetCommandFlags("give", flags|FCVAR_CHEAT);
@@ -171,8 +175,11 @@ public GiveVomitjar(){
 		SetCommandFlags("give", flags & ~FCVAR_CHEAT);	
 		for (new i = 1; i <= MaxClients; i++)
 		{
-			count++
-			if (IsClientInGame(i) && GetClientTeam(i)==2) FakeClientCommand(i, "give vomitjar");
+			if (IsClientInGame(i) && GetClientTeam(i)==2)
+			{
+				FakeClientCommand(i, "give vomitjar");
+				count++
+			}
 			if (count==GetConVarInt(g_iZLGiveVomitCount)) break;
 		}
 		SetCommandFlags("give", flags|FCVAR_CHEAT);
