@@ -56,38 +56,43 @@ public Action Cmd_SetAiSpawns(int client, int args)
 	int playermode;
 	int SiNum;
 
-	if (arg < 2)
+	if (args < 2)
 	{
 		ReplyToCommand(client, "[SM] 使用方式: sm_SetAiSpawns <生还玩家数量> <特感数量>");
 		return Plugin_Handled;
 	}
 	playermode = GetCmdArgInt(1);
+	SiNum = GetCmdArgInt(2);
 	switch(playermode){
-		case "1":
-			SiNum = GetCmdArgInt(2);
+		case 1:
+		{
 			SS_1_SiNum.IntValue = SiNum;
 			SS_1_SiLim.IntValue = SILimit(SiNum);
-			break;
-		case "2":
-			SiNum = GetCmdArgInt(2);
+		}
+		case 2:
+		{
 			SS_2_SiNum.IntValue = SiNum;
 			SS_2_SiLim.IntValue = SILimit(SiNum);
-			break;
-		case "3":
-			SiNum = GetCmdArgInt(2);
+		}
+		case 3:
+		{
 			SS_3_SiNum.IntValue = SiNum;
 			SS_3_SiLim.IntValue = SILimit(SiNum);
-			break;
-		case "4":
-			SiNum = GetCmdArgInt(2);
+		}
+		case 4:
+		{
 			SS_4_SiNum.IntValue = SiNum;
 			SS_4_SiLim.IntValue = SILimit(SiNum);
-			break;
+		}
 		default:
-			PrintToChat(client, "[SM] 参数错误: sm_SetAiSpawns <生还玩家数量> <特感数量>")；
-			break;
+		{
+			PrintToChat(client, "[SM] 参数错误: sm_SetAiSpawns <生还玩家数量> <特感数量>");
+		}
 	}
-	CPrintToChatAll("{green}[{lightgreen}!{green}] {olive}%s{default}修改了特感刷新配置", GetClientName(client));
+	char name[64];
+	GetClientName(client, name, sizeof(name));
+	CPrintToChatAll("{green}[{lightgreen}!{green}] {olive}%s{default}修改了特感刷新配置", name);
 	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}刷新配置：{olive}%d - %d - %d - %d",	SS_1_SiNum.IntValue, SS_2_SiNum.IntValue, SS_3_SiNum.IntValue, SS_4_SiNum.IntValue);
 	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}单种特感限制： {olive}%d - %d - %d - %d",	SS_1_SiNum.IntValue, SS_2_SiNum.IntValue, SS_3_SiNum.IntValue, SS_4_SiNum.IntValue);
+	return Plugin_Continue;
 }
