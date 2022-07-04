@@ -1,11 +1,12 @@
 DirectorOptions <-
 {
-    ActiveChallenge = 1
+   	ActiveChallenge = 1
 	cm_AggressiveSpecials 			= true
 	cm_ShouldHurry 					= 1
 	//cm_SpecialRespawnInterval 		= 15 //Time for an SI spawn slot to become available
 	cm_SpecialSlotCountdownTime 	= 0
-
+	BehindSurvivorsSpawnDistance = 700
+	
 	DominatorLimit 			= 3
 	cm_BaseSpecialLimit 	= 3
 	cm_MaxSpecials 			= 3
@@ -15,7 +16,7 @@ DirectorOptions <-
 	JockeyLimit 			= 1
 	ChargerLimit 			= 1
 	SmokerLimit 			= 0
-    DefaultItems =
+    	DefaultItems =
  	[
  		"weapon_smg",
  		"weapon_pistol",
