@@ -45,8 +45,8 @@
 
 **Plugins/beam_follow_classname** 投掷物后添加轨迹 所有人都能看见(所以我没用:)
 
-**Plugins/Ast_SiSpawnSystem** Ast药役的刷特相关插件 用于自己多特服  
-
+**Plugins/Ast_SiSpawnSystem** Ast药役的刷特相关插件 用于自己多特服 略微修改以方便直接在游戏内调节
+> 设置特感数量 sm_setaispawns <生还玩家数量> <特感数量>
 ------  
 
 ### 设置fastdownload服务器 Set fastdl server
