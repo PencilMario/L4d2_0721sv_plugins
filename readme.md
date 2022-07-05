@@ -47,6 +47,7 @@
 
 **Plugins/Ast_SiSpawnSystem** Ast药役的刷特相关插件 用于自己多特服 略微修改以方便直接在游戏内调节
 > 设置特感数量 sm_setaispawns <生还玩家数量> <特感数量>
+> 默认只有mutation4（绝境）模式有效 如果想在coop和versus使用可以复制一份vscript改为对应的模式名字（AST要求两个都要）
 ------  
 
 ### 设置fastdownload服务器 Set fastdl server
