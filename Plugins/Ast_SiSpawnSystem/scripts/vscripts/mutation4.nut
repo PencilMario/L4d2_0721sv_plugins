@@ -5,7 +5,6 @@ DirectorOptions <-
 	cm_ShouldHurry 					= 1
 	//cm_SpecialRespawnInterval 		= 15 //Time for an SI spawn slot to become available
 	cm_SpecialSlotCountdownTime 	= 0
-	BehindSurvivorsSpawnDistance = 700
 	
 	DominatorLimit 			= 3
 	cm_BaseSpecialLimit 	= 3
@@ -16,7 +15,7 @@ DirectorOptions <-
 	JockeyLimit 			= 1
 	ChargerLimit 			= 1
 	SmokerLimit 			= 0
-    	DefaultItems =
+    DefaultItems =
  	[
  		"weapon_smg",
  		"weapon_pistol",
@@ -41,7 +40,7 @@ MapData <-{
 function update_diff()
 {
     local difficulty = Convars.GetStr("das_fakedifficulty");
-    local timer = 15
+    local timer = (Convars.GetFloat("SS_Time")).tointeger()
     local Si1p = (Convars.GetFloat("sss_1P")).tointeger()
     local Si2p = (Convars.GetFloat("sss_2P")).tointeger()
     local Si3p = (Convars.GetFloat("sss_3P")).tointeger()
@@ -51,6 +50,8 @@ function update_diff()
     local Si3pl = (Convars.GetFloat("sss_3P_Lim")).tointeger()
     local Si4pl = (Convars.GetFloat("sss_4P_Lim")).tointeger()
 
+    DirectorOptions.cm_SpecialRespawnInterval = timer
+    DirectorOptions.cm_SpecialSlotCountdownTime = timer
     switch (difficulty){
         case "1":
             DirectorOptions.HunterLimit = Si1pl

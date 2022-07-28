@@ -10,6 +10,7 @@ ConVar SS_1_SiLim;
 ConVar SS_2_SiLim;
 ConVar SS_3_SiLim;
 ConVar SS_4_SiLim;
+ConVar SS_Time;
 
 public Plugin myinfo =
 {
@@ -23,6 +24,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	RegConsoleCmd("sm_SetAiSpawns", Cmd_SetAiSpawns);
+	RegConsoleCmd("sm_SetAiTime", Cmd_SetAiTime);
 	SS_1_SiNum = CreateConVar("sss_1P", "4", "1人模式特感数量");
 	SS_2_SiNum = CreateConVar("sss_2P", "9", "2人模式特感数量");
 	SS_3_SiNum = CreateConVar("sss_3P", "14", "3人模式特感数量");
@@ -33,11 +35,13 @@ public void OnPluginStart()
 	SS_3_SiLim = CreateConVar("sss_3P_Lim", "3", "3人模式特感单类限制");
 	SS_4_SiLim = CreateConVar("sss_4P_Lim", "3", "4人模式特感单类限制");
 
+	SS_Time = CreateConVar("SS_Time", "15", "刷新间隔");
+
 	HookConVarChange(SS_1_SiNum, reload_script);
 	HookConVarChange(SS_2_SiNum, reload_script);
 	HookConVarChange(SS_3_SiNum, reload_script);
 	HookConVarChange(SS_4_SiNum, reload_script);
-
+	HookConVarChange(SS_Time, reload_script);
 }
 
 public reload_script(Handle:convar, const String:oldValue[], const String:newValue[]){
@@ -47,8 +51,25 @@ public reload_script(Handle:convar, const String:oldValue[], const String:newVal
 public int SILimit(int num){
 	int Si = num/6;
 	if (Si*6 != num) Si++;
-	if (Si <= 0) Si++;
+	if (Si <= 0) Si=1;
 	return Si
+}
+
+public Action Cmd_SetAiTime(int client, int args)
+{
+	int time;
+	if (args < 1)
+	{
+		ReplyToCommand(client, "[SM] 使用方式: sm_SetAiTime <刷新间隔>");
+		return Plugin_Handled;
+	}
+	time = GetCmdArgInt(1);
+	SS_Time.IntValue = time;
+	char name[64];
+	GetClientName(client, name, sizeof(name));
+	CPrintToChatAll("{green}[{lightgreen}!{green}] {olive}%s{default}修改了特感刷新时间", name);
+	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}刷新时间：{olive}%d", SS_Time.IntValue);
+	return Plugin_Continue;
 }
 
 public Action Cmd_SetAiSpawns(int client, int args)
@@ -93,6 +114,6 @@ public Action Cmd_SetAiSpawns(int client, int args)
 	GetClientName(client, name, sizeof(name));
 	CPrintToChatAll("{green}[{lightgreen}!{green}] {olive}%s{default}修改了特感刷新配置", name);
 	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}刷新配置：{olive}%d - %d - %d - %d",	SS_1_SiNum.IntValue, SS_2_SiNum.IntValue, SS_3_SiNum.IntValue, SS_4_SiNum.IntValue);
-	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}单种特感限制： {olive}%d - %d - %d - %d",	SS_1_SiNum.IntValue, SS_2_SiNum.IntValue, SS_3_SiNum.IntValue, SS_4_SiNum.IntValue);
+	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}单种特感限制： {olive}%d - %d - %d - %d",	SS_1_SiLim.IntValue, SS_2_SiLim.IntValue, SS_3_SiLim.IntValue, SS_4_SiLim.IntValue);
 	return Plugin_Continue;
 }

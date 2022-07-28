@@ -4,7 +4,7 @@
 #include <left4dhooks>
 #include <multicolors>
 
-#define PLUGIN_VERSION "0.1"
+#define PLUGIN_VERSION "0.2"
 #define CONFIG_FILENAME "l4d_fuck_zuolao"
 
 int g_sRestartCount;
@@ -14,7 +14,7 @@ int g_teamSafeCountTime;
 Handle healtimer;
 
 ConVar g_iZuoLaoLv;  
-ConVar g_iZuoLaoHeadShotHpLv, g_iZuoLaoRegHp40Lv, g_iZuoLaoGivePillLv, g_iZuoLaoGiveVomitLv, g_iZuoLaoRegHp100Lv;
+ConVar g_iZuoLaoHeadShotHpLv, g_iZuoLaoRegHp40Lv, g_iZuoLaoGivePillLv, g_iZuoLaoGiveVomitLv, g_iZuoLaoRegHp100Lv, g_iZuoLaoStart;
 ConVar g_iZLGivePillCount, g_iZLGiveVomitCount;
 public Plugin myinfo =
 {
@@ -42,7 +42,7 @@ public void OnPluginStart()
 	g_iZuoLaoGiveVomitLv = CreateConVar("zl_GiveVomit_Level", "5", "启用开局胆汁所需要的坐牢等级", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZLGiveVomitCount = CreateConVar("zl_GiveVomit_Count","2" , "给胆汁数量", FCVAR_SPONLY|FCVAR_NOTIFY, true , 1, true, 4)
 	g_iZuoLaoRegHp100Lv = CreateConVar("zl_Fast_RegTo100_Level", "7", "启用快速回血至100所需的坐牢等级 *当队伍中任何人受伤时，回血会暂停9s", FCVAR_SPONLY|FCVAR_NOTIFY);
-
+	g_iZuoLaoStart = CreateConVar("zl_extra_level", "0", "额外的坐牢等级")
 	AutoExecConfig(true, CONFIG_FILENAME);
 }
 
@@ -63,13 +63,13 @@ public PrintZuoLaoStatus()
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoRegHp40Lv)) CPrintToChatAll("{default}经过一次又一次的坐牢, 你明白必须要让自己不能拖累团队\n{green}现在HP低于40将会缓慢恢复!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoGivePillLv)) CPrintToChatAll("{default}出于对坐牢的恐惧, 你做足了准备\n{green}现在开局将会给药!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoGiveVomitLv)) CPrintToChatAll("{default}出于对坐牢的恐惧, 你做足了准备\n{green}现在开局将会给胆汁!");
-	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoHeadShotHpLv)) CPrintToChatAll("{default}一次又一次的坐牢使你麻木不堪, 你已不想再继续坐牢了\n{green}现在HP回复的速度更快更多!");
+	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoRegHp100Lv)) CPrintToChatAll("{default}一次又一次的坐牢使你麻木不堪, 你已不想再继续坐牢了\n{green}现在HP回复的速度更快更多!");
 }
 
 // 检测是否坐牢
 public Is_FuckZuolao()
 {
-	g_sZuoLaoLevel = (g_sRestartCount / GetConVarInt(g_iZuoLaoLv)) - 1
+	g_sZuoLaoLevel = (g_sRestartCount / GetConVarInt(g_iZuoLaoLv)) - 1 + GetConVarInt(g_iZuoLaoStart)
 }
 
 //---------------------------------------
