@@ -14,8 +14,8 @@ int g_teamSafeCountTime;
 Handle healtimer;
 
 ConVar g_iZuoLaoLv;  
-ConVar g_iZuoLaoHeadShotHpLv, g_iZuoLaoRegHp40Lv, g_iZuoLaoGivePillLv, g_iZuoLaoGiveVomitLv, g_iZuoLaoRegHp100Lv, g_iZuoLaoStart;
-ConVar g_iZLGivePillCount, g_iZLGiveVomitCount;
+ConVar g_iZuoLaoHeadShotHpLv, g_iZupLaoRegMoreFast, g_iZuoLaoRegHp40Lv, g_iZuoLaoGivePillLv, g_iZuoLaoGiveVomitLv, g_iZuoLaoRegHp100Lv, g_iZuoLaoStart;
+ConVar g_iZLGivePillCount, g_iZLGiveVomitCount, g_iHealingCooldownTime;
 public Plugin myinfo =
 {
 	name = "[L4D2] ZuolaoAnti",
@@ -99,7 +99,7 @@ public Action RoundEnd_Event(Event event, const String:name[], bool:dontBroadcas
 public Action PlayerDeath_Event(Event event, const String:name[], bool:dontBroadcast){
 	if (event.GetBool("headshot") == false) return;
 	int client = GetClientOfUserId(event.GetInt("attacker"));
-	if (GetClientTeam(player)!=L4D_TEAM_SURVIVOR) return;
+	if (GetClientTeam(client)!=L4D_TEAM_SURVIVOR) return;
 	int health = GetPlayerHealth(client);
 	if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
 		if (health < 100) SetPlayerHealth(client, health + 1);
