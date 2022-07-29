@@ -32,17 +32,20 @@ public void OnPluginStart()
 	HookEvent("round_end", RoundEnd_Event);
 	HookEvent("round_start", RoundStart_Event);
 	HookEvent("player_hurt", PlayerHure_Event);
+	HookEvent("player_death", PlayerDeath_Event);
 
 	CreateConVar("zl_Plugin_Version", PLUGIN_VERSION, "Anti坐牢插件版本")
-	g_iZuoLaoLv = CreateConVar("zl_Per_Level_Time", "4", "每个坐牢等级的间隔，坐牢等级的计算公式为(重启次数/cvar值)-1", FCVAR_SPONLY|FCVAR_NOTIFY, true, 1);
-	g_iZuoLaoHeadShotHpLv = CreateConVar("zl_Headshot_regHp", "1", "启用爆头CI回血所需要的坐牢等级", FCVAR_SPONLY|FCVAR_NOTIFY);
+	g_iZuoLaoLv = CreateConVar("zl_Per_Level_Time", "3", "每个坐牢等级的间隔，坐牢等级的计算公式为(重启次数/cvar值)-1", FCVAR_SPONLY|FCVAR_NOTIFY, true, 1);
+	g_iZuoLaoHeadShotHpLv = CreateConVar("zl_Headshot_regHp", "1", "启用爆头回血所需要的坐牢等级", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZuoLaoRegHp40Lv = CreateConVar("zl_Slow_RegTo40_Level", "2", "启用缓慢回血至40所需的坐牢等级 *当队伍中任何人受伤时，回血会暂停9s", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZuoLaoGivePillLv = CreateConVar("zl_GivePill_Level", "4", "启用开局药所需的坐牢等级", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZLGivePillCount = CreateConVar("zl_GivePill_Count","4" , "给药数量", FCVAR_SPONLY|FCVAR_NOTIFY, true , 1, true, 4)
 	g_iZuoLaoGiveVomitLv = CreateConVar("zl_GiveVomit_Level", "5", "启用开局胆汁所需要的坐牢等级", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZLGiveVomitCount = CreateConVar("zl_GiveVomit_Count","2" , "给胆汁数量", FCVAR_SPONLY|FCVAR_NOTIFY, true , 1, true, 4)
 	g_iZuoLaoRegHp100Lv = CreateConVar("zl_Fast_RegTo100_Level", "7", "启用快速回血至100所需的坐牢等级 *当队伍中任何人受伤时，回血会暂停9s", FCVAR_SPONLY|FCVAR_NOTIFY);
+	g_iZupLaoRegMoreFast= CreateConVar("zl_Fast_RegTo100More_Level", "8", "启用更快的回血所需的坐牢等级（每次回‘坐牢等级’点hp） *当队伍中任何人受伤时，回血会暂停9s", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZuoLaoStart = CreateConVar("zl_extra_level", "0", "额外的坐牢等级")
+	g_iHealingCooldownTime = CreateConVar("zl_healing_cooldowntime", "3", "受伤回血cd*3")
 	AutoExecConfig(true, CONFIG_FILENAME);
 }
 
@@ -64,6 +67,8 @@ public PrintZuoLaoStatus()
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoGivePillLv)) CPrintToChatAll("{default}出于对坐牢的恐惧, 你做足了准备\n{green}现在开局将会给药!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoGiveVomitLv)) CPrintToChatAll("{default}出于对坐牢的恐惧, 你做足了准备\n{green}现在开局将会给胆汁!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoRegHp100Lv)) CPrintToChatAll("{default}一次又一次的坐牢使你麻木不堪, 你已不想再继续坐牢了\n{green}现在HP回复的速度更快更多!");
+	if (g_sZuoLaoLevel == GetConVarInt(g_iZupLaoRegMoreFast)) CPrintToChatAll("{default}你已经麻辣！\n{green}现在HP每次回复 %d 点hp!", g_sZuoLaoLevel);
+
 }
 
 // 检测是否坐牢
@@ -91,10 +96,20 @@ public Action RoundEnd_Event(Event event, const String:name[], bool:dontBroadcas
 	healtimer = INVALID_HANDLE;
 }
 
+public Action PlayerDeath_Event(Event event, const String:name[], bool:dontBroadcast){
+	if (event.GetBool("headshot") == false) return;
+	int client = GetClientOfUserId(event.GetInt("attacker"));
+	if (GetClientTeam(player)!=L4D_TEAM_SURVIVOR) return;
+	int health = GetPlayerHealth(client);
+	if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
+		if (health < 100) SetPlayerHealth(client, health + 1);
+	}
+}
+
 public Action PlayerHure_Event(Event event, const String:name[], bool:dontBroadcast){
 	int player = GetClientOfUserId(event.GetInt("userid"))
 	if (IsClientInGame(player) && GetClientTeam(player)==L4D_TEAM_SURVIVOR){
-		g_teamSafeCountTime = 3;
+		g_teamSafeCountTime = GetConVarInt(g_iHealingCooldownTime);
 	}
 }
 
@@ -133,6 +148,9 @@ public Action Timer_Re_Health(Handle Timer){
 					}
 					if(health < 100 && g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoRegHp100Lv)){
 						SetPlayerHealth(p, health + 4);
+					}
+					if(health < 100 && g_sZuoLaoLevel >= GetConVarInt(g_iZupLaoRegMoreFast)){
+						SetPlayerHealth(p, health + g_sZuoLaoLevel);
 					}
 				}
 			}
