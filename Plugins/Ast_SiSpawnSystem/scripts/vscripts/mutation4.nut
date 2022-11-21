@@ -3,7 +3,7 @@ DirectorOptions <-
    	ActiveChallenge = 1
 	cm_AggressiveSpecials 			= true
 	cm_ShouldHurry 					= 1
-	//cm_SpecialRespawnInterval 		= 15 //Time for an SI spawn slot to become available
+	cm_SpecialRespawnInterval 		= 15 //Time for an SI spawn slot to become available
 	cm_SpecialSlotCountdownTime 	= 0
 	
 	DominatorLimit 			= 3
