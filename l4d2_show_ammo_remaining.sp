@@ -15,7 +15,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-    RegConsoleCmd("sm_printammoremain", Call_AmmoPrint, "6");
+    /*RegConsoleCmd("sm_printammoremain", Call_AmmoPrint, "6");*/
     HookEvent("weapon_reload", Reload_WeaponEvent, EventHookMode_Post);
 }
 
@@ -23,6 +23,11 @@ public Action Reload_WeaponEvent(Event event, const String:name[], bool:dontBroa
     int playerid = event.GetInt("userid");
     int client = GetClientOfUserId(playerid);
     int primary = GetPlayerWeaponSlot(client, 0);
+    char w_name[32];
+    Client_GetActiveWeaponName(client, char w_name, sizeof(w_name))
+    if (w_name == "weapon_pistol" && w_name == "weapon_pistol_magnum"){
+        return Plugin_Continue
+    }
     int bakammo = GetWeaponBackupAmmo(client, primary);
     if (1000 > bakammo && bakammo > 950){
         CPrintToChat(client, "{green}[{lightgreen}!{green}] {default}当剩余子弹低于950后将不再提示此信息");
@@ -33,7 +38,7 @@ public Action Reload_WeaponEvent(Event event, const String:name[], bool:dontBroa
     return Plugin_Continue
 }
 
-public Action Call_AmmoPrint(int client, int args){
+/*public Action Call_AmmoPrint(int client, int args){
     int primary = GetPlayerWeaponSlot(client, 0);
     int bakammo = GetWeaponBackupAmmo(client, primary);
     if (1100 > bakammo && bakammo > 1000){
@@ -43,7 +48,7 @@ public Action Call_AmmoPrint(int client, int args){
         CPrintToChat(client, "{green}[{lightgreen}!{green}] {default}剩余子弹 \x0B> {olive}%d", bakammo);
     }
     return Plugin_Continue
-}
+}*/
 
 public int GetWeaponBackupAmmo(int owner, int weapon){
     return GetEntProp(owner, Prop_Data, "m_iAmmo", _, GetWeaponAmmoType(weapon));

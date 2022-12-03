@@ -40,15 +40,22 @@
 **l4d2_show_ammo_remaining** 当备弹超过950时, 提示备弹量
 
 **Plugins/MusicMapStart** 在对局开始时播放音乐
->需要设置fastdl服务器 如果不设置 会导致无法进服  
->具体的设置方法可以查看[原网站](https://forums.alliedmods.net/showthread.php?p=2645342)  
+> 需要设置fastdl服务器，否则会导致**服务器无法进入**
+> 具体的设置方法可以查看[原网站](https://forums.alliedmods.net/showthread.php?p=2645342)    
 
-**Plugins/beam_follow_classname** 投掷物后添加轨迹 所有人都能看见(所以我没用:)
 
 **Plugins/Ast_SiSpawnSystem** Ast药役的刷特相关插件 用于自己多特服 略微修改以方便直接在游戏内调节
 > 设置特感数量 sm_setaispawns <生还玩家数量> <特感数量>
+> 设置复活cd sm_setaitime <复活时间s>
 > 默认只有mutation4（绝境）模式有效 如果想在coop和versus使用可以复制一份vscript改为对应的模式名字（AST要求两个都要）
-------  
+
+**Plugins/fortnite_emotes_extended** 跳舞插件
+> 跳舞指令 `sm_emote`/`sm_dance`  
+> 需要设置fastdl服务器，否则会导致**服务器无法进入**  
+> 客户端需要将“自定义服务器内容”改为“全部”才能看到跳舞  
+> 插件来自评论区修改版，所以没源码
+
+------    
 
 ### 设置fastdownload服务器 Set fastdl server
 
