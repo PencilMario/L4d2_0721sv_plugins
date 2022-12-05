@@ -116,11 +116,11 @@ HostNameChange()
 	if(getConfigName != null)
 	{
         getConfigName.GetString(g_sConfigName, sizeof(g_sConfigName));
-		if(iGameMode == 4)
+		if(L4D_GetGameModeType() & (GAMEMODE_VERSUS))
 		{
 			if(GetSeriousClientCount() == 0)
 			{
-                Format(g_sNewName, sizeof(g_sNewName), "[Inactive] %s", g_sDefultName);
+                Format(g_sNewName, sizeof(g_sNewName), "[闲置] %s", g_sDefultName);
 				SetConVarString(g_hHostName, g_sNewName, false, false);
 				return
 			}
@@ -138,12 +138,12 @@ HostNameChange()
 		}
 		else
 		{
-			Format(g_sNewName, sizeof(g_sNewName), "[Unknown] %s", g_sDefultName);
+			Format(g_sNewName, sizeof(g_sNewName), "[摸鱼中] %s", g_sDefultName);
 		}
 	}
 	else
 	{
-		Format(g_sNewName, sizeof(g_sNewName), "[Inactive] %s", g_sDefultName);
+		Format(g_sNewName, sizeof(g_sNewName), "[闲置] %s", g_sDefultName);
 	}
 	SetConVarString(g_hHostName, g_sNewName, false, false);
 }
