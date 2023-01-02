@@ -10,7 +10,7 @@
 int g_sRestartCount;
 int g_sZuoLaoLevel;
 int g_teamSafeCountTime;
-
+new g_SafeCountTime[MAXPLAYERS+1] = 0;
 Handle healtimer;
 
 ConVar g_iZuoLaoLv;  
@@ -45,7 +45,7 @@ public void OnPluginStart()
 	g_iZuoLaoRegHp100Lv = CreateConVar("zl_Fast_RegTo100_Level", "7", "启用快速回血至100所需的坐牢等级 *当队伍中任何人受伤时，回血会暂停9s", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZupLaoRegMoreFast= CreateConVar("zl_Fast_RegTo100More_Level", "8", "启用更快的回血所需的坐牢等级（每次回‘坐牢等级’点hp） *当队伍中任何人受伤时，回血会暂停9s", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZuoLaoStart = CreateConVar("zl_extra_level", "0", "额外的坐牢等级")
-	g_iHealingCooldownTime = CreateConVar("zl_healing_cooldowntime", "3", "受伤回血cd*3")
+	g_iHealingCooldownTime = CreateConVar("zl_healing_cooldowntime", "3", "受伤回血cd*2")
 	AutoExecConfig(true, CONFIG_FILENAME);
 }
 
@@ -62,7 +62,7 @@ public OnMapStart()
 public PrintZuoLaoStatus()
 {
 	//CPrintToChatAll("{green}[{lightgreen}!{green}] {default}坐牢等级 \x0B> {olive}%d", g_sZuoLaoLevel);
-	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoHeadShotHpLv)) CPrintToChatAll("{default}经过短暂的坐牢旅途, 你明白了必须无时不刻都要准备状态\n{green}现在爆头CI将会回复HP!");
+	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoHeadShotHpLv)) CPrintToChatAll("{default}经过短暂的坐牢旅途, 你明白了必须无时不刻都要准备状态\n{green}现在击杀僵尸将会回复HP!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoRegHp40Lv)) CPrintToChatAll("{default}经过一次又一次的坐牢, 你明白必须要让自己不能拖累团队\n{green}现在HP低于40将会缓慢恢复!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoGivePillLv)) CPrintToChatAll("{default}出于对坐牢的恐惧, 你做足了准备\n{green}现在开局将会给药!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoGiveVomitLv)) CPrintToChatAll("{default}出于对坐牢的恐惧, 你做足了准备\n{green}现在开局将会给胆汁!");
@@ -97,7 +97,7 @@ public Action RoundEnd_Event(Event event, const String:name[], bool:dontBroadcas
 }
 
 public Action PlayerDeath_Event(Event event, const String:name[], bool:dontBroadcast){
-	if (event.GetBool("headshot") == false) return;
+	//if (event.GetBool("headshot") == false) return;
 	int client = GetClientOfUserId(event.GetInt("attacker"));
 	if (GetClientTeam(client)!=L4D_TEAM_SURVIVOR) return;
 	int health = GetPlayerHealth(client);
@@ -109,13 +109,13 @@ public Action PlayerDeath_Event(Event event, const String:name[], bool:dontBroad
 public Action PlayerHure_Event(Event event, const String:name[], bool:dontBroadcast){
 	int player = GetClientOfUserId(event.GetInt("userid"))
 	if (IsClientInGame(player) && GetClientTeam(player)==L4D_TEAM_SURVIVOR){
-		g_teamSafeCountTime = GetConVarInt(g_iHealingCooldownTime);
+		g_SafeCountTime[player] = GetConVarInt(g_iHealingCooldownTime);
 	}
 }
 
 // 爆头回血
 public Action Infected_Death_Event(Event event, const String:name[], bool:dontBroadcast){
-	if (event.GetBool("headshot") == false) return;
+	//if (event.GetBool("headshot") == false) return;
 	int client = GetClientOfUserId(event.GetInt("attacker"));
 	int health = GetPlayerHealth(client);
 	if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
@@ -134,34 +134,34 @@ public void SetPlayerHealth(int player, int health){
 
 // 呼吸回血
 public Action Timer_Re_Health(Handle Timer){
-	if (g_teamSafeCountTime > 0){
-		g_teamSafeCountTime--;
-	}
-	else
-	{
-		if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoRegHp40Lv)){
-			for (new p = 1; p <= MaxClients; p++){
-				if (IsClientInGame(p) && GetClientTeam(p)==2){
-					int health = GetPlayerHealth(p);
-					if (health < 40){
-						SetPlayerHealth(p, health + 1);
-					}
-					if(health < 100 && g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoRegHp100Lv)){
-						SetPlayerHealth(p, health + 4);
-					}
-					if(health < 100 && g_sZuoLaoLevel >= GetConVarInt(g_iZupLaoRegMoreFast)){
-						SetPlayerHealth(p, health + g_sZuoLaoLevel);
-					}
+
+	if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoRegHp40Lv)){
+		for (new p = 1; p <= MaxClients; p++){
+			if (IsClientInGame(p) && GetClientTeam(p)==2){
+				if (g_SafeCountTime[p] > 0){
+					g_SafeCountTime[p] = g_SafeCountTime[p] - 1
+					continue
+				}
+				int health = GetPlayerHealth(p);
+				if (health < 40){
+					SetPlayerHealth(p, health + 1);
+				}
+				if(health < 100 && g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoRegHp100Lv)){
+					SetPlayerHealth(p, health + 4);
+				}
+				if(health < 100 && g_sZuoLaoLevel >= GetConVarInt(g_iZupLaoRegMoreFast)){
+					SetPlayerHealth(p, health + g_sZuoLaoLevel);
 				}
 			}
 		}
 	}
+
 	return Plugin_Continue;
 }
 // 开局给药
 public Action RoundStart_Event(Event event, const String:name[], bool:dontBroadcast){
 	// TIMER
-	healtimer = CreateTimer(3.0, Timer_Re_Health, _,TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+	healtimer = CreateTimer(2.0, Timer_Re_Health, _,TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	GivePill();
 	GiveVomitjar();
 	PrintZuoLaoStatus();
