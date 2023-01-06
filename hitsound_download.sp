@@ -1,4 +1,4 @@
-#pragma semicolon FCVAR_NOTIFY
+#pragma semicolon 1
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
@@ -49,12 +49,12 @@ public OnPluginStart()
 
 	CreateConVar("l4d2_hitsound", PLUGIN_VERSION, "Plugin version", 0);
 	Time = CreateConVar("sm_hitsound_showtime", "0.3", "图标存在的时长（ 默认为0.3 ）");
-	sound_1 = CreateConVar("sm_hitsound_mp3_headshot", "hitsound/headshot.mp3", "爆头音效的地址");	
-	sound_2 = CreateConVar("sm_hitsound_mp3_hit", "hitsound/hit.mp3", "击中音效的地址");
-	sound_3 = CreateConVar("sm_hitsound_mp3_kill", "hitsound/kill.mp3", "击杀音效的地址");
-	hit1 = CreateConVar("sm_hitsound_pic_headshot", "overlays/hitsound/headshot", "爆头图标的地址");
-	hit2 = CreateConVar("sm_hitsound_pic_hit", "overlays/hitsound/hit", "击中图标的地址");
-	hit3 = CreateConVar("sm_hitsound_pic_kill", "overlays/hitsound/kill", "击杀图标的地址");
+	sound_1 = CreateConVar("sm_hitsound_mp3_headshot", "sound/hitsound/headshot.mp3", "爆头音效的地址");	
+	sound_2 = CreateConVar("sm_hitsound_mp3_hit", "sound/hitsound/hit.mp3", "击中音效的地址");
+	sound_3 = CreateConVar("sm_hitsound_mp3_kill", "sound/hitsound/kill.mp3", "击杀音效的地址");
+	hit1 = CreateConVar("sm_hitsound_pic_headshot", "material/soverlays/hitsound/headshot", "爆头图标的地址");
+	hit2 = CreateConVar("sm_hitsound_pic_hit", "materials/overlays/hitsound/hit", "击中图标的地址");
+	hit3 = CreateConVar("sm_hitsound_pic_kill", "materials/overlays/hitsound/kill", "击杀图标的地址");
 	
 	plugin_enable 		= CreateConVar("sm_hitsound_enable",		"1",       	"是否开启本插件（ 0-关, 1-开 )", CVAR_FLAGS);
 	AutoExecConfig(true, "l4d2_hitsound");
@@ -264,16 +264,20 @@ public OnMapStart()
 	char picc[64];
 	GetConVarString(hit2, picb, sizeof(picb));
 	GetConVarString(hit3, picc, sizeof(picc));
-	Format(sound_file,sizeof(sound_file),"sound/%s",sounda);
+	Format(sound_file,sizeof(sound_file),"%s",sounda);
 	AddFileToDownloadsTable(sound_file);
-	Format(sound_file,sizeof(sound_file),"sound/%s",soundb);
+	Format(sound_file,sizeof(sound_file),"%s",soundb);
 	AddFileToDownloadsTable(sound_file);
-	Format(sound_file,sizeof(sound_file),"sound/%s",soundc);
+	Format(sound_file,sizeof(sound_file),"%s",soundc);
 	AddFileToDownloadsTable(sound_file);
-	AddFileToDownloadsTable("materials/head.vmt");
-	AddFileToDownloadsTable("materials/body.vmt");
-	AddFileToDownloadsTable("materials/head.vtf");
-	AddFileToDownloadsTable("materials/body.vtf");
+	Format(overlays_file,sizeof(overlays_file),"%s.vtf",picb);
+	AddFileToDownloadsTable(overlays_file);
+	Format(overlays_file,sizeof(overlays_file),"%s.vtf",picc);
+	AddFileToDownloadsTable(overlays_file);
+	Format(overlays_file,sizeof(overlays_file),"%s.vmt",picb);
+	AddFileToDownloadsTable(overlays_file);
+	Format(overlays_file,sizeof(overlays_file),"%s.vmt",picc);
+	AddFileToDownloadsTable(overlays_file);
 }
 
 

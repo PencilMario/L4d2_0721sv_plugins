@@ -52,9 +52,9 @@ public OnPluginStart()
 	sound_1 = CreateConVar("sm_hitsound_mp3_headshot", "sound/hitsound/headshot.mp3", "爆头音效的地址");	
 	sound_2 = CreateConVar("sm_hitsound_mp3_hit", "sound/hitsound/hit.mp3", "击中音效的地址");
 	sound_3 = CreateConVar("sm_hitsound_mp3_kill", "sound/hitsound/kill.mp3", "击杀音效的地址");
-	hit1 = CreateConVar("sm_hitsound_pic_headshot", "overlays/hitsound/headshot", "爆头图标的地址");
-	hit2 = CreateConVar("sm_hitsound_pic_hit", "overlays/hitsound/hit", "击中图标的地址");
-	hit3 = CreateConVar("sm_hitsound_pic_kill", "overlays/hitsound/kill", "击杀图标的地址");
+	hit1 = CreateConVar("sm_hitsound_pic_headshot", "material/soverlays/hitsound/headshot", "爆头图标的地址");
+	hit2 = CreateConVar("sm_hitsound_pic_hit", "materials/overlays/hitsound/hit", "击中图标的地址");
+	hit3 = CreateConVar("sm_hitsound_pic_kill", "materials/overlays/hitsound/kill", "击杀图标的地址");
 	
 	plugin_enable 		= CreateConVar("sm_hitsound_enable",		"1",       	"是否开启本插件（ 0-关, 1-开 )", CVAR_FLAGS);
 	AutoExecConfig(true, "l4d2_hitsound");
@@ -276,7 +276,7 @@ public OnMapStart()
 	AddFileToDownloadsTable(overlays_file);
 	Format(overlays_file,sizeof(overlays_file),"%s.vmt",picb);
 	AddFileToDownloadsTable(overlays_file);
-	Format(overlays_file,sizeof(overlays_file),"materials/%s.vmt",picc);
+	Format(overlays_file,sizeof(overlays_file),"%s.vmt",picc);
 	AddFileToDownloadsTable(overlays_file);
 }
 
