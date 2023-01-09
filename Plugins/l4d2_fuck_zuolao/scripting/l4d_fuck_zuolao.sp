@@ -4,17 +4,23 @@
 #include <left4dhooks>
 #include <multicolors>
 
+
 #define PLUGIN_VERSION "0.3"
 #define CONFIG_FILENAME "l4d_fuck_zuolao"
-static Handle:hRoundRespawn = INVALID_HANDLE;
 int g_sRestartCount;
 int g_sZuoLaoLevel;
 int g_teamSafeCountTime;
 new g_SafeCountTime[MAXPLAYERS+1] = 0;
-int g_respawntarget;
+int g_respawntarget = 0;
 bool g_respawnused;
 Handle healtimer;
 Handle respawntimer;
+
+static Float:g_pos[3];
+static Handle:hRoundRespawn = INVALID_HANDLE;
+static Handle:hBecomeGhost = INVALID_HANDLE;
+static Handle:hState_Transition = INVALID_HANDLE;
+static Handle:hGameConf = INVALID_HANDLE;
 
 ConVar g_iZuoLaoLv;  
 ConVar g_iZuoLaoHeadShotHpLv, g_iZupLaoRegMoreFast, g_iZuoLaoRegHp40Lv, g_iZuoLaoGivePillLv, g_iZuoLaoGiveVomitLv, g_iZuoLaoRegHp100Lv, g_iZuoLaoStart;
@@ -47,14 +53,14 @@ public void OnPluginStart()
 	g_iZLGiveVomitCount = CreateConVar("zl_GiveVomit_Count","2" , "给胆汁数量", FCVAR_SPONLY|FCVAR_NOTIFY, true , 1, true, 4)
 	g_iZuoLaoRegHp100Lv = CreateConVar("zl_Fast_RegTo100_Level", "7", "启用快速回血至100所需的坐牢等级 *当受伤时，回血会暂停", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZupLaoRegMoreFast= CreateConVar("zl_Fast_RegTo100More_Level", "8", "启用更快的回血所需的坐牢等级（每次回‘坐牢等级’点hp） *当受伤时，回血会暂停", FCVAR_SPONLY|FCVAR_NOTIFY);
-	g_iZlIgnoreIncapHurt = CreateConVar("zl_Ignore_Incap_Hurted", "12", "倒地时继续回血至100", FCVAR_SPONLY|FCVAR_NOTIFY);
+	g_iZlIgnoreIncapHurt = CreateConVar("zl_Ignore_Incap_Hurted", "10", "倒地时继续回血至100", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZlRespawnFirstDied = CreateConVar("zl_respawnFirstDied", "16", "复活第一个死亡的人(30s)", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZuoLaoStart = CreateConVar("zl_extra_level", "0", "额外的坐牢等级")
 	g_iHealingCooldownTime = CreateConVar("zl_healing_cooldowntime", "3", "受伤回血cd*2")
 	AutoExecConfig(true, CONFIG_FILENAME);
 
 	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(LoadGameConfigFile("l4drespawn");, SDKConf_Signature, "RoundRespawn");
+	PrepSDKCall_SetFromConf(LoadGameConfigFile("l4drespawn"), SDKConf_Signature, "RoundRespawn");
 	hRoundRespawn = EndPrepSDKCall();
 }
 
@@ -78,7 +84,7 @@ public PrintZuoLaoStatus()
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoRegHp100Lv)) CPrintToChatAll("{default}一次又一次的坐牢使你麻木不堪, 你已不想再继续坐牢了\n{green}现在HP回复的速度更快更多!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZupLaoRegMoreFast)) CPrintToChatAll("{default}你已经麻辣！\n{green}现在HP每次回复 %d 点hp!", g_sZuoLaoLevel);
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZlIgnoreIncapHurt)) CPrintToChatAll("{default}你在倒地时想起自己推过的gal，充满了力量！\n{green}现在倒地<100hp会继续回血了!", g_sZuoLaoLevel);
-	if (g_sZuoLaoLevel == GetConVarInt(g_iZlRespawnFirstDied)) CPrintToChatAll("{default}你在去世时想起了三司绫濑，你觉着你不能这么死去！\n{green}现在第一个死的倒霉蛋会在30s后复活!", g_sZuoLaoLevel);
+	if (g_sZuoLaoLevel == GetConVarInt(g_iZlRespawnFirstDied)) CPrintToChatAll("{default}你在去世时想起了三司绫濑，你觉着你不能这么死去！\n{green}现在第一个死的倒霉蛋会在60s后复活...一般是第一个", g_sZuoLaoLevel);
 
 }
 
@@ -104,16 +110,29 @@ public Action RoundEnd_Event(Event event, const String:name[], bool:dontBroadcas
 	g_sRestartCount++;
 	Is_FuckZuolao();
 	KillTimer(healtimer);
+	KillTimer(respawntimer);
 	healtimer = INVALID_HANDLE;
+	respawntimer = INVALID_HANDLE;
+	g_respawntarget = 0;
 }
 
 public Action PlayerDeath_Event(Event event, const String:name[], bool:dontBroadcast){
 	//if (event.GetBool("headshot") == false) return;
 	int client = GetClientOfUserId(event.GetInt("attacker"));
-	if (GetClientTeam(client)!=L4D_TEAM_SURVIVOR) return;
-	int health = GetPlayerHealth(client);
-	if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
-		if (health < 100) SetPlayerHealth(client, health + 1);
+	if (GetClientTeam(client)==L4D_TEAM_SURVIVOR){ 
+		int health = GetPlayerHealth(client);
+		if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
+			if (health < 100) SetPlayerHealth(client, health + 1);
+		}
+	}
+
+	// 死亡复活
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	if (GetClientTeam(victim) == L4D_TEAM_SURVIVOR && g_respawnused == false && g_sZuoLaoLevel >= GetConVarInt(g_iZlRespawnFirstDied)){
+		if (g_respawnused == false){
+		CPrintToChatAll("{default}[{green}!{default}] 有人开始打复活赛喽");}
+		g_respawntarget = victim;
+		respawntimer = CreateTimer(60.0, Timer_Respawn, _,TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
@@ -134,7 +153,7 @@ public Action PlayerHure_Event(Event event, const String:name[], bool:dontBroadc
 
 // 爆头回血
 public Action Infected_Death_Event(Event event, const String:name[], bool:dontBroadcast){
-	//if (event.GetBool("headshot") == false) return;
+	if (event.GetBool("headshot") == false) return;
 	int client = GetClientOfUserId(event.GetInt("attacker"));
 	int health = GetPlayerHealth(client);
 	if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
@@ -175,12 +194,12 @@ static RespawnPlayer(client, player_id)
 	}
 }
 public int GetPlayerHealth(int player){
-	return GetClientHealth(player);
+	return GetSurvivorPermanentHealth(player);
 }
 public int GetPlayerTempHealth(int player){
-	return GetTempHealth(player);
+	return GetSurvivorTemporaryHealth(player)
 }
-Weapon_SetPrimaryAmmoCount()
+
 public void SetPlayerHealth(int player, int health){
 	if (health >= 100) health=100;
 	new h2;
@@ -192,14 +211,19 @@ public void SetPlayerHealth(int player, int health){
 		SetEntityHealth(player, 100-h2);
 	}
 }
-L4D2Direct_GetPreIncapHealthBuffer()
 // 30s后复活
 public Action Timer_Respawn(Handle Timer){
 	for (new i=1;i<MaxClients;i++){
-		IsClientInGame(i) && GetClientTeam(i) == L4D2Team_Survivor && IsPlayerAlive(i);
-		RespawnPlayer(i, g_respawntarget)
+		if (IsClientInGame(i) && GetClientTeam(i) == L4D2Team_Survivor && IsPlayerAlive(i) && !g_respawnused){
+			RespawnPlayer(i, g_respawntarget)
+			if (g_respawnused == false){
+			CPrintToChatAll("{default}[{green}!{default}] 有人复活赛打赢了，我不说是谁");}
+			g_respawntarget = 0
+			g_respawnused = true
+			break
+		}
 	}
-	g_respawnused = true
+	
 }
 // 呼吸回血
 public Action Timer_Re_Health(Handle Timer){
@@ -282,4 +306,48 @@ stock CheatCommand(client, String:command[], String:arguments[]="")
 	FakeClientCommand(client, "%s %s", command, arguments);
 	SetCommandFlags(command, flags);
 	SetUserFlagBits(client, userflags);
+}
+public bool:TraceEntityFilterPlayer(entity, contentsMask)
+{
+	return entity > MaxClients || !entity;
+} 
+static bool:SetTeleportEndPoint(client)
+{
+	decl Float:vAngles[3], Float:vOrigin[3];
+	
+	GetClientEyePosition(client,vOrigin);
+	GetClientEyeAngles(client, vAngles);
+	
+	//get endpoint for teleport
+	new Handle:trace = TR_TraceRayFilterEx(vOrigin, vAngles, MASK_SHOT, RayType_Infinite, TraceEntityFilterPlayer);
+	
+	if(TR_DidHit(trace))
+	{
+		decl Float:vBuffer[3], Float:vStart[3];
+
+		TR_GetEndPosition(vStart, trace);
+		GetVectorDistance(vOrigin, vStart, false);
+		new Float:Distance = -35.0;
+		GetAngleVectors(vAngles, vBuffer, NULL_VECTOR, NULL_VECTOR);
+		g_pos[0] = vStart[0] + (vBuffer[0]*Distance);
+		g_pos[1] = vStart[1] + (vBuffer[1]*Distance);
+		g_pos[2] = vStart[2] + (vBuffer[2]*Distance);
+	}
+	else
+	{
+		PrintToChat(client, "[SM] %s", "Could not teleport player after respawn");
+		CloseHandle(trace);
+		return false;
+	}
+	CloseHandle(trace);
+	return true;
+}
+
+
+PerformTeleport(client, target, Float:pos[3])
+{
+	pos[2]+=40.0;
+	TeleportEntity(target, pos, NULL_VECTOR, NULL_VECTOR);
+	
+	LogAction(client,target, "\"%L\" teleported \"%L\" after respawning him" , client, target);
 }
