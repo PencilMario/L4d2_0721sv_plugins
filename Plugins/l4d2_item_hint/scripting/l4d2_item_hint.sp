@@ -7,6 +7,7 @@
 #include <sdkhooks>
 #include <sdktools>
 #include <sourcemod>
+#include <multicolors>
 
 #define MAXENTITIES 2048
 #define MODEL_MARK_FIELD 	"materials/sprites/laserbeam.vmt"
@@ -17,6 +18,9 @@
 #define TEAM_SURVIVOR 2
 #define TEAM_INFECTED 3
 #define ENTITY_SAFE_LIMIT 2000
+#define L4D2_BEAM_LIFE_MIN 0.1
+#define DIRECTION_OUT 0
+#define DIRECTION_IN 1
 
 ConVar g_hItemHintCoolDown, g_hSpotMarkCoolDown, g_hInfectedMarkCoolDown,
 	g_hItemUseHintRange, g_hItemUseSound, g_hItemAnnounceType, g_hItemGlowTimer, g_hItemGlowRange, g_hItemCvarColor,
@@ -60,7 +64,7 @@ public Plugin myinfo =
 	name        = "L4D2 Item hint",
 	author      = "BHaType, fdxx, HarryPotter",
 	description = "When using 'Look' in vocalize menu, print corresponding item to chat area and make item glow or create spot marker/infeced maker like back 4 blood.",
-	version     = "2.1",
+	version     = "2.5",
 	url         = "https://forums.alliedmods.net/showpost.php?p=2765332&postcount=30"
 };
 
@@ -125,7 +129,7 @@ public void OnPluginStart()
 	g_hItemInstructorHint	= CreateConVar("l4d2_item_instructorhint_enable", "1", "If 1, Create instructor hint on marked item.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_hItemInstructorColor	= CreateConVar("l4d2_item_instructorhint_color", "0 255 255", "Instructor hint color on marked item.", FCVAR_NOTIFY);
 	g_hItemInstructorIcon	= CreateConVar("l4d2_item_instructorhint_icon", "icon_interact", "Instructor icon name on marked item. (For more icons: https://developer.valvesoftware.com/wiki/Env_instructor_hint)", FCVAR_NOTIFY);
-	
+
 	g_hSpotMarkCoolDown			= CreateConVar("l4d2_spot_marker_cooldown_time", "2.5", "Cold Down Time in seconds a player can use 'Look' Spot Marker again.", FCVAR_NOTIFY, true, 0.0);
 	g_hSpotMarkUseRange     	= CreateConVar("l4d2_spot_marker_use_range", "1800", "How far away can a player use 'Look' Spot Marker.", FCVAR_NOTIFY, true, 1.0);
 	g_hSpotMarkUseSound     	= CreateConVar("l4d2_spot_marker_use_sound", "buttons/blip1.wav", "Spot Marker Sound. (relative to to sound/, Empty = OFF)", FCVAR_NOTIFY);
@@ -135,7 +139,7 @@ public void OnPluginStart()
 	g_hSpotMarkInstructorHint	= CreateConVar("l4d2_spot_marker_instructorhint_enable", "1", "If 1, Create instructor hint on Spot Marker.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_hSpotMarkInstructorColor	= CreateConVar("l4d2_spot_marker_instructorhint_color", "200 200 200", "Instructor hint color on Spot Marker.", FCVAR_NOTIFY);
 	g_hSpotMarkInstructorIcon	= CreateConVar("l4d2_spot_marker_instructorhint_icon", "icon_info", "Instructor icon name on Spot Marker.", FCVAR_NOTIFY);
-	
+
 	g_hInfectedMarkCoolDown		= CreateConVar("l4d2_infected_marker_cooldown_time", "0.25", "Cold Down Time in seconds a player can use 'Look' Infected Marker again.", FCVAR_NOTIFY, true, 0.0);
 	g_hInfectedMarkUseRange     = CreateConVar("l4d2_infected_marker_use_range", "1800", "How far away can a player use 'Look' Infected Marker.", FCVAR_NOTIFY, true, 1.0);
 	g_hInfectedMarkUseSound		= CreateConVar("l4d2_infected_marker_use_sound", "items/suitchargeok1.wav", "Infected Marker Sound. (relative to to sound/, Empty = OFF)", FCVAR_NOTIFY);
@@ -144,7 +148,7 @@ public void OnPluginStart()
 	g_hInfectedMarkGlowRange   	= CreateConVar("l4d2_infected_marker_glow_range", "2500", "Infected Marker Glow Range", FCVAR_NOTIFY, true, 0.0);
 	g_hInfectedMarkCvarColor   	= CreateConVar("l4d2_infected_marker_glow_color", "255 120 203", "Infected Marker Glow Color, Three values between 0-255 separated by spaces. (Empty = Disable Infected Marker)", FCVAR_NOTIFY);
 	g_hInfectedMarkWitch    	= CreateConVar("l4d2_infected_marker_witch_enable", "1", "If 1, Enable 'Look' Infected Marker on witch.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	
+
 	AutoExecConfig(true, "l4d2_item_hint");
 
 	GetCvars();
@@ -177,12 +181,14 @@ public void OnPluginStart()
 	g_hInfectedMarkGlowRange.AddChangeHook(ConVarChanged_Cvars);
 	g_hInfectedMarkCvarColor.AddChangeHook(ConVarChanged_Cvars);
 	g_hInfectedMarkWitch.AddChangeHook(ConVarChanged_Cvars);
-	
+
+	RegConsoleCmd("sm_mark", CMD_MARK, "Mark item/infected/spot");
+
 	HookEvent("round_start", Event_RoundStart);
 	HookEvent("round_end", Event_Round_End);
-	HookEvent("map_transition", Event_Round_End);            //戰役過關到下一關的時候 (沒有觸發round_end)
-	HookEvent("mission_lost", Event_Round_End);              //戰役滅團重來該關卡的時候 (之後有觸發round_end)
-	HookEvent("finale_vehicle_leaving", Event_Round_End);    //救援載具離開之時  (沒有觸發round_end)
+	HookEvent("map_transition", Event_Round_End);         //戰役過關到下一關的時候 (沒有觸發round_end)
+	HookEvent("mission_lost", Event_Round_End);           //戰役滅團重來該關卡的時候 (之後有觸發round_end)
+	HookEvent("finale_vehicle_leaving", Event_Round_End); //救援載具離開之時  (沒有觸發round_end)
 	HookEvent("spawner_give_item", Event_SpawnerGiveItem);
 	HookEvent("player_spawn", Event_PlayerSpawn);
 	HookEvent("player_team", Event_PlayerTeam);
@@ -199,6 +205,27 @@ public void OnPluginStart()
 			{
 				OnClientPutInServer(i);
 			}
+		}
+
+		char classname[21];
+		int entity;
+
+		classname = "prop_minigun_l4d1";
+		entity = INVALID_ENT_REFERENCE;
+		while ((entity = FindEntityByClassname(entity, classname)) != INVALID_ENT_REFERENCE)
+		{
+			if(!IsValidEntity(entity)) continue;
+			
+			SDKHook(entity, SDKHook_UsePost, OnUse);
+		}
+
+		classname = "prop_minigun";
+		entity = INVALID_ENT_REFERENCE;
+		while ((entity = FindEntityByClassname(entity, classname)) != INVALID_ENT_REFERENCE)
+		{
+			if(!IsValidEntity(entity)) continue;
+			
+			SDKHook(entity, SDKHook_UsePost, OnUse);
 		}
 	}
 }
@@ -232,7 +259,7 @@ void GetCvars()
 	g_hItemInstructorColor.GetString(g_sItemInstructorColor, sizeof(g_sItemInstructorColor));
 	TrimString(g_sItemInstructorColor);
 	g_hItemInstructorIcon.GetString(g_sItemInstructorIcon, sizeof(g_sItemInstructorIcon));
-	
+
 	g_fSpotMarkCoolDown = g_hSpotMarkCoolDown.FloatValue;
 	g_fSpotMarkUseRange = g_hSpotMarkUseRange.FloatValue;
 	g_hSpotMarkUseSound.GetString(g_sSpotMarkUseSound, sizeof(g_sSpotMarkUseSound));
@@ -249,7 +276,7 @@ void GetCvars()
 	g_hSpotMarkInstructorColor.GetString(g_sSpotMarkInstructorColor, sizeof(g_sSpotMarkInstructorColor));
 	TrimString(g_sSpotMarkInstructorColor);
 	g_hSpotMarkInstructorIcon.GetString(g_sSpotMarkInstructorIcon, sizeof(g_sSpotMarkInstructorIcon));
-	
+
 	g_fInfectedMarkCoolDown = g_hInfectedMarkCoolDown.FloatValue;
 	g_fInfectedMarkUseRange = g_hInfectedMarkUseRange.FloatValue;
 	g_hInfectedMarkUseSound.GetString(g_sInfectedMarkUseSound, sizeof(g_sInfectedMarkUseSound));
@@ -267,63 +294,63 @@ void CreateStringMap()
 	g_smModelToName = new StringMap();
 
 	// Case-sensitive
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_medkit.mdl", "First aid kit!");
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_defibrillator.mdl", "Defibrillator!");
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_painpills.mdl", "Pain pills!");
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_adrenaline.mdl", "Adrenaline!");
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_bile_flask.mdl", "Bile Bomb!");
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_molotov.mdl", "Molotov!");
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_pipebomb.mdl", "Pipe bomb!");
-	g_smModelToName.SetString("models/w_models/weapons/w_laser_sights.mdl", "Laser Sight!");
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_incendiary_ammopack.mdl", "Incendiary UpgradePack!");
-	g_smModelToName.SetString("models/w_models/weapons/w_eq_explosive_ammopack.mdl", "Explosive UpgradePack!");
-	g_smModelToName.SetString("models/props/terror/ammo_stack.mdl", "Ammo!");
-	g_smModelToName.SetString("models/props_unique/spawn_apartment/coffeeammo.mdl", "Ammo!");
-	g_smModelToName.SetString("models/props/de_prodigy/ammo_can_02.mdl", "Ammo!");
-	g_smModelToName.SetString("models/weapons/melee/w_chainsaw.mdl", "Chainsaw!");
-	g_smModelToName.SetString("models/w_models/weapons/w_pistol_b.mdl", "Pistol!");
-	g_smModelToName.SetString("models/w_models/weapons/w_pistol_a.mdl", "Pistol!");
-	g_smModelToName.SetString("models/w_models/weapons/w_desert_eagle.mdl", "Magnum!");
-	g_smModelToName.SetString("models/w_models/weapons/w_shotgun.mdl", "Pump Shotgun!");
-	g_smModelToName.SetString("models/w_models/weapons/w_pumpshotgun_a.mdl", "Shotgun Chrome!");
-	g_smModelToName.SetString("models/w_models/weapons/w_smg_uzi.mdl", "Uzi!");
-	g_smModelToName.SetString("models/w_models/weapons/w_smg_a.mdl", "Silenced Smg!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_medkit.mdl", "包!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_defibrillator.mdl", "电!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_painpills.mdl", "药!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_adrenaline.mdl", "针!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_bile_flask.mdl", "胆汁!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_molotov.mdl", "火瓶!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_pipebomb.mdl", "土质!");
+	g_smModelToName.SetString("models/w_models/weapons/w_laser_sights.mdl", "激光!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_incendiary_ammopack.mdl", "燃烧弹包!");
+	g_smModelToName.SetString("models/w_models/weapons/w_eq_explosive_ammopack.mdl", "高爆弹包!");
+	g_smModelToName.SetString("models/props/terror/ammo_stack.mdl", "子弹!");
+	g_smModelToName.SetString("models/props_unique/spawn_apartment/coffeeammo.mdl", "子弹!");
+	g_smModelToName.SetString("models/props/de_prodigy/ammo_can_02.mdl", "子弹!");
+	g_smModelToName.SetString("models/weapons/melee/w_chainsaw.mdl", "电锯!");
+	g_smModelToName.SetString("models/w_models/weapons/w_pistol_b.mdl", "手枪!");
+	g_smModelToName.SetString("models/w_models/weapons/w_pistol_a.mdl", "手枪!");
+	g_smModelToName.SetString("models/w_models/weapons/w_desert_eagle.mdl", "马格南!");
+	g_smModelToName.SetString("models/w_models/weapons/w_shotgun.mdl", "木喷!");
+	g_smModelToName.SetString("models/w_models/weapons/w_pumpshotgun_a.mdl", "铁喷!");
+	g_smModelToName.SetString("models/w_models/weapons/w_smg_uzi.mdl", "uzi!");
+	g_smModelToName.SetString("models/w_models/weapons/w_smg_a.mdl", "smg!");
 	g_smModelToName.SetString("models/w_models/weapons/w_smg_mp5.mdl", "MP5!");
-	g_smModelToName.SetString("models/w_models/weapons/w_rifle_m16a2.mdl", "Rifle!");
+	g_smModelToName.SetString("models/w_models/weapons/w_rifle_m16a2.mdl", "m16!");
 	g_smModelToName.SetString("models/w_models/weapons/w_rifle_sg552.mdl", "SG552!");
 	g_smModelToName.SetString("models/w_models/weapons/w_rifle_ak47.mdl", "AK47!");
-	g_smModelToName.SetString("models/w_models/weapons/w_desert_rifle.mdl", "Desert Rifle!");
-	g_smModelToName.SetString("models/w_models/weapons/w_shotgun_spas.mdl", "Shotgun Spas!");
-	g_smModelToName.SetString("models/w_models/weapons/w_autoshot_m4super.mdl", "Auto Shotgun!");
-	g_smModelToName.SetString("models/w_models/weapons/w_sniper_mini14.mdl", "Hunting Rifle!");
-	g_smModelToName.SetString("models/w_models/weapons/w_sniper_military.mdl", "Military Sniper!");
-	g_smModelToName.SetString("models/w_models/weapons/w_sniper_scout.mdl", "Scout!");
+	g_smModelToName.SetString("models/w_models/weapons/w_desert_rifle.mdl", "三连发!");
+	g_smModelToName.SetString("models/w_models/weapons/w_shotgun_spas.mdl", "二代连喷!");
+	g_smModelToName.SetString("models/w_models/weapons/w_autoshot_m4super.mdl", "一代连喷!");
+	g_smModelToName.SetString("models/w_models/weapons/w_sniper_mini14.mdl", "15连!");
+	g_smModelToName.SetString("models/w_models/weapons/w_sniper_military.mdl", "30连!");
+	g_smModelToName.SetString("models/w_models/weapons/w_sniper_scout.mdl", "鸟狙!");
 	g_smModelToName.SetString("models/w_models/weapons/w_sniper_awp.mdl", "AWP!");
-	g_smModelToName.SetString("models/w_models/weapons/w_grenade_launcher.mdl", "Grenade Launcher!");
+	g_smModelToName.SetString("models/w_models/weapons/w_grenade_launcher.mdl", "榴弹!");
 	g_smModelToName.SetString("models/w_models/weapons/w_m60.mdl", "M60!");
-	g_smModelToName.SetString("models/props_junk/gascan001a.mdl", "Gas Can!");
-	g_smModelToName.SetString("models/props_junk/explosive_box001.mdl", "Firework!");
-	g_smModelToName.SetString("models/props_junk/propanecanister001a.mdl", "Propane Tank!");
-	g_smModelToName.SetString("models/props_equipment/oxygentank01.mdl", "Oxygen Tank!");
-	g_smModelToName.SetString("models/props_junk/gnome.mdl", "Gnome!");
-	g_smModelToName.SetString("models/w_models/weapons/w_cola.mdl", "Cola!");
-	g_smModelToName.SetString("models/w_models/weapons/50cal.mdl", ".50 Cal Machine Gun here!");
-	g_smModelToName.SetString("models/w_models/weapons/w_minigun.mdl", "Minigun here!");
-	g_smModelToName.SetString("models/props/terror/exploding_ammo.mdl", "Explosive Ammo!");
-	g_smModelToName.SetString("models/props/terror/incendiary_ammo.mdl", "Incendiary Ammo!");
-	g_smModelToName.SetString("models/w_models/weapons/w_knife_t.mdl", "Knife!");
-	g_smModelToName.SetString("models/weapons/melee/w_bat.mdl", "Baseball Bat!");
-	g_smModelToName.SetString("models/weapons/melee/w_cricket_bat.mdl", "Cricket Bat!");
-	g_smModelToName.SetString("models/weapons/melee/w_crowbar.mdl", "Crowbar!");
-	g_smModelToName.SetString("models/weapons/melee/w_electric_guitar.mdl", "Electric Guitar!");
-	g_smModelToName.SetString("models/weapons/melee/w_fireaxe.mdl", "Fireaxe!");
-	g_smModelToName.SetString("models/weapons/melee/w_frying_pan.mdl", "Frying Pan!");
-	g_smModelToName.SetString("models/weapons/melee/w_katana.mdl", "Katana!");
-	g_smModelToName.SetString("models/weapons/melee/w_machete.mdl", "Machete!");
-	g_smModelToName.SetString("models/weapons/melee/w_tonfa.mdl", "Nightstick!");
-	g_smModelToName.SetString("models/weapons/melee/w_golfclub.mdl", "Golf Club!");
-	g_smModelToName.SetString("models/weapons/melee/w_pitchfork.mdl", "Pitckfork!");
-	g_smModelToName.SetString("models/weapons/melee/w_shovel.mdl", "Shovel");
+	g_smModelToName.SetString("models/props_junk/gascan001a.mdl", "油桶!");
+	g_smModelToName.SetString("models/props_junk/explosive_box001.mdl", "烟花!");
+	g_smModelToName.SetString("models/props_junk/propanecanister001a.mdl", "煤气罐!");
+	g_smModelToName.SetString("models/props_equipment/oxygentank01.mdl", "氧气罐!");
+	g_smModelToName.SetString("models/props_junk/gnome.mdl", "侏儒!");
+	g_smModelToName.SetString("models/w_models/weapons/w_cola.mdl", "可乐!");
+	g_smModelToName.SetString("models/w_models/weapons/50cal.mdl", ".50大机枪!");
+	g_smModelToName.SetString("models/w_models/weapons/w_minigun.mdl", "加特林!");
+	g_smModelToName.SetString("models/props/terror/exploding_ammo.mdl", "高爆弹!");
+	g_smModelToName.SetString("models/props/terror/incendiary_ammo.mdl", "燃烧弹!");
+	g_smModelToName.SetString("models/w_models/weapons/w_knife_t.mdl", "小刀!");
+	g_smModelToName.SetString("models/weapons/melee/w_bat.mdl", "棒球棒!");
+	g_smModelToName.SetString("models/weapons/melee/w_cricket_bat.mdl", "板球棒!");
+	g_smModelToName.SetString("models/weapons/melee/w_crowbar.mdl", "撬棍!");
+	g_smModelToName.SetString("models/weapons/melee/w_electric_guitar.mdl", "吉他!");
+	g_smModelToName.SetString("models/weapons/melee/w_fireaxe.mdl", "斧头!");
+	g_smModelToName.SetString("models/weapons/melee/w_frying_pan.mdl", "锅!");
+	g_smModelToName.SetString("models/weapons/melee/w_katana.mdl", "武士刀!");
+	g_smModelToName.SetString("models/weapons/melee/w_machete.mdl", "砍刀!");
+	g_smModelToName.SetString("models/weapons/melee/w_tonfa.mdl", "警棍!");
+	g_smModelToName.SetString("models/weapons/melee/w_golfclub.mdl", "高尔夫球棒!");
+	g_smModelToName.SetString("models/weapons/melee/w_pitchfork.mdl", "草叉!");
+	g_smModelToName.SetString("models/weapons/melee/w_shovel.mdl", "铲子");
 	g_smModelToName.SetString("models/infected/boomette.mdl", "Boomer!");
 	g_smModelToName.SetString("models/infected/boomer.mdl", "Boomer!");
 	g_smModelToName.SetString("models/infected/boomer_l4d1.mdl", "Boomer!");
@@ -335,7 +362,7 @@ void CreateStringMap()
 	g_smModelToName.SetString("models/infected/hunter.mdl", "Hunter!");
 	g_smModelToName.SetString("models/infected/hunter_l4d1.mdl", "Hunter!");
 	g_smModelToName.SetString("models/infected/witch.mdl", "Witch!");
-	g_smModelToName.SetString("models/infected/witch_bride.mdl", "Witch Bride!");
+	g_smModelToName.SetString("models/infected/witch_bride.mdl", "新娘Witch!");
 	g_smModelToName.SetString("models/infected/spitter.mdl", "Spitter!");
 	g_smModelToName.SetString("models/infected/jockey.mdl", "Jockey!");
 	g_smModelToName.SetString("models/infected/charger.mdl", "Charger!");
@@ -441,6 +468,22 @@ public void OnWeaponEquipPost(int client, int weapon)
 	delete g_iTargetInstructorTimer[weapon];
 }
 
+public Action CMD_MARK(int client, int args)
+{
+	if (client == 0)
+	{
+		PrintToServer("[TS] This command cannot be used by server.");
+		return Plugin_Handled;
+	}
+
+	if (IsRealSur(client) && !IsHandingFromLedge(client) && GetInfectedAttacker(client) == -1)
+	{
+		PlayerMarkHint(client);
+	}
+
+	return Plugin_Handled;
+}
+
 public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	Clear();
@@ -476,11 +519,11 @@ public void L4D_OnEnterGhostState(int client)
 }
 
 public void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
-{ 
+{
 	RemoveEntityModelGlow(GetClientOfUserId(event.GetInt("userid")));
 }
 
-public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast) 
+public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
 	RemoveEntityModelGlow(GetClientOfUserId(event.GetInt("userid")));
 }
@@ -496,7 +539,7 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
 public void Event_WitchKilled(Event event, const char[] name, bool dontBroadcast)
 {
 	RemoveEntityModelGlow(event.GetInt("witchid"));
-}		
+}
 
 public Action Vocalize_Listener(int client, const char[] command, int argc)
 {
@@ -507,114 +550,7 @@ public Action Vocalize_Listener(int client, const char[] command, int argc)
 		{
 			if (strncmp(sCmdString, "smartlook #", 11, false) == 0)
 			{
-				int clientAim;
-				bool bIsAimInfeced = false, bIsAimWitch = false, bIsVaildItem = false;
-				static char sItemName[64], sEntModelName[PLATFORM_MAX_PATH];
-
-				// marker priority (infected maker > item hint > spot marker)
-				clientAim = GetClientAimTarget(client, false); //ignore glow model
-				
-				if (1 <= clientAim <= MaxClients && IsClientInGame(clientAim) && GetClientTeam(clientAim) == TEAM_INFECTED && IsPlayerAlive(clientAim) && !IsPlayerGhost(clientAim)) 
-				{
-					bIsAimInfeced = true;
-
-					if( CreateInfectedMarker(client, clientAim) == true )
-						return Plugin_Continue;
-				}
-				else if ( IsWitch(clientAim) )
-				{
-					bIsAimWitch = true;
-
-					if( CreateInfectedMarker(client, clientAim, true) == true )
-						return Plugin_Continue;
-				}
-
-				static int iEntity;
-				iEntity = GetUseEntity(client, g_fItemUseHintRange);
-				//PrintToChatAll("%N is looking at %d", client, iEntity);
-				if ( !bIsAimInfeced && !bIsAimWitch && IsValidEntityIndex(iEntity) && IsValidEntity(iEntity) && HasParentClient(iEntity) == false )
-				{
-					static char targetname[128];
-					GetEntPropString(iEntity, Prop_Data, "m_iName", targetname, sizeof(targetname));
-					if (strcmp(targetname, "harry_marked_item") == 0) //custom model
-					{
-						iEntity = GetEntPropEnt(iEntity, Prop_Data, "m_pParent");
-					}
-					
-					if (HasEntProp(iEntity, Prop_Data, "m_ModelName"))
-					{
-						if (GetEntPropString(iEntity, Prop_Data, "m_ModelName", sEntModelName, sizeof(sEntModelName)) > 1)
-						{
-							//PrintToChatAll("Model - %s", sEntModelName);
-							StringToLowerCase(sEntModelName);
-							float fHeight = 10.0;
-							if (g_smModelToName.GetString(sEntModelName, sItemName, sizeof(sItemName)))
-							{
-								g_smModelHeight.GetValue(sEntModelName, fHeight);
-								bIsVaildItem = true;
-							}
-							else if (StrContains(sEntModelName, "/melee/") != -1)   // entity is not in the listb(custom melee weapon model)
-							{
-								FormatEx(sItemName, sizeof sItemName, "%s", "Melee!");
-								fHeight = 5.0;
-
-								bIsVaildItem = true;
-							}
-							else if (StrContains(sEntModelName, "/weapons/") != -1) // entity is not in the list (custom weapom model)
-							{
-								FormatEx(sItemName, sizeof sItemName, "%s", "Weapons!");
-								fHeight = 10.0;
-
-								bIsVaildItem = true;
-							}
-							else // entity is not in the list (other entity model on the map)
-							{ 
-								bIsVaildItem = false;
-							}
-							
-							if(bIsVaildItem)
-							{
-								if(GetEngineTime() > g_fItemHintCoolDownTime[client])
-								{
-									NotifyMessage(client, sItemName, view_as<EHintType>(eItemHint));
-									
-									if (strlen(g_sItemUseSound) > 0)
-									{
-										for (int target = 1; target <= MaxClients; target++)
-										{
-											if (!IsClientInGame(target))
-												continue;
-
-											if (IsFakeClient(target))
-												continue;
-
-											if (GetClientTeam(target) == TEAM_INFECTED)
-												continue;
-
-											EmitSoundToClient(target, g_sItemUseSound, client);
-										}
-									}
-									
-									g_fItemHintCoolDownTime[client] = GetEngineTime() + g_fItemHintCoolDown;
-									CreateEntityModelGlow(iEntity, sEntModelName);
-									
-									if(g_bItemInstructorHint)
-									{
-										float vEndPos[3];
-										GetEntPropVector(iEntity, Prop_Send, "m_vecOrigin", vEndPos);
-										vEndPos[2] = vEndPos[2] + fHeight;
-										CreateInstructorHint(client, vEndPos, sItemName, iEntity, view_as<EHintType>(eItemHint));
-									}
-								}
-								
-								return Plugin_Continue;
-							}
-						}
-					}
-				}
-
-				// client / world / witch
-				CreateSpotMarker(client, clientAim, bIsAimInfeced);
+				PlayerMarkHint(client);
 			}
 		}
 	}
@@ -626,7 +562,7 @@ public Action Timer_ItemGlow(Handle timer, int iEntity)
 {
 	RemoveEntityModelGlow(iEntity);
 	g_iModelTimer[iEntity] = null;
-	
+
 	return Plugin_Continue;
 }
 
@@ -688,9 +624,50 @@ int GetColor(char[] sTemp)
 
 bool IsValidEntRef(int entity)
 {
-	if (entity && EntRefToEntIndex(entity) != INVALID_ENT_REFERENCE && entity != -1)
+	if (entity && EntRefToEntIndex(entity) != INVALID_ENT_REFERENCE)
 		return true;
 	return false;
+}
+
+public void OnEntityCreated(int entity, const char[] classname)
+{
+	switch (classname[0])
+	{
+		case 'p':
+		{
+			if( strcmp(classname, "prop_minigun_l4d1") == 0 )
+			{
+				SDKHook(entity, SDKHook_SpawnPost, SpawnPost);
+			}
+			else if( strcmp(classname, "prop_minigun") == 0 )
+			{
+				SDKHook(entity, SDKHook_SpawnPost, SpawnPost);
+			}
+		}
+	}
+}
+
+void SpawnPost(int entity)
+{
+    // Validate
+    if( !IsValidEntity(entity) ) return;
+
+    SDKHook(entity, SDKHook_UsePost, OnUse);
+}
+
+public void OnUse(int weapon, int client, int caller, UseType type, float value)
+{
+	if(client && IsClientInGame(client))
+	{
+		RemoveEntityModelGlow(weapon);
+		delete g_iModelTimer[weapon];
+
+		RemoveInstructor(weapon);
+		delete g_iInstructorTimer[weapon];
+
+		RemoveTargetInstructor(weapon);
+		delete g_iTargetInstructorTimer[weapon];
+	}
 }
 
 public void OnEntityDestroyed(int entity)
@@ -755,11 +732,11 @@ bool IsValidEntityIndex(int entity)
 void CreateEntityModelGlow(int iEntity, const char[] sEntModelName)
 {
 	if (g_iItemCvarColor == 0) return; //no glow
-		
+
 	// Spawn dynamic prop entity
 	int entity = CreateEntityByName("prop_dynamic_override");
 	if( !CheckIfEntityMax(entity) ) return;
-	
+
 	// Delete previous glow first
 	RemoveEntityModelGlow(iEntity);
 	delete g_iModelTimer[iEntity];
@@ -790,7 +767,7 @@ void CreateEntityModelGlow(int iEntity, const char[] sEntModelName)
 	SetVariantString("!activator");
 	AcceptEntityInput(entity, "SetParent", iEntity);
 	///////發光物件完成//////////
-	
+
 	g_iModelIndex[iEntity] = EntIndexToEntRef(entity);
 
 	g_iModelTimer[iEntity] = CreateTimer(g_fItemGlowTimer, Timer_ItemGlow, iEntity);
@@ -801,27 +778,26 @@ void CreateEntityModelGlow(int iEntity, const char[] sEntModelName)
 
 bool CreateInfectedMarker(int client, int infected, bool bIsWitch = false)
 {
-	if( GetEngineTime() < g_fInfectedMarkCoolDownTime[client]) return true; //colde down not yet 
+	if( GetEngineTime() < g_fInfectedMarkCoolDownTime[client]) return true; //colde down not yet
 
-	if (g_iInfectedMarkCvarColor == 0) return false; // disable infected mark
 	if (bIsWitch && g_bInfectedMarkWitch == false) return false; // disable infected mark on witch
 
 	float vStartPos[3], vEndPos[3];
 	GetEntPropVector(client, Prop_Data, "m_vecOrigin", vStartPos);
 	GetEntPropVector(infected, Prop_Data, "m_vecOrigin", vEndPos);
-	if (GetVectorDistance(vStartPos, vEndPos, true) > g_fInfectedMarkUseRange * g_fInfectedMarkUseRange)    // over distance
+	if (GetVectorDistance(vStartPos, vEndPos, true) > g_fInfectedMarkUseRange * g_fInfectedMarkUseRange) // over distance
 		return false;
-		
+
 	// Spawn dynamic prop entity
 	int entity = -1;
 	entity = CreateEntityByName("prop_dynamic_ornament");
-	
+
 	if( !CheckIfEntityMax(entity) ) return false;
 
 	// Delete previous glow first
 	RemoveEntityModelGlow(infected);
 	delete g_iModelTimer[infected];
-	
+
 	// Get Model
 	static char sModelName[64];
 	GetEntPropString(infected, Prop_Data, "m_ModelName", sModelName, sizeof(sModelName));
@@ -841,7 +817,7 @@ bool CreateInfectedMarker(int client, int infected, bool bIsWitch = false)
 	// Set model invisible
 	SetEntityRenderMode(entity, RENDER_TRANSCOLOR);
 	SetEntityRenderColor(entity, 0, 0, 0, 0);
-	
+
 	// Set model attach to infected, and always synchronize
 	SetVariantString("!activator");
 	AcceptEntityInput(entity, "SetAttached", infected);
@@ -851,10 +827,10 @@ bool CreateInfectedMarker(int client, int infected, bool bIsWitch = false)
 	g_iModelIndex[infected] = EntIndexToEntRef(entity);
 
 	g_iModelTimer[infected] = CreateTimer(g_fInfectedMarkGlowTimer, Timer_ItemGlow, infected);
-	
+
 	//model 只能給誰看?
 	SDKHook(entity, SDKHook_SetTransmit, Hook_SetTransmit);
-	
+
 	g_fInfectedMarkCoolDownTime[client] = GetEngineTime() + g_fInfectedMarkCoolDown;
 
 	if (strlen(g_sInfectedMarkUseSound) > 0)
@@ -873,16 +849,16 @@ bool CreateInfectedMarker(int client, int infected, bool bIsWitch = false)
 			EmitSoundToClient(target, g_sInfectedMarkUseSound, client);
 		}
 	}
-	
+
 	static char sItemName[64];
 	StringToLowerCase(sModelName);
 	g_smModelToName.GetString(sModelName, sItemName, sizeof(sItemName));
 	NotifyMessage(client, sItemName, view_as<EHintType>(eInfectedMaker));
-	
+
 	return true;
 }
 
-void CreateSpotMarker(int client, int clientAim = 0, bool bIsAimInfeced)
+void CreateSpotMarker(int client, bool bIsAimInfeced)
 {
 	if (bIsAimInfeced) return;
 	if (GetEngineTime() < g_fSpotMarkCoolDownTime[client]) return; // cool down not yet
@@ -891,56 +867,35 @@ void CreateSpotMarker(int client, int clientAim = 0, bool bIsAimInfeced)
 	float vStartPos[3], vEndPos[3];
 	GetClientAbsOrigin(client, vStartPos);
 
-	if (clientAim == 0) clientAim = GetClientAimTarget(client, true);
+	float vPos[3];
+	GetClientEyePosition(client, vPos);
 
-	if (1 <= clientAim <= MaxClients && IsClientInGame(clientAim))
+	float vAng[3];
+	GetClientEyeAngles(client, vAng);
+
+	Handle trace = TR_TraceRayFilterEx(vPos, vAng, MASK_ALL, RayType_Infinite, TraceFilter, client);
+
+	if (TR_DidHit(trace))
 	{
-		switch(GetClientTeam(clientAim))
-		{
-			case TEAM_SPECTATOR: hit = false;
-			case TEAM_INFECTED: {
-				if(IsPlayerGhost(clientAim))
-					hit = false;
-			}
-			default:{
-				hit = true;
-				GetClientAbsOrigin(clientAim, vEndPos);
-			}
-		}
-	}
-	
-	if(hit == false)
-	{
-		float vPos[3];
-		GetClientEyePosition(client, vPos);
-
-		float vAng[3];
-		GetClientEyeAngles(client, vAng);
-
-		Handle trace = TR_TraceRayFilterEx(vPos, vAng, MASK_ALL, RayType_Infinite, TraceFilter, client);
-
-		if (TR_DidHit(trace))
-		{
-			hit = true;
-			TR_GetEndPosition(vEndPos, trace);
-		}
-
-		delete trace;
+		hit = true;
+		TR_GetEndPosition(vEndPos, trace);
 	}
 
-	if (!hit)    // not hit
+	delete trace;
+
+	if (!hit) // not hit
 		return;
 
 	if ( g_bSpotMarkInstructorHint ) CreateInstructorHint(client, vEndPos, "", 0, view_as<EHintType>(eSpotMarker));
 
 	if ( strlen(g_sSpotMarkCvarColor) == 0 ) return; //disable spot mark glow
 
-	if (GetVectorDistance(vStartPos, vEndPos, true) > g_fSpotMarkUseRange * g_fSpotMarkUseRange)    // over distance
+	if (GetVectorDistance(vStartPos, vEndPos, true) > g_fSpotMarkUseRange * g_fSpotMarkUseRange) // over distance
 		return;
 
 	float vBeamPos[3];
 	vBeamPos = vEndPos;
-	vBeamPos[2] += (2.0 + 1.0);    // Change the Z pos to go up according with the width for better looking
+	vBeamPos[2] += (2.0 + 1.0); // Change the Z pos to go up according with the width for better looking
 
 	int color[4];
 	color[0] = g_iSpotMarkCvarColorArray[0];
@@ -948,10 +903,12 @@ void CreateSpotMarker(int client, int clientAim = 0, bool bIsAimInfeced)
 	color[2] = g_iSpotMarkCvarColorArray[2];
 	color[3] = 255;
 
+	int direction = DIRECTION_IN;
 	float timeLimit = GetGameTime() + g_fSpotMarkGlowTimer;
 
 	DataPack pack;
 	CreateDataTimer(1.0, TimerField, pack, TIMER_FLAG_NO_MAPCHANGE);
+	pack.WriteCell(direction);
 	pack.WriteCell(color[0]);
 	pack.WriteCell(color[1]);
 	pack.WriteCell(color[2]);
@@ -963,8 +920,8 @@ void CreateSpotMarker(int client, int clientAim = 0, bool bIsAimInfeced)
 
 	float fieldDuration = (timeLimit - GetGameTime() < 1.0 ? timeLimit - GetGameTime() : 1.0);
 
-	if (fieldDuration < 0.11)    // Prevent rounding to 0 which makes the beam don't disappear
-		fieldDuration = 0.11;    // less than 0.11 reads as 0 in L4D1
+	if (fieldDuration < L4D2_BEAM_LIFE_MIN) // Prevents rounding to 0, which makes the beam not disappear
+		fieldDuration = L4D2_BEAM_LIFE_MIN;
 
 	int targets[MAXPLAYERS+1];
 	int targetCount;
@@ -1037,7 +994,7 @@ void CreateSpotMarker(int client, int clientAim = 0, bool bIsAimInfeced)
 
 			DispatchKeyValue(sprite, "model", g_sSpotMarkSpriteModel);
 			DispatchKeyValue(sprite, "rendercolor", g_sSpotMarkCvarColor);
-			DispatchKeyValue(sprite, "renderamt", "255");    // If renderamt goes before rendercolor, it doesn't render
+			DispatchKeyValue(sprite, "renderamt", "255"); // If renderamt goes before rendercolor, it doesn't render
 			DispatchKeyValue(sprite, "scale", "0.25");
 			DispatchKeyValue(sprite, "fademindist", "-1");
 
@@ -1046,14 +1003,14 @@ void CreateSpotMarker(int client, int clientAim = 0, bool bIsAimInfeced)
 			ActivateEntity(sprite);
 
 			SetVariantString("!activator");
-			AcceptEntityInput(sprite, "SetParent", infoTarget);    // We need parent the entity to an info_target, otherwise SetTransmit won't work
+			AcceptEntityInput(sprite, "SetParent", infoTarget); // We need parent the entity to an info_target, otherwise SetTransmit won't work
 
 			SetEntPropEnt(sprite, Prop_Send, "m_hOwnerEntity", client);
 			AcceptEntityInput(sprite, "ShowSprite");
 			SetVariantString(g_sKillDelay);
 			AcceptEntityInput(sprite, "AddOutput");
 			AcceptEntityInput(sprite, "FireUser1");
-			
+
 			CreateTimer(0.1, TimerMoveSprite, EntIndexToEntRef(sprite), TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
@@ -1061,11 +1018,13 @@ void CreateSpotMarker(int client, int clientAim = 0, bool bIsAimInfeced)
 
 public Action TimerField(Handle timer, DataPack pack)
 {
+	int direction;
 	int color[4];
 	float timeLimit;
 	float vBeamPos[3];
 
 	pack.Reset();
+	direction = pack.ReadCell();
 	color[0] = pack.ReadCell();
 	color[1] = pack.ReadCell();
 	color[2] = pack.ReadCell();
@@ -1080,8 +1039,8 @@ public Action TimerField(Handle timer, DataPack pack)
 
 	float fieldDuration = (timeLimit - GetGameTime() < 1.0 ? timeLimit - GetGameTime() : 1.0);
 
-	if (fieldDuration < 0.11) // Prevent rounding to 0 which makes the beam don't disappear
-		fieldDuration = 0.11; // less than 0.11 reads as 0 in L4D1
+	if (fieldDuration < L4D2_BEAM_LIFE_MIN) // Prevents rounding to 0, which makes the beam not disappear
+		fieldDuration = L4D2_BEAM_LIFE_MIN;
 
 	int targets[MAXPLAYERS+1];
 	int targetCount;
@@ -1099,11 +1058,25 @@ public Action TimerField(Handle timer, DataPack pack)
 		targets[targetCount++] = target;
 	}
 
-	TE_SetupBeamRingPoint(vBeamPos, 75.0, 100.0, g_iFieldModelIndex, 0, 0, 0, fieldDuration, 2.0, 0.0, color, 0, 0);
-	TE_Send(targets, targetCount);
+	switch (direction)
+	{
+		case DIRECTION_OUT:
+		{
+			direction = DIRECTION_IN;
+			TE_SetupBeamRingPoint(vBeamPos, 75.0, 100.0, g_iFieldModelIndex, 0, 0, 0, fieldDuration, 2.0, 0.0, color, 0, 0);
+			TE_Send(targets, targetCount);
+		}
+		case DIRECTION_IN:
+		{
+			direction = DIRECTION_OUT;
+			TE_SetupBeamRingPoint(vBeamPos, 100.0, 75.0, g_iFieldModelIndex, 0, 0, 0, fieldDuration, 2.0, 0.0, color, 0, 0);
+			TE_Send(targets, targetCount);
+		}
+	}
 
 	DataPack pack2;
 	CreateDataTimer(1.0, TimerField, pack2, TIMER_FLAG_NO_MAPCHANGE);
+	pack2.WriteCell(direction);
 	pack2.WriteCell(color[0]);
 	pack2.WriteCell(color[1]);
 	pack2.WriteCell(color[2]);
@@ -1112,7 +1085,7 @@ public Action TimerField(Handle timer, DataPack pack)
 	pack2.WriteFloat(vBeamPos[0]);
 	pack2.WriteFloat(vBeamPos[1]);
 	pack2.WriteFloat(vBeamPos[2]);
-	
+
 	return Plugin_Continue;
 }
 
@@ -1227,7 +1200,7 @@ void NotifyMessage(int client, const char[] sItemName, EHintType eType)
 				{
 					if (IsClientInGame(i) && !IsFakeClient(i) && GetClientTeam(i) != TEAM_INFECTED)
 					{
-						PrintToChat(i, "\x01(\x04Vocalize\x01) \x05%N\x01: %s", client, sItemName);
+						CPrintToChat(i, "({green}Vocalize{default}) {olive}%N{default}: %s", client, sItemName);
 					}
 				}
 			}
@@ -1236,7 +1209,7 @@ void NotifyMessage(int client, const char[] sItemName, EHintType eType)
 				{
 					if (IsClientInGame(i) && !IsFakeClient(i) && GetClientTeam(i) != TEAM_INFECTED)
 					{
-						PrintHintText(i, "\x01(\x04Vocalize\x01) \x05%N\x01: %s", client, sItemName);
+						PrintHintText(i, "(Vocalize) %N: %s", client, sItemName);
 					}
 				}
 			}
@@ -1245,7 +1218,7 @@ void NotifyMessage(int client, const char[] sItemName, EHintType eType)
 				{
 					if (IsClientInGame(i) && !IsFakeClient(i) && GetClientTeam(i) != TEAM_INFECTED)
 					{
-						PrintCenterText(i, "\x01(\x04Vocalize\x01) \x05%N\x01: %s", client, sItemName);
+						PrintCenterText(i, "(Vocalize) %N: %s", client, sItemName);
 					}
 				}
 			}
@@ -1283,7 +1256,7 @@ void NotifyMessage(int client, const char[] sItemName, EHintType eType)
 					}
 				}
 			}
-		}	
+		}
 	}
 }
 
@@ -1352,7 +1325,7 @@ public Action Hook_SetTransmit(int entity, int client)
 {
 	if( GetClientTeam(client) == TEAM_INFECTED)
 		return Plugin_Handled;
-	
+
 	return Plugin_Continue;
 }
 
@@ -1373,7 +1346,7 @@ void CreateInstructorHint(int client, const float vOrigin[3], const char[] sItem
 {
 	static char sTargetName[64], sCaption[128];
 	Format(sTargetName, sizeof sTargetName, "%i_%.0f", client, GetEngineTime());
-	
+
 	switch(type)
 	{
 		case view_as<EHintType>(eItemHint):
@@ -1388,7 +1361,7 @@ void CreateInstructorHint(int client, const float vOrigin[3], const char[] sItem
 		{
 			if( Create_info_target(iEntity, vOrigin, sTargetName, g_fSpotMarkGlowTimer) )
 			{
-				FormatEx(sCaption, sizeof sCaption, "%N Marked something here", client);
+				FormatEx(sCaption, sizeof sCaption, "%N Marked Here", client);
 				Create_env_instructor_hint(iEntity, view_as<EHintType>(eSpotMarker), vOrigin, sTargetName, g_sSpotMarkInstructorIcon, sCaption, g_sSpotMarkInstructorColor, g_fSpotMarkGlowTimer, g_fSpotMarkUseRange);
 			}
 		}
@@ -1399,14 +1372,14 @@ bool Create_info_target(int iEntity, const float vOrigin[3], const char[] sTarge
 {
 	int entity = CreateEntityByName(CLASSNAME_INFO_TARGET);
 	if (!CheckIfEntityMax(entity)) return false;
-	
+
 	DispatchKeyValue(entity, "targetname", sTargetName);
 	DispatchKeyValue(entity, "spawnflags", "1"); //Only visible to survivors
 	DispatchSpawn(entity);
 	TeleportEntity(entity, vOrigin, NULL_VECTOR, NULL_VECTOR);
 	SetVariantString("!activator");
-	AcceptEntityInput(entity, "SetParent", iEntity);    // We need parent the info_target to an entity, otherwise it won't follow moveable item such as gascan, pill and throwable
-	
+	AcceptEntityInput(entity, "SetParent", iEntity); // We need parent the info_target to an entity, otherwise it won't follow moveable item such as gascan, pill and throwable
+
 	SDKHook(entity, SDKHook_SetTransmit, Hook_SetTransmit);
 
 	if (iEntity > 0)
@@ -1423,8 +1396,8 @@ bool Create_info_target(int iEntity, const float vOrigin[3], const char[] sTarge
 		char szBuffer[36];
 		Format(szBuffer, sizeof szBuffer, "OnUser1 !self:Kill::%f:-1", duration);
 
-		SetVariantString(szBuffer); 
-		AcceptEntityInput(entity, "AddOutput"); 
+		SetVariantString(szBuffer);
+		AcceptEntityInput(entity, "AddOutput");
 		AcceptEntityInput(entity, "FireUser1");
 	}
 
@@ -1474,8 +1447,8 @@ void Create_env_instructor_hint(int iEntity, EHintType eType, const float vOrigi
 		char szBuffer[36];
 		Format(szBuffer, sizeof szBuffer, "OnUser1 !self:Kill::%f:-1", duration);
 
-		SetVariantString(szBuffer); 
-		AcceptEntityInput(entity, "AddOutput"); 
+		SetVariantString(szBuffer);
+		AcceptEntityInput(entity, "AddOutput");
 		AcceptEntityInput(entity, "FireUser1");
 	}
 }
@@ -1485,7 +1458,7 @@ public Action Timer_instructor_hint(Handle timer, int iEntity)
 {
 	RemoveInstructor(iEntity);
 	g_iInstructorTimer[iEntity] = null;
-	
+
 	return Plugin_Continue;
 }
 
@@ -1502,7 +1475,7 @@ public Action Timer_target_instructor_hint(Handle timer, int iEntity)
 {
 	RemoveTargetInstructor(iEntity);
 	g_iTargetInstructorTimer[iEntity] = null;
-	
+
 	return Plugin_Continue;
 }
 
@@ -1529,3 +1502,143 @@ bool HasParentClient(int entity)
 
 	return false;
 }
+
+int GetClientViewClient(int client) {
+    float m_vecOrigin[3];
+    float m_angRotation[3];
+    GetClientEyePosition(client, m_vecOrigin);
+    GetClientEyeAngles(client, m_angRotation);
+    Handle tr = TR_TraceRayFilterEx(m_vecOrigin, m_angRotation, MASK_ALL, RayType_Infinite, TRDontHitSelf, client);
+    int pEntity = -1;
+    if (TR_DidHit(tr)) {
+        pEntity = TR_GetEntityIndex(tr);
+        delete tr;
+
+        return pEntity;
+    }
+    delete tr;
+
+    return -1;
+}
+
+bool TRDontHitSelf(int entity, int mask, any data) {
+    if (entity == data)
+        return false;
+    return true;
+}
+
+void PlayerMarkHint(int client)
+{
+	bool bIsAimInfeced = false, bIsAimWitch = false, bIsVaildItem = false;
+	static char sItemName[64], sEntModelName[PLATFORM_MAX_PATH];
+
+	// marker priority (infected maker > item hint > spot marker)
+
+	if (g_iInfectedMarkCvarColor != 0)
+	{
+		int clientAim = GetClientViewClient(client); //ignore glow model
+
+		if (1 <= clientAim <= MaxClients && IsClientInGame(clientAim) && GetClientTeam(clientAim) == TEAM_INFECTED && IsPlayerAlive(clientAim) && !IsPlayerGhost(clientAim))
+		{
+			bIsAimInfeced = true;
+			//PrintToChatAll("look at %N", clientAim);
+			
+			if( CreateInfectedMarker(client, clientAim) == true )
+				return;
+		}
+		else if ( IsWitch(clientAim) )
+		{
+			bIsAimWitch = true;
+
+			if( CreateInfectedMarker(client, clientAim, true) == true )
+				return;
+		}
+	}
+
+	static int iEntity;
+	iEntity = GetUseEntity(client, g_fItemUseHintRange);
+	//PrintToChatAll("%N is looking at %d", client, iEntity);
+	if ( !bIsAimInfeced && !bIsAimWitch && IsValidEntityIndex(iEntity) && IsValidEntity(iEntity) && HasParentClient(iEntity) == false )
+	{
+		static char targetname[128];
+		GetEntPropString(iEntity, Prop_Data, "m_iName", targetname, sizeof(targetname));
+		if (strcmp(targetname, "harry_marked_item") == 0) //custom model
+		{
+			iEntity = GetEntPropEnt(iEntity, Prop_Data, "m_pParent");
+		}
+
+		if (HasEntProp(iEntity, Prop_Data, "m_ModelName"))
+		{
+			if (GetEntPropString(iEntity, Prop_Data, "m_ModelName", sEntModelName, sizeof(sEntModelName)) > 1)
+			{
+				//PrintToChatAll("Model - %s", sEntModelName);
+				StringToLowerCase(sEntModelName);
+				float fHeight = 10.0;
+				if (g_smModelToName.GetString(sEntModelName, sItemName, sizeof(sItemName)))
+				{
+					g_smModelHeight.GetValue(sEntModelName, fHeight);
+					bIsVaildItem = true;
+				}
+				else if (StrContains(sEntModelName, "/melee/") != -1) // entity is not in the listb(custom melee weapon model)
+				{
+					FormatEx(sItemName, sizeof sItemName, "%s", "Melee!");
+					fHeight = 5.0;
+
+					bIsVaildItem = true;
+				}
+				else if (StrContains(sEntModelName, "/weapons/") != -1) // entity is not in the list (custom weapom model)
+				{
+					FormatEx(sItemName, sizeof sItemName, "%s", "Weapons!");
+					fHeight = 10.0;
+
+					bIsVaildItem = true;
+				}
+				else // entity is not in the list (other entity model on the map)
+				{
+					bIsVaildItem = false;
+				}
+
+				if(bIsVaildItem)
+				{
+					if(GetEngineTime() > g_fItemHintCoolDownTime[client])
+					{
+						NotifyMessage(client, sItemName, view_as<EHintType>(eItemHint));
+
+						if (strlen(g_sItemUseSound) > 0)
+						{
+							for (int target = 1; target <= MaxClients; target++)
+							{
+								if (!IsClientInGame(target))
+									continue;
+
+								if (IsFakeClient(target))
+									continue;
+
+								if (GetClientTeam(target) == TEAM_INFECTED)
+									continue;
+
+								EmitSoundToClient(target, g_sItemUseSound, client);
+							}
+						}
+
+						g_fItemHintCoolDownTime[client] = GetEngineTime() + g_fItemHintCoolDown;
+						CreateEntityModelGlow(iEntity, sEntModelName);
+
+						if(g_bItemInstructorHint)
+						{
+							float vEndPos[3];
+							GetEntPropVector(iEntity, Prop_Send, "m_vecOrigin", vEndPos);
+							vEndPos[2] = vEndPos[2] + fHeight;
+							CreateInstructorHint(client, vEndPos, sItemName, iEntity, view_as<EHintType>(eItemHint));
+						}
+					}
+
+					return;
+				}
+			}
+		}
+	}
+
+	// client / world / witch
+	CreateSpotMarker(client, bIsAimInfeced);
+} 
