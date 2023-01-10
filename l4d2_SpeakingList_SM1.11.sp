@@ -9,13 +9,12 @@ public Plugin myinfo =
 	name = "[L4D2] Speaking List",
 	author = "Sir.P (fork Accelerator (Fork by Dragokas, Grey83))",
 	description = "Voice Announce. Print To Center Message who's Speaking",
-	version = "1.4.4",
+	version = "1.4.5",
 	url = "https://forums.alliedmods.net/showthread.php?t=339934"
 }
 
 /*
 	ChangeLog:
-	
 	 * 1.4.1 (26-Jan-2020) (Dragokas)
 	  - Client in game check fixed
 	  - Code is simplified
@@ -28,6 +27,9 @@ public Plugin myinfo =
 	 * 1.4.4 (10-Oct-2022) (Grey83)
 	  - Optimization: timer moved from OnPluginStart to OnMapStart.
 	  - Optimization: max. buffer checks and caching.
+
+	 * 1.4.5 (10-Jan-2023) (Sir.P)
+	  - 现在会检查sv_alltalk的值
 */
 
 bool g_bSpeaking[MAXPLAYERS+1];
@@ -59,6 +61,7 @@ public Action Timer_List(Handle timer)
 	static int i, g;
 	static bool show;
 	char team[16];
+	ConVar alltalk = FindConVar("sv_alltalk");
 	for( g = 1; g <= MaxClients; g++){
 		show = false;
 		if( !IsClientInGame(g) ) continue;
@@ -69,7 +72,8 @@ public Action Timer_List(Handle timer)
 				g_bSpeaking[i] = false;
 				if( !IsClientInGame(i) ) continue;
 				if ( GetClientTeam(g) != L4D2Team_Spectator){
-					if (GetClientTeam(g) != GetClientTeam(i)) continue;
+					if (alltalk.IntValue == 0){
+					if (GetClientTeam(g) != GetClientTeam(i)) continue;}
 				}
 				if (GetClientTeam(i) == L4D2Team_Infected)
 				{
