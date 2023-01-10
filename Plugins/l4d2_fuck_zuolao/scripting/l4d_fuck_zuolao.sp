@@ -214,7 +214,7 @@ public void SetPlayerHealth(int player, int health){
 // 30s后复活
 public Action Timer_Respawn(Handle Timer){
 	for (new i=1;i<MaxClients;i++){
-		if (IsClientInGame(i) && GetClientTeam(i) == L4D2Team_Survivor && IsPlayerAlive(i) && !g_respawnused){
+		if (IsClientInGame(i) && GetClientTeam(i) == L4D2Team_Survivor && IsPlayerAlive(i) && !g_respawnused && !IsPlayerAlive(g_respawntarget)){
 			RespawnPlayer(i, g_respawntarget)
 			if (g_respawnused == false){
 			CPrintToChatAll("{default}[{green}!{default}] 有人复活赛打赢了，我不说是谁");}
