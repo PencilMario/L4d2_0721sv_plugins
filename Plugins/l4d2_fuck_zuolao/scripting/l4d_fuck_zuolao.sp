@@ -53,8 +53,8 @@ public void OnPluginStart()
 	g_iZLGiveVomitCount = CreateConVar("zl_GiveVomit_Count","2" , "给胆汁数量", FCVAR_SPONLY|FCVAR_NOTIFY, true , 1, true, 4)
 	g_iZuoLaoRegHp100Lv = CreateConVar("zl_Fast_RegTo100_Level", "7", "启用快速回血至100所需的坐牢等级 *当受伤时，回血会暂停", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZupLaoRegMoreFast= CreateConVar("zl_Fast_RegTo100More_Level", "8", "启用更快的回血所需的坐牢等级（每次回‘坐牢等级’点hp） *当受伤时，回血会暂停", FCVAR_SPONLY|FCVAR_NOTIFY);
-	g_iZlIgnoreIncapHurt = CreateConVar("zl_Ignore_Incap_Hurted", "10", "倒地时继续回血至100", FCVAR_SPONLY|FCVAR_NOTIFY);
-	g_iZlRespawnFirstDied = CreateConVar("zl_respawnFirstDied", "16", "复活第一个死亡的人(30s)", FCVAR_SPONLY|FCVAR_NOTIFY);
+	g_iZlIgnoreIncapHurt = CreateConVar("zl_Ignore_Incap_Hurted", "9", "倒地时继续回血至100", FCVAR_SPONLY|FCVAR_NOTIFY);
+	g_iZlRespawnFirstDied = CreateConVar("zl_respawnFirstDied", "10", "复活第一个死亡的人(30s)", FCVAR_SPONLY|FCVAR_NOTIFY);
 	g_iZuoLaoStart = CreateConVar("zl_extra_level", "0", "额外的坐牢等级")
 	g_iHealingCooldownTime = CreateConVar("zl_healing_cooldowntime", "3", "受伤回血cd*2")
 	AutoExecConfig(true, CONFIG_FILENAME);
