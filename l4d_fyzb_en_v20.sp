@@ -76,7 +76,7 @@ public OnPluginStart()
  	l4d_fyzb_callboss = CreateConVar("l4d_fyzb_callboss", "0", "call infected probility %", FCVAR_PLUGIN);
  	l4d_fyzb_showtime = CreateConVar("l4d_fyzb_showtime", "80", "message time", FCVAR_PLUGIN);
   	l4d_fyzb_infecteduse = CreateConVar("l4d_fyzb_infecteduse", "0", "0 , disable for infected 1, enable for infected, 3,enable for infected but tank", FCVAR_PLUGIN);
-  	l4d_fyzb_god = CreateConVar("l4d_fyzb_god", "1", "0  enable fall damage, 1: disable fall damage", FCVAR_PLUGIN);
+  	l4d_fyzb_god = CreateConVar("l4d_fyzb_god", "0", "0  enable fall damage, 1: disable fall damage", FCVAR_PLUGIN);
 	AutoExecConfig(true, "l4d_fyzb_en_v20");
 
 	HookConVarChange(l4d_fyzb_enabled, ConVarChange);

@@ -24,7 +24,7 @@ public Plugin:myinfo =
 
 public void OnPluginStart()
 {											//此处改为你的服务器名
-	Format(g_sDefultName, sizeof(g_sDefultName), "i love");
+	Format(g_sDefultName, sizeof(g_sDefultName), "二次元差不多得了");
     Format(g_sNewName, sizeof(g_sNewName), g_sDefultName);
 	g_hHostName = FindConVar("hostname");
 

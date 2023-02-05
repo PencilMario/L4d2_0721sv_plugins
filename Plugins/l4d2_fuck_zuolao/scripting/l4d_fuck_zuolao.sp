@@ -84,7 +84,7 @@ public PrintZuoLaoStatus()
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZuoLaoRegHp100Lv)) CPrintToChatAll("{default}一次又一次的坐牢使你麻木不堪, 你已不想再继续坐牢了\n{green}现在HP回复的速度更快更多!");
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZupLaoRegMoreFast)) CPrintToChatAll("{default}你已经麻辣！\n{green}现在HP每次回复 %d 点hp!", g_sZuoLaoLevel);
 	if (g_sZuoLaoLevel == GetConVarInt(g_iZlIgnoreIncapHurt)) CPrintToChatAll("{default}你在倒地时想起自己推过的gal，充满了力量！\n{green}现在倒地<100hp会继续回血了!", g_sZuoLaoLevel);
-	if (g_sZuoLaoLevel == GetConVarInt(g_iZlRespawnFirstDied)) CPrintToChatAll("{default}你在去世时想起了三司绫濑，你觉着你不能这么死去！\n{green}现在第一个死的倒霉蛋会在60s后复活...一般是第一个", g_sZuoLaoLevel);
+	if (g_sZuoLaoLevel == GetConVarInt(g_iZlRespawnFirstDied)) CPrintToChatAll("{default}你在去世时想起了三司绫濑，你觉着你不能这么死去！\n{green}现在第一个死的倒霉蛋会在30s后复活...一般是第一个", g_sZuoLaoLevel);
 
 }
 
@@ -211,6 +211,7 @@ public void SetPlayerHealth(int player, int health){
 		SetEntityHealth(player, 100-h2);
 	}
 }
+
 // 30s后复活
 public Action Timer_Respawn(Handle Timer){
 	for (new i=1;i<MaxClients;i++){

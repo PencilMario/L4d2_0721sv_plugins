@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"VOTE_TITLE"
+	{
+		"chi"			"{default}[{green}!{default}] 开始随机分队"
+	}
+
+	"VOTE_MESSAGE"
+	{
+		"chi"			"{default}[{green}!{default}] 正在随机分队中"
+	}
+}

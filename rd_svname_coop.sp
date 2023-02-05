@@ -27,6 +27,7 @@ public void OnPluginStart()
     Format(g_sNewName, sizeof(g_sNewName), g_sDefultName);
     g_hHostName = FindConVar("hostname");
     g_sRestartCount = 0;
+    HookEvent("asw_mission_restart", AswMissionRestart_Event, EventHookMode_Pre)
     HookEvent("round_end", RoundEnd_Event, EventHookMode_Pre);
     HookEvent("player_disconnect", PlayerDisconnect_Event, EventHookMode_Pre);
     HookEvent("player_connect", PlayerConnect_Event, EventHookMode_Pre);
@@ -38,6 +39,12 @@ public OnMapStart()
 {
     g_sRestartCount = 0;
     HostNameChange();
+}
+
+public void AswMissionRestart_Event(Event:event, const String:name[], bool:dontBroadcast)
+{
+    g_sRestartCount++
+    CreateTimer(4.0, PrintRestartCount);
 }
 
 public Action PlayerConnect_Event(Handle:event, const String:name[], bool:dontBroadcast)
@@ -52,9 +59,9 @@ public Action PlayerDisconnect_Event(Handle:event, const String:name[], bool:don
 
 public Action RoundEnd_Event(Event event, const char[] name, bool dontBroadcast)
 {
-    g_sRestartCount++;
+    //g_sRestartCount++;
     HostNameChange();
-    CreateTimer(4.0, PrintRestartCount)
+    
 }
 
 

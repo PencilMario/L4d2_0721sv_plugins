@@ -1,0 +1,50 @@
+"Phrases"
+{
+	"UNSUPPORT_MODE"
+	{
+		"en"			"Mix unsupport this mode."
+	}
+	"BAD_ARGUMENT"
+	{
+		"#format"		"{1:s}"
+		"en"			"Bad argument {1} for mix. Use: {olive}!mix [random|capitan]"
+	}
+	
+	"NO_ARGUMENT"
+	{
+		"en"			"No arguments for mix. Use: {olive}!mix [random|capitan]"
+	}
+
+	"CANT_CHAGNE_TEAM"
+	{
+		"en"			"You cannot change the team {olive}during the mix"
+	}
+
+	"BAD_TEAM_SIZE"
+	{
+		"#format"		"{1:d}"
+		"en"			"There are not enough players in the game. {olive}Need {1} players"
+	}
+
+	"LEFT_READYUP"
+	{
+		"en"			"Impossible to mix: {olive}only available during ready-up"
+	}
+
+	"COULDOWN"
+	{
+		"#format"		"{1:d}"
+		"en"			"A vote cannot be called at this moment, try again in a {1} second"
+	}
+
+	"ROUND_LIVE"
+	{
+		"en"			"Impossible to mix: {olive}the round has already begun"
+	}
+
+	"CLIENT_LEAVE"
+	{
+		"#format"		"{1:N}"
+		"en"			"Mix member {olive}{1} left{default}. {olive}Mix rollback"
+	}
+}

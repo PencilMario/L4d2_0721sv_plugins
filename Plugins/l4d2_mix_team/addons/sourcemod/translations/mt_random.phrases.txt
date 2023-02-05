@@ -1,0 +1,12 @@
+"Phrases"
+{
+	"VOTE_TITLE"
+	{
+		"en"			"Start command mix randomly"
+	}
+
+	"VOTE_MESSAGE"
+	{
+		"en"			"Random command mixing in progress"
+	}
+}

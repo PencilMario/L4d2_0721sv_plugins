@@ -67,11 +67,11 @@ char karmaNames[KarmaType_MAX][] = {
 	"撞秒了",
 	"撞飞了",
 	"骑秒了",
-	"拍到了",
 	"拍飞了",
-	"拉了",
+	"拍飞了",
+	"拉秒了",
 	"硬直掉下去",
-	"信仰之跃",
+	"放生了",
 };
 
 // I'll probably eventually add a logger for karma jumps and add "lastDistance" to this enum struct that dictates the closest special infected if maybe something messed up.
@@ -314,7 +314,7 @@ public void OnPluginStart()
 
 	cvarFatalFallDamage = FindConVar("survivor_incap_max_fall_damage");
 
-	karmaPrefix                      = CreateConVar("l4d2_karma_charge_prefix", "/x04[/x05!/x04]", "Prefix for announcements. For colors, replace the side the slash points towards, example is /x04[/x05KarmaCharge/x03]", CVAR_FLAGS);
+	karmaPrefix                      = CreateConVar("l4d2_karma_charge_prefix", "{default}{green}!{default}", "Prefix for announcements. For colors, replace the side the slash points towards, example is /x04[/x05KarmaCharge/x03]", CVAR_FLAGS);
 	karmaJump                        = CreateConVar("l4d2_karma_jump", "1", "Enable karma jumping. Karma jumping only registers on confirmed kills.", CVAR_FLAGS, true, 0.0, true, 1.0);
 	karmaAwardConfirmed              = CreateConVar("l4d2_karma_award_confirmed", "1", "Award a confirmed karma maker with a player_death event.", CVAR_FLAGS, true, 0.0, true, 1.0);
 	karmaDamageAwardConfirmed        = CreateConVar("l4d2_karma_damage_award_confirmed", "300", "Damage to award on confirmed kills, or -1 to disable. Requires l4d2_karma_award_confirmed set to 1", CVAR_FLAGS, true, -1.0);
@@ -2020,11 +2020,11 @@ void AnnounceKarma(int client, int victim, int type, bool bBird, bool bKillConfi
 
 		if (type == KT_Jump)
 		{
-			CPrintToChatAll("[{olive}%s{default}] {green}%s{olive} [%s] {default} %s %s {olive}%N{default}, 波门~", g_sPrefix, LastKarma[victim][type].artistName, LastKarma[victim][type].artistSteamId, bBird ? "Bird" : "Karma", KarmaName, victim);
+			CPrintToChatAll("[{olive}%s{default}] {green}%s{olive} [%s] {default} %s %s {olive}%N{default}, 波门~", g_sPrefix, LastKarma[victim][type].artistName, LastKarma[victim][type].artistSteamId, bBird ? "" : "", KarmaName, victim);
 		}
 		else
 		{
-			CPrintToChatAll("[{olive}%s{default}] {green}%s{default} %s %s {olive}%N{default}, 波门~", g_sPrefix, LastKarma[victim][type].artistName, bBird ? "飞" : "被", KarmaName, victim);
+			CPrintToChatAll("[{olive}%s{default}] {green}%s{default} %s %s {olive}%N{default}, 波门~", g_sPrefix, LastKarma[victim][type].artistName, bBird ? "" : "", KarmaName, victim);
 		}
 	}
 

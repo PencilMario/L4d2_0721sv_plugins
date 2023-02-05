@@ -27,7 +27,7 @@ public void OnPluginStart()
 {
 	memory = new MemoryBlock(0x4C);
 	
-	sm_side_dolls_invisible_body 	= CreateConVar("sm_side_dolls_invisible_body"	, "0");
+	sm_side_dolls_invisible_body 	= CreateConVar("sm_side_dolls_invisible_body"	, "1");
 	sm_side_dolls_remove 			= CreateConVar("sm_side_dolls_remove"			, "0");
 	
 	sm_side_dolls_invisible_body.AddChangeHook(OnConVarChanged);

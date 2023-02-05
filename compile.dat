@@ -119,7 +119,7 @@ Age=1420985742
 [l4d_svname.sp]
 Age=1420869132
 [l4d_svname_coop.sp]
-Age=1422891732
+Age=1446491522
 [pause.sp]
 Age=1420977718
 [readyup.sp]
@@ -139,9 +139,9 @@ Age=1420532552
 [D:\GithubKu\L4d2_0721sv_plugins\rygive.sp]
 Age=1431201474
 [E:\GithubKu\L4d2_0721sv_plugins\l4d_svname.sp]
-Age=1434738754
+Age=1447380096
 [E:\GithubKu\L4d2_0721sv_plugins\readyup.sp]
-Age=1434564076
+Age=1447380282
 [E:\GithubKu\L4d2_0721sv_plugins\l4d2_SpeakingList_SM1.11.sp]
 Age=1445610682
 [E:\GithubKu\L4d2_0721sv_plugins\l4d_fuck_zuolao.sp]
@@ -155,4 +155,12 @@ Age=1445629014
 [e:\GithubKu\L4d2_0721sv_plugins\l4d2_item_hint_5935.sp]
 Age=1445943074
 [E:\GithubKu\L4d2_0721sv_plugins\l4d2_karma_kill.sp]
-Age=1446140344
+Age=1446200305
+[e:\GithubKu\L4d2_0721sv_plugins\rd_svname_coop.sp]
+Age=1446532132
+[e:\GithubKu\L4d2_0721sv_plugins\SpeakingList_SM1.11.sp]
+Age=1447318097
+[E:\GithubKu\L4d2_0721sv_plugins\l4d2_server_ragdoll.sp]
+Age=1447383245
+[E:\GithubKu\L4d2_0721sv_plugins\l4d_fyzb_en_v20.sp]
+Age=1447383273
