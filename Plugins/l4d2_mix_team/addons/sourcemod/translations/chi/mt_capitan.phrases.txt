@@ -3,29 +3,29 @@
 	"NEW_FIRST_CAPITAN"
 	{
 		"#format"		"{1:N},{2:d}"
-		"chi"			"{olive}生还者 {default}队长 {green}{1} {default}({2} 票)"
+		"chi"			"[{green}!{default}] {olive}生还者 {default}队长 {green}{1} {default}({2} 票)"
 	}
 
 	"NEW_SECOND_CAPITAN"
 	{
 		"#format"		"{1:N},{2:d}"
-		"chi"			"{olive}感染者 {olive}队长 {green}{1} {default}({2} 票)"
+		"chi"			"[{green}!{default}] {olive}感染者 {olive}队长 {green}{1} {default}({2} 票)"
 	}
 
 	"PICK_TEAM"
 	{
 		"#format"		"{1:N},{2:N}"
-		"chi"			"队长 {olive}{1} {default}选择了玩家 {green}{2}"
+		"chi"			"[{green}!{default}] 队长 {olive}{1} {default}选择了玩家 {green}{2}"
 	}
 
 	"VOTE_TITLE"
 	{
-		"chi"			"队长开始选人"
+		"chi"			"开始进行mix（队长选人）"
 	}
 
 	"VOTE_MESSAGE"
 	{
-		"chi"			"{default}[{green}!{default}] 队长选人进行中"
+		"chi"			"即将开始mix..."
 	}
 
 	"MENU_TITLE_FIRST_CAPITAN"

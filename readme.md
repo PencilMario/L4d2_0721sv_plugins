@@ -65,6 +65,8 @@
 
 **Plugins/l4d2_fuck_zuolao** 一个简单的坐牢给buff插件
 
+**Plugins/l4d2_mix_team** mix分队，支持队长/随机，需要nativevote前置
+
 **l4d2_SpeakingList_SM1.11** 显示当前说话人【待测试】
 > 因为混野时看到几个服用的这个插件是全局都能看到的, 拿来简单改了改，只显示对应的队伍
 > 基于 https://forums.alliedmods.net/showthread.php?p=2790744
