@@ -15,7 +15,7 @@ public Plugin myinfo = {
 };
 
 public void OnMapStart()
-{
+{   
     Format(g_sName, sizeof(g_sName), "漏风牢房");
 }
 
