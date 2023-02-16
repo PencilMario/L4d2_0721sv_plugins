@@ -7,7 +7,6 @@
 int g_iFrindlyKillCount[MAXPLAYERS+1] = {0};
 int g_iContFKCount[MAXPLAYERS+1] = {0};
 int g_iContFKTime[MAXPLAYERS+1] = {0};
-int g_bHasFK = false;
 
 Handle g_tCounter;
 
@@ -52,6 +51,11 @@ public void OnMapStart(){
     PrecacheSound("announcer_killing_spree/announcer_kill_monster_01.mp3");
     PrecacheSound("announcer_killing_spree/announcer_kill_godlike_01.mp3");
     PrecacheSound("announcer_killing_spree/announcer_kill_holy_01.mp3");
+    for (int i=0;i < MAXPLAYERS;i++){
+        if (g_iFrindlyKillCount[i]!=0){
+            g_iFrindlyKillCount[i]=0;
+        }
+    }
 }
 
 public void RoundStart_Event(Event event, const char[] name, bool dontBroadcast)
@@ -82,16 +86,14 @@ public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast
             g_iContFKCount[attacker]++;
             g_iContFKTime[attacker] = 15;
             AnnounceSound(attacker);
-            g_bHasFK = true;
         }
 	}	
 }
 public Action TimePasser(Handle Timer){
 
-	for (int p = 0; p <= MaxClients; p++){
+	for (int p = 1; p <= MaxClients; p++){
         if (g_iContFKTime[p]>0){
             g_iContFKTime[p]--;
-            PrintToConsoleAll("%i-%i",p ,g_iContFKTime[p]);
         }
         else{
             g_iContFKCount[p]=0;
@@ -146,22 +148,19 @@ void AnnounceSound(int client){
                 AaP(client, "{red}[!] %s 超神了！！！", "announcer_killing_spree/announcer_kill_holy_01.mp3");
         }
     }
-    PrintToConsoleAll("fk: %i-k%i", client, g_iFrindlyKillCount[client]);
 }
 
 public void AaP(int client, const char[] message, const char[] sound){
     char cname[64];
     GetClientName(client, cname, sizeof(cname));
     CPrintToChatAll(message,cname);
-    PlaySound(sound);
-}
-void PlaySound(const char[] sound){
-    for (int i = 0; i < MaxClients + 1; i++){
-        if (IsClientInGame(i)){
-        EmitSoundToClient(i, sound);
+    for (int p = 1; p <= MaxClients; p++){
+        if (IsClientInGame(p)){
+        EmitSoundToClient(p, sound, SOUND_FROM_PLAYER, SNDCHAN_STATIC, SNDLEVEL_NORMAL, SND_NOFLAGS, SNDVOL_NORMAL, SNDPITCH_NORMAL, -1, NULL_VECTOR, NULL_VECTOR, true, 0.0);
         }
     }
 }
+
 
 
 
