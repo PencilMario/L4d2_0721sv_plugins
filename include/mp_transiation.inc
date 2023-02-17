@@ -44,8 +44,8 @@ native int RemoveMapTransition(char[] map);
 
 public SharedPlugin __pl_mp_transiation =
 {
-	name = "mp_transition",
-	file = "mp_transition.smx",
+	name = "mp_transiation",
+	file = "mp_transiation.smx",
 #if defined REQUIRE_PLUGIN
 	required = 1,
 #else

@@ -18,6 +18,10 @@
 	}
 	"QUEUE_NO_MAP"
 	{
-		"mixmap没有地图!"
+		"chi"  			"mixmap没有地图!"
+	}
+	"CHANGE_TO_FIRST_MAP"
+	{
+		"chi"			"[mix]将于5秒后切换到第一张图..."
 	}
 }

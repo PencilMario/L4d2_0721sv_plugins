@@ -20,4 +20,8 @@
 	{
 		"No mixmap!"
 	}
+	"CHANGE_TO_FIRST_MAP"
+	{
+		"chi"			"[mix] After 5s change to the first map..."
+	}
 }
