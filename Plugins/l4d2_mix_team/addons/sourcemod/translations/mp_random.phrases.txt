@@ -1,0 +1,23 @@
+"Phrases"
+{
+	"VOTE_TITLE"
+	{
+		"en"			"Start random maps"
+	}
+    "VOTE_MESSAGE"
+	{
+		"en"			"Random map in progress"
+	}
+	"ANNOUNCE_MIXMAP_PREFIX"
+	{
+		"en"			"[{red}!{default}] mixmap queue: "
+	}
+	"HINT_SHOW_MAP_QUEUE"
+	{
+		"Use {olive}!mixmap{default} to show again"
+	}
+	"QUEUE_NO_MAP"
+	{
+		"队列中没有地图！"
+	}
+}

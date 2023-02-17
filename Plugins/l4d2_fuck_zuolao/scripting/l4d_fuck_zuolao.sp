@@ -37,7 +37,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	RegConsoleCmd("sm_zllv", call_Print_Zuolao, "输出坐牢等级");
-	HookEvent("infected_death", Infected_Death_Event);
+	//HookEvent("infected_death", Infected_Death_Event);
 	HookEvent("round_end", RoundEnd_Event);
 	HookEvent("round_start", RoundStart_Event);
 	HookEvent("player_hurt", PlayerHure_Event);
@@ -122,7 +122,12 @@ public Action PlayerDeath_Event(Event event, const String:name[], bool:dontBroad
 	if (GetClientTeam(client)==L4D_TEAM_SURVIVOR){ 
 		int health = GetPlayerHealth(client);
 		if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
-			if (health < 100) SetPlayerHealth(client, health + 1);
+			SetPlayerHealth(client, health + 3);
+		}
+		if (event.GetBool("headshot")){
+			if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
+				SetPlayerHealth(client, health + 7);
+			}
 		}
 	}
 
@@ -151,15 +156,7 @@ public Action PlayerHure_Event(Event event, const String:name[], bool:dontBroadc
 	}
 }
 
-// 爆头回血
-public Action Infected_Death_Event(Event event, const String:name[], bool:dontBroadcast){
-	if (event.GetBool("headshot") == false) return;
-	int client = GetClientOfUserId(event.GetInt("attacker"));
-	int health = GetPlayerHealth(client);
-	if (g_sZuoLaoLevel >= GetConVarInt(g_iZuoLaoHeadShotHpLv)){
-		if (health < 100) SetPlayerHealth(client, health + 1);
-	}
-}
+
 // https://forums.alliedmods.net/showthread.php?p=862618
 static RespawnPlayer(client, player_id)
 {
@@ -201,14 +198,14 @@ public int GetPlayerTempHealth(int player){
 }
 
 public void SetPlayerHealth(int player, int health){
-	if (health >= 100) health=100;
+	if (health >= 200) health=200;
 	new h2;
 	h2 = GetPlayerTempHealth(player);
-	if(h2 + health < 100){
+	if(h2 + health < 200){
 		SetEntityHealth(player, health);
 	}
 	else{
-		SetEntityHealth(player, 100-h2);
+		SetEntityHealth(player, 200-h2);
 	}
 }
 
@@ -255,6 +252,7 @@ public Action Timer_Re_Health(Handle Timer){
 // 开局给药
 public Action RoundStart_Event(Event event, const String:name[], bool:dontBroadcast){
 	// TIMER
+	Is_FuckZuolao();
 	healtimer = CreateTimer(2.0, Timer_Re_Health, _,TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	GivePill();
 	GiveVomitjar();
