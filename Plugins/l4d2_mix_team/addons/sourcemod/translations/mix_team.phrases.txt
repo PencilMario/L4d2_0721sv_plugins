@@ -7,7 +7,7 @@
 	"BAD_ARGUMENT"
 	{
 		"#format"		"{1:s}"
-		"en"			"Bad argument {1} for mix. Use: {olive}!mix [random|capitan]"
+		"en"			"Bad argument {1} for mix. Use: {olive}!mix [random|capitan|randmap]"
 	}
 	
 	"NO_ARGUMENT"

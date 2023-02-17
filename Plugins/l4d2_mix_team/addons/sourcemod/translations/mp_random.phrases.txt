@@ -18,6 +18,6 @@
 	}
 	"QUEUE_NO_MAP"
 	{
-		"队列中没有地图！"
+		"No mixmap!"
 	}
 }

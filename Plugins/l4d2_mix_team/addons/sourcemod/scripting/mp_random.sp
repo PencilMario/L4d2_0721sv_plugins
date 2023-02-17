@@ -201,6 +201,8 @@ public void OnMixStart()
 	CallEndMix();
     CPrintToChatAll(message);
     CPrintToChatAll("HINT_SHOW_MAP_QUEUE");  //  LMCCore.inc
+    CPrintToChatAll("CHANGE_TO_FIRST_MAP");  //  LMCCore.inc
+    CreateTimer(5.0, ChangeToFirstMap, _,TIMER_FLAG_NO_MAPCHANGE)
 
 }
 public void GetAnnounceString(char[] buffer, int maxlen){
