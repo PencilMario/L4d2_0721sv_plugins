@@ -130,10 +130,36 @@ public void OnPluginStart()
     // ====================查询指令=========================
     RegConsoleCmd("sm_mixmaps", Cmd_ShowMixedMaps);
 }
+
+public void OnMapStart()
+{
+    char currmap[MAP_NAME_MAX_LENGTH];
+    char sMap1[MAP_NAME_MAX_LENGTH], sMap2[MAP_NAME_MAX_LENGTH], sMap3[MAP_NAME_MAX_LENGTH], sMap4[MAP_NAME_MAX_LENGTH], sMap5[MAP_NAME_MAX_LENGTH];
+
+    if (g_sMixMapQueue.Length != 4 || g_sMixMapQueue.Length != 5){
+        ResetAllMapTransition();
+    }
+    else{
+        GetCurrentMap(currmap, sizeof(currmap));
+        g_sMixMapQueue.GetString(0, sMap1, sizeof(sMap1));
+        g_sMixMapQueue.GetString(1, sMap2, sizeof(sMap1));
+        g_sMixMapQueue.GetString(2, sMap3, sizeof(sMap1));
+        g_sMixMapQueue.GetString(3, sMap4, sizeof(sMap1));
+        if (!(
+            StrEqual(currmap, sMap1) ||
+            StrEqual(currmap, sMap1) ||
+            StrEqual(currmap, sMap1) ||
+            StrEqual(currmap, sMap1) 
+            )){
+                ResetAllMapTransition();
+            }
+    }
+}
+
 public Action Cmd_ShowMixedMaps(int iClient, int iArgs){
-    PrintToChatAll("start sm_mixmaps");
+    //PrintToChatAll("start sm_mixmaps");
     char message[MAX_MESSAGE_LENGTH];
-    OnMixStart();
+    //OnMixStart();
     GetAnnounceString(message, sizeof(message));
     CPrintToChat(iClient, message);
     
@@ -147,12 +173,12 @@ public void GetRandomMap(ArrayList maplist, char[] buffer, int maxlen){
     int copednum = 0;
     char selectedmap[MAP_NAME_MAX_LENGTH];
     Format(buffer, maxlen, NULL_MAP);
-    PrintToConsoleAll("maplist.Length - %i", maplist.Length);
+    //PrintToConsoleAll("maplist.Length - %i", maplist.Length);
     while(StrEqual(buffer, NULL_MAP)){
         randm = GetRandomInt(1, maplist.Length-1);
         copednum = maplist.GetString(randm, buffer, maxlen);
         maplist.GetString(randm, selectedmap, sizeof(selectedmap));
-        PrintToConsoleAll("randommap - %s, %i", selectedmap, copednum);
+       // PrintToConsoleAll("randommap - %s, %i", selectedmap, copednum);
     }
 }
 
@@ -183,19 +209,19 @@ stock int GetSeriousClientCount(bool inGame = false)
 }
 public void OnMixStart()
 {
-    PrintToChatAll("start random map");
+    //PrintToChatAll("start random map");
     char sMap1[MAP_NAME_MAX_LENGTH], sMap2[MAP_NAME_MAX_LENGTH], sMap3[MAP_NAME_MAX_LENGTH], sMap4[MAP_NAME_MAX_LENGTH], sMap5[MAP_NAME_MAX_LENGTH];
     GetRandomMap(g_sOfficialMapsM1, sMap1, sizeof(sMap1));
-    PrintToConsoleAll("map - %s", sMap1);
+    //PrintToConsoleAll("map - %s", sMap1);
     g_sMixMapQueue.PushString(sMap1);
     GetRandomMap(g_sOfficialMapsM2, sMap2, sizeof(sMap1));
-    PrintToConsoleAll("map - %s", sMap2);
+    //PrintToConsoleAll("map - %s", sMap2);
     g_sMixMapQueue.PushString(sMap2);
     GetRandomMap(g_sOfficialMapsM3, sMap3, sizeof(sMap1));
-    PrintToConsoleAll("map - %s", sMap3);
+    //PrintToConsoleAll("map - %s", sMap3);
     g_sMixMapQueue.PushString(sMap3);
     GetRandomMap(g_sOfficialMapsM4, sMap4, sizeof(sMap1));
-    PrintToConsoleAll("map - %s", sMap4);
+    //PrintToConsoleAll("map - %s", sMap4);
     g_sMixMapQueue.PushString(sMap4);
 
     AddMapTransition(sMap1, sMap2);
@@ -204,11 +230,11 @@ public void OnMixStart()
     int m5 = GetRandomInt(1,14);
     if (m5 > 7){
         GetRandomMap(g_sOfficialMapsM5, sMap5, sizeof(sMap1));
-        PrintToConsoleAll("map - %s", sMap5);
+        //PrintToConsoleAll("map - %s", sMap5);
         g_sMixMapQueue.PushString(sMap5);
         AddMapTransition(sMap4, sMap5);
     }
-    PrintToChatAll("start add to translation list");
+    //PrintToChatAll("start add to translation list");
 
     
 
