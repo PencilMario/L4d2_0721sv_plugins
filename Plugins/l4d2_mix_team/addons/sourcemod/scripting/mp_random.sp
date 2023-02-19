@@ -43,7 +43,7 @@ public void OnPluginStart()
     g_sOfficialMapsM5 = new ArrayList();
     g_sMixMapQueue = new ArrayList();
 
-    InitTranslations();
+    //InitTranslations();
 
     // ========================官图m1========================
     g_sOfficialMapsM1.PushString(NULL_MAP);
@@ -131,9 +131,12 @@ public void OnPluginStart()
     RegConsoleCmd("sm_mixmaps", Cmd_ShowMixedMaps);
 }
 public Action Cmd_ShowMixedMaps(int iClient, int iArgs){
-    char message[512];
+    PrintToChatAll("start sm_mixmaps");
+    char message[MAX_MESSAGE_LENGTH];
+    OnMixStart();
     GetAnnounceString(message, sizeof(message));
     CPrintToChat(iClient, message);
+    
 }
 public void OnAllPluginsLoaded() {
 	AddMixType("randmap", MIN_PLAYERS);
@@ -148,11 +151,11 @@ public void GetRandomMap(ArrayList maplist, char[] buffer, int maxlen){
 }
 
 public void GetVoteTitle(int iClient, char[] sTitle) {
-	Format(sTitle, VOTE_TITLE_SIZE, "%T", "VOTE_TITLE", iClient);
+	Format(sTitle, VOTE_TITLE_SIZE, "开始MixMap", iClient);
 }
 
 public void GetVoteMessage(int iClient, char[] sMsg) {
-	Format(sMsg, VOTE_MSG_SIZE, "%T", "VOTE_MESSAGE", iClient);
+	Format(sMsg, VOTE_MSG_SIZE, "正在随机地图...", iClient);
 }
 stock int GetSeriousClientCount(bool inGame = false)
 {
@@ -174,6 +177,7 @@ stock int GetSeriousClientCount(bool inGame = false)
 }
 public void OnMixStart()
 {
+    PrintToChatAll("start random map");
     char sMap1[MAP_NAME_MAX_LENGTH];
     char sMap2[MAP_NAME_MAX_LENGTH];
     GetRandomMap(g_sOfficialMapsM1, sMap1, sizeof(sMap1));
@@ -190,24 +194,26 @@ public void OnMixStart()
         GetRandomMap(g_sOfficialMapsM5, sMap1, sizeof(sMap1));
         g_sMixMapQueue.PushString(sMap1);
     }
+    PrintToChatAll("start add to translation list");
     int pos = 0;
     while(pos + 1 < g_sMixMapQueue.Length - 1){
     g_sMixMapQueue.GetString(0, sMap1, sizeof(sMap1));
     g_sMixMapQueue.GetString(1, sMap1, sizeof(sMap1));
     AddMapTransition(sMap1, sMap2);
     }
-    char message[512];
+    PrintToChatAll("start announcing");
+    char message[MAX_MESSAGE_LENGTH];
     GetAnnounceString(message, sizeof(message));
 	CallEndMix();
     CPrintToChatAll(message);
-    CPrintToChatAll("HINT_SHOW_MAP_QUEUE");  //  LMCCore.inc
-    CPrintToChatAll("CHANGE_TO_FIRST_MAP");  //  LMCCore.inc
+    CPrintToChatAll("使用!mixmaps再次展示");  //  LMCCore.inc
+    CPrintToChatAll("即将切换到第一张地图");  //  LMCCore.inc
     CreateTimer(5.0, ChangeToFirstMap, _,TIMER_FLAG_NO_MAPCHANGE);
 
 }
 public void GetAnnounceString(char[] buffer, int maxlen){
     char sPrefix[96];
-    Format(sPrefix, sizeof(sPrefix), "ANNOUNCE_MIXMAP_PREFIX");
+    Format(sPrefix, sizeof(sPrefix),"Mix地图序列:");
     char sMap1[MAP_NAME_MAX_LENGTH], sMap2[MAP_NAME_MAX_LENGTH], sMap3[MAP_NAME_MAX_LENGTH], sMap4[MAP_NAME_MAX_LENGTH], sMap5[MAP_NAME_MAX_LENGTH];
     if (g_sMixMapQueue.Length == 5){
         g_sMixMapQueue.GetString(0, sMap1, sizeof(sMap1));
@@ -227,7 +233,7 @@ public void GetAnnounceString(char[] buffer, int maxlen){
         sPrefix,sMap1,sMap2,sMap3,sMap4);
     }
     else{
-        Format(buffer, maxlen, "QUEUE_NO_MAP");
+        Format(buffer, maxlen,"队列中没有地图");
     }
 }
 public Action ChangeToFirstMap(Handle timer){
