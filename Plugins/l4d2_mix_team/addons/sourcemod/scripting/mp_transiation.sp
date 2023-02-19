@@ -186,12 +186,15 @@ void SetScores()
 }
 
 int Native_AddMapTransition(Handle plugin, int numParams){
-	
+	//PrintToConsoleAll("Added map tran by native");
     GetNativeString(1, sMapStart, sizeof(sMapStart));
     GetNativeString(2, sMapEnd, sizeof(sMapEnd));
 	String_ToLower(sMapStart, sizeof(sMapStart));
 	String_ToLower(sMapEnd, sizeof(sMapEnd));
 	g_hMapTransitionPair.SetString(sMapStart, sMapEnd, true);
+	#if DEBUG
+		PrintToConsoleAll("MT - %s>%s", sMapStart, sMapEnd);
+	#endif
 	return 0;
 }
 

@@ -36,12 +36,12 @@ void InitTranslations()
 
 public void OnPluginStart()
 {
-    g_sOfficialMapsM1 = new ArrayList();
-    g_sOfficialMapsM2 = new ArrayList();
-    g_sOfficialMapsM3 = new ArrayList();
-    g_sOfficialMapsM4 = new ArrayList();
-    g_sOfficialMapsM5 = new ArrayList();
-    g_sMixMapQueue = new ArrayList();
+    g_sOfficialMapsM1 = new ArrayList(64);
+    g_sOfficialMapsM2 = new ArrayList(64);
+    g_sOfficialMapsM3 = new ArrayList(64);
+    g_sOfficialMapsM4 = new ArrayList(64);
+    g_sOfficialMapsM5 = new ArrayList(64);
+    g_sMixMapQueue = new ArrayList(64);
 
     //InitTranslations();
 
@@ -144,9 +144,15 @@ public void OnAllPluginsLoaded() {
 
 public void GetRandomMap(ArrayList maplist, char[] buffer, int maxlen){
     int randm = 0;
+    int copednum = 0;
+    char selectedmap[MAP_NAME_MAX_LENGTH];
+    Format(buffer, maxlen, NULL_MAP);
+    PrintToConsoleAll("maplist.Length - %i", maplist.Length);
     while(StrEqual(buffer, NULL_MAP)){
-        randm = GetRandomInt(1, maplist.Length);
-        maplist.GetString(randm, buffer, maxlen);
+        randm = GetRandomInt(1, maplist.Length-1);
+        copednum = maplist.GetString(randm, buffer, maxlen);
+        maplist.GetString(randm, selectedmap, sizeof(selectedmap));
+        PrintToConsoleAll("randommap - %s, %i", selectedmap, copednum);
     }
 }
 
@@ -178,32 +184,48 @@ stock int GetSeriousClientCount(bool inGame = false)
 public void OnMixStart()
 {
     PrintToChatAll("start random map");
-    char sMap1[MAP_NAME_MAX_LENGTH];
-    char sMap2[MAP_NAME_MAX_LENGTH];
+    char sMap1[MAP_NAME_MAX_LENGTH], sMap2[MAP_NAME_MAX_LENGTH], sMap3[MAP_NAME_MAX_LENGTH], sMap4[MAP_NAME_MAX_LENGTH], sMap5[MAP_NAME_MAX_LENGTH];
     GetRandomMap(g_sOfficialMapsM1, sMap1, sizeof(sMap1));
+    PrintToConsoleAll("map - %s", sMap1);
     g_sMixMapQueue.PushString(sMap1);
-    GetRandomMap(g_sOfficialMapsM2, sMap1, sizeof(sMap1));
-    g_sMixMapQueue.PushString(sMap1);
-    GetRandomMap(g_sOfficialMapsM3, sMap1, sizeof(sMap1));
-    g_sMixMapQueue.PushString(sMap1);
-    GetRandomMap(g_sOfficialMapsM4, sMap1, sizeof(sMap1));
-    g_sMixMapQueue.PushString(sMap1);
+    GetRandomMap(g_sOfficialMapsM2, sMap2, sizeof(sMap1));
+    PrintToConsoleAll("map - %s", sMap2);
+    g_sMixMapQueue.PushString(sMap2);
+    GetRandomMap(g_sOfficialMapsM3, sMap3, sizeof(sMap1));
+    PrintToConsoleAll("map - %s", sMap3);
+    g_sMixMapQueue.PushString(sMap3);
+    GetRandomMap(g_sOfficialMapsM4, sMap4, sizeof(sMap1));
+    PrintToConsoleAll("map - %s", sMap4);
+    g_sMixMapQueue.PushString(sMap4);
 
+    AddMapTransition(sMap1, sMap2);
+    AddMapTransition(sMap2, sMap3);
+    AddMapTransition(sMap3, sMap4);
     int m5 = GetRandomInt(1,14);
     if (m5 > 7){
-        GetRandomMap(g_sOfficialMapsM5, sMap1, sizeof(sMap1));
-        g_sMixMapQueue.PushString(sMap1);
+        GetRandomMap(g_sOfficialMapsM5, sMap5, sizeof(sMap1));
+        PrintToConsoleAll("map - %s", sMap5);
+        g_sMixMapQueue.PushString(sMap5);
+        AddMapTransition(sMap4, sMap5);
     }
     PrintToChatAll("start add to translation list");
-    int pos = 0;
-    while(pos + 1 < g_sMixMapQueue.Length - 1){
-    g_sMixMapQueue.GetString(0, sMap1, sizeof(sMap1));
-    g_sMixMapQueue.GetString(1, sMap1, sizeof(sMap1));
-    AddMapTransition(sMap1, sMap2);
-    }
-    PrintToChatAll("start announcing");
+
+    
+
+
+    //int pos = 0;
+    
+    //while(pos + 1 < g_sMixMapQueue.Length - 1){
+    //    g_sMixMapQueue.GetString(pos, sMap1, sizeof(sMap1));
+    //    g_sMixMapQueue.GetString(pos + 1, sMap1, sizeof(sMap1));
+    //    AddMapTransition(sMap1, sMap2);
+    //    pos++;
+    //}
+    
     char message[MAX_MESSAGE_LENGTH];
+    
     GetAnnounceString(message, sizeof(message));
+    
 	CallEndMix();
     CPrintToChatAll(message);
     CPrintToChatAll("使用!mixmaps再次展示");  //  LMCCore.inc
