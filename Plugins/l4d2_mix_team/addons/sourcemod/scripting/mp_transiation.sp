@@ -131,6 +131,7 @@ public Action OnRoundEnd_Post(Handle hTimer)
 		#endif
 
 		CPrintToChatAll("{olive}[MT]{default} Starting transition from: {blue}%s{default} to: {blue}%s", sCurrentMapName, sNextMapName);
+		g_hMapTransitionPair.Remove(sCurrentMapName);
 		ForceChangeLevel(sNextMapName, "Map Transitions");
 	}
 

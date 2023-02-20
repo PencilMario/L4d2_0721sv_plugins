@@ -19,6 +19,8 @@ public Plugin myinfo = {
 	version = "1.0"
 };
 
+int g_iResetLastCount = 0;
+
 ArrayList g_sOfficialMapsM1,g_sOfficialMapsM2,g_sOfficialMapsM3,g_sOfficialMapsM4,g_sOfficialMapsM5;
 ArrayList g_sMixMapQueue;
 
@@ -129,30 +131,24 @@ public void OnPluginStart()
 
     // ====================查询指令=========================
     RegConsoleCmd("sm_mixmaps", Cmd_ShowMixedMaps);
+    //RegAdminCmd("sm_removemixmaps")
 }
 
-public void OnMapStart()
-{
+public void OnMapStart(){
+    int mapfinded;
     char currmap[MAP_NAME_MAX_LENGTH];
-    char sMap1[MAP_NAME_MAX_LENGTH], sMap2[MAP_NAME_MAX_LENGTH], sMap3[MAP_NAME_MAX_LENGTH], sMap4[MAP_NAME_MAX_LENGTH], sMap5[MAP_NAME_MAX_LENGTH];
-
-    if (g_sMixMapQueue.Length != 4 || g_sMixMapQueue.Length != 5){
-        ResetAllMapTransition();
-    }
-    else{
-        GetCurrentMap(currmap, sizeof(currmap));
-        g_sMixMapQueue.GetString(0, sMap1, sizeof(sMap1));
-        g_sMixMapQueue.GetString(1, sMap2, sizeof(sMap1));
-        g_sMixMapQueue.GetString(2, sMap3, sizeof(sMap1));
-        g_sMixMapQueue.GetString(3, sMap4, sizeof(sMap1));
-        if (!(
-            StrEqual(currmap, sMap1) ||
-            StrEqual(currmap, sMap1) ||
-            StrEqual(currmap, sMap1) ||
-            StrEqual(currmap, sMap1) 
-            )){
-                ResetAllMapTransition();
-            }
+    GetCurrentMap(currmap, sizeof(currmap));
+    mapfinded = g_sMixMapQueue.FindString(currmap);
+    if (mapfinded == -1){
+        if (g_iResetLastCount < 1){
+            ResetAllMapTransition();
+            g_sMixMapQueue.Clear();
+        }
+        else{
+            g_iResetLastCount--;
+        }
+    }else{
+        g_iResetLastCount = 2;
     }
 }
 
@@ -183,11 +179,11 @@ public void GetRandomMap(ArrayList maplist, char[] buffer, int maxlen){
 }
 
 public void GetVoteTitle(int iClient, char[] sTitle) {
-	Format(sTitle, VOTE_TITLE_SIZE, "开始MixMap", iClient);
+	Format(sTitle, VOTE_TITLE_SIZE, "开始随机MixMap", iClient);
 }
 
 public void GetVoteMessage(int iClient, char[] sMsg) {
-	Format(sMsg, VOTE_MSG_SIZE, "正在随机地图...", iClient);
+	Format(sMsg, VOTE_MSG_SIZE, "即将切换至m1...", iClient);
 }
 stock int GetSeriousClientCount(bool inGame = false)
 {
@@ -209,6 +205,8 @@ stock int GetSeriousClientCount(bool inGame = false)
 }
 public void OnMixStart()
 {
+    ResetAllMapTransition();
+    g_sMixMapQueue.Clear();
     //PrintToChatAll("start random map");
     char sMap1[MAP_NAME_MAX_LENGTH], sMap2[MAP_NAME_MAX_LENGTH], sMap3[MAP_NAME_MAX_LENGTH], sMap4[MAP_NAME_MAX_LENGTH], sMap5[MAP_NAME_MAX_LENGTH];
     GetRandomMap(g_sOfficialMapsM1, sMap1, sizeof(sMap1));
@@ -269,7 +267,7 @@ public void GetAnnounceString(char[] buffer, int maxlen){
         g_sMixMapQueue.GetString(2, sMap3, sizeof(sMap3));
         g_sMixMapQueue.GetString(3, sMap4, sizeof(sMap4));
         g_sMixMapQueue.GetString(4, sMap5, sizeof(sMap5));
-        Format(buffer, maxlen, "%s{olive}%s{default}>{olive}%s{default}>{olive}%s{default}>{olive}%s{default}>{olive}%s",
+        Format(buffer, maxlen, "%s{olive}%s{default} > {olive}%s{default} > {olive}%s{default} > {olive}%s{default} > {olive}%s",
             sPrefix,sMap1,sMap2,sMap3,sMap4,sMap5);
     }
     else if(g_sMixMapQueue.Length == 4){
@@ -277,7 +275,7 @@ public void GetAnnounceString(char[] buffer, int maxlen){
         g_sMixMapQueue.GetString(1, sMap2, sizeof(sMap2));
         g_sMixMapQueue.GetString(2, sMap3, sizeof(sMap3));
         g_sMixMapQueue.GetString(3, sMap4, sizeof(sMap4));
-        Format(buffer, maxlen, "%s{olive}%s{default}>{olive}%s{default}>{olive}%s{default}>{olive}%s{default}",
+        Format(buffer, maxlen, "%s{olive}%s{default} > {olive}%s{default} > {olive}%s{default} > {olive}%s{default}",
         sPrefix,sMap1,sMap2,sMap3,sMap4);
     }
     else{
