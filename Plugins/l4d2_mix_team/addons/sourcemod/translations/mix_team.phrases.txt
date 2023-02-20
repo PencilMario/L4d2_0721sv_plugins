@@ -12,7 +12,7 @@
 	
 	"NO_ARGUMENT"
 	{
-		"en"			"No arguments for mix. Use: {olive}!mix [random|capitan]"
+		"en"			"No arguments for mix. Use: {olive}!mix [random|capitan|randmap]"
 	}
 
 	"CANT_CHAGNE_TEAM"

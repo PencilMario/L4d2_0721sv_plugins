@@ -5,6 +5,7 @@
 #include <colors>
 #include <mix_team>
 #include <mp_transiation>
+#include <readyup>
 
 
 #define MAP_NAME_MAX_LENGTH     64
@@ -19,7 +20,6 @@ public Plugin myinfo = {
 	version = "1.0"
 };
 
-int g_iResetLastCount = 0;
 
 ArrayList g_sOfficialMapsM1,g_sOfficialMapsM2,g_sOfficialMapsM3,g_sOfficialMapsM4,g_sOfficialMapsM5;
 ArrayList g_sMixMapQueue;
@@ -134,21 +134,15 @@ public void OnPluginStart()
     //RegAdminCmd("sm_removemixmaps")
 }
 
-public void OnMapStart(){
+public void OnRoundIsLive(){
     int mapfinded;
     char currmap[MAP_NAME_MAX_LENGTH];
     GetCurrentMap(currmap, sizeof(currmap));
     mapfinded = g_sMixMapQueue.FindString(currmap);
-    if (mapfinded == -1){
-        if (g_iResetLastCount < 1){
-            ResetAllMapTransition();
-            g_sMixMapQueue.Clear();
-        }
-        else{
-            g_iResetLastCount--;
-        }
-    }else{
-        g_iResetLastCount = 2;
+    if (mapfinded == -1 && g_sMixMapQueue.Length != 0){
+        ResetAllMapTransition();
+        g_sMixMapQueue.Clear();
+        PrintToChatAll("已切换至非MIX队列地图，地图队列已重置");
     }
 }
 
