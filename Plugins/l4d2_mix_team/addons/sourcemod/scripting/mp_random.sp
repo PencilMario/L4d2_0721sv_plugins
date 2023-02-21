@@ -143,7 +143,12 @@ public void OnRoundIsLive(){
         ResetAllMapTransition();
         g_sMixMapQueue.Clear();
         PrintToChatAll("已切换至非MIX队列地图，地图队列已重置");
+    }else if(mapfinded == g_sMixMapQueue.Length - 1){
+        ResetAllMapTransition();
+        g_sMixMapQueue.Clear();
+        PrintToChatAll("已经是救援关，地图队列已重置");
     }
+    
 }
 
 public Action Cmd_ShowMixedMaps(int iClient, int iArgs){
