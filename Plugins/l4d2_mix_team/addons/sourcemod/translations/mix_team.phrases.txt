@@ -15,7 +15,7 @@
 		"en"			"No arguments for mix. Use: {olive}!mix [random|capitan|randmap]"
 	}
 
-	"CANT_CHAGNE_TEAM"
+	"CANT_CHANGE_TEAM"
 	{
 		"en"			"You cannot change the team {olive}during the mix"
 	}
@@ -46,5 +46,13 @@
 	{
 		"#format"		"{1:N}"
 		"en"			"Mix member {olive}{1} left{default}. {olive}Mix rollback"
+	}
+	"ALREADY_IN_PROGRESS"
+	{
+		"en"			"A mix session is in progress!"
+	}
+	"UNSUPPORTED"
+	{
+		"en" 			"This poll type is not supported!"
 	}
 }
