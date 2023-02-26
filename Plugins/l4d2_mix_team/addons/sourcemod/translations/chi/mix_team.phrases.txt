@@ -47,4 +47,13 @@
 		"#format"		"{1:N}"
 		"chi"			"{default}[{green}!{default}] mix 成员 {olive}{1} 离开了游戏{default}. {olive}回滚队伍状态"
 	} 
+	"ALREADY_IN_PROGRESS"
+	{
+		"chi"			"一个mix正在进行中!"
+	}
+	"UNSUPPORTED"
+	{
+		"chi" 			"该投票类型不支持!"
+	}
+
 }

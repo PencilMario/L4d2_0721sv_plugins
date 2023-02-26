@@ -5,6 +5,7 @@
 #include <colors>
 #include <mix_team>
 
+#define IS_VALID_CLIENT(%1)     (%1 > 0 && %1 <= MaxClients)
 
 public Plugin myinfo = { 
 	name = "MixTeamCapitan",
@@ -66,7 +67,7 @@ public void OnPluginStart() {
 }
 
 public void OnAllPluginsLoaded() {
-	AddMixType("capitan", (FindConVar("survivor_limit").IntValue * 2));
+	AddMixType("capitan", 1);
 }
 
 public void GetVoteTitle(int iClient, char[] sTitle) {
@@ -190,7 +191,7 @@ public int HandleMenu(Menu hMenu, MenuAction iAction, int iClient, int iIndex)
 
 				if (bIsPickFirstCapitan)
 				{
-					ChangeClientTeam(iTarget, TEAM_SURVIVOR);	
+					SetClientTeam(iTarget, TEAM_SURVIVOR);	
 					CPrintToChatAll("%t", "PICK_TEAM", g_iFirstCapitan, iTarget);
 
 					Flow(STEP_PICK_TEAM_SECOND);
@@ -198,7 +199,7 @@ public int HandleMenu(Menu hMenu, MenuAction iAction, int iClient, int iIndex)
 
 				else
 				{
-					ChangeClientTeam(iTarget, TEAM_INFECTED);	
+					SetClientTeam(iTarget, TEAM_INFECTED);	
 					CPrintToChatAll("%t", "PICK_TEAM", g_iSecondCapitan, iTarget);
 
 					Flow(STEP_PICK_TEAM_FIRST);
@@ -208,6 +209,35 @@ public int HandleMenu(Menu hMenu, MenuAction iAction, int iClient, int iIndex)
 	}
 
 	return 0;
+}
+/**
+ * Sets the client team.
+ * 
+ * @param iClient     Client index
+ * @param iTeam       Param description
+ * @return            true if success
+ */
+bool SetClientTeam(int iClient, int iTeam)
+{
+    if (!IS_VALID_CLIENT(iClient)) {
+        return false;
+    }
+
+    if (GetClientTeam(iClient) == iTeam) {
+        return true;
+    }
+
+    if (iTeam != TEAM_SURVIVOR) {
+        ChangeClientTeam(iClient, iTeam);
+        return true;
+    }
+    else if (FindSurvivorBot() > 0)
+    {
+        CheatCommand(iClient, "sb_takecontrol");
+        return true;
+    }
+
+    return false;
 }
 
 public void Flow(int iStep)
@@ -253,7 +283,7 @@ public void Flow(int iStep)
 						continue;
 					}
 
-					ChangeClientTeam(iClient, FindSurvivorBot() > 0 ? TEAM_SURVIVOR : TEAM_INFECTED);	
+					SetClientTeam(iClient, FindSurvivorBot() > 0 ? TEAM_SURVIVOR : TEAM_INFECTED);	
 					break;
 				}
 
@@ -315,7 +345,7 @@ void SetFirstCapitan(int iClient)
 {
 	g_iFirstCapitan = iClient;
 
-	ChangeClientTeam(iClient, TEAM_SURVIVOR);
+	SetClientTeam(iClient, TEAM_SURVIVOR);
 	CPrintToChatAll("%t", "NEW_FIRST_CAPITAN", iClient, g_iVoteCount[iClient]);
 }
 
@@ -323,7 +353,7 @@ void SetSecondCapitan(int iClient)
 {
 	g_iSecondCapitan = iClient;
 
-	ChangeClientTeam(iClient, TEAM_INFECTED);
+	SetClientTeam(iClient, TEAM_INFECTED);
 	CPrintToChatAll("%t", "NEW_SECOND_CAPITAN", iClient, g_iVoteCount[iClient]);
 }
 
@@ -344,4 +374,16 @@ int FindSurvivorBot()
 	}
 
 	return -1;
+}
+/**
+ * Hack to execute cheat commands.
+ * 
+ * @noreturn
+ */
+void CheatCommand(int iClient, const char[] sCmd, const char[] sArgs = "")
+{
+    int iFlags = GetCommandFlags(sCmd);
+    SetCommandFlags(sCmd, iFlags & ~FCVAR_CHEAT);
+    FakeClientCommand(iClient, "%s %s", sCmd, sArgs);
+    SetCommandFlags(sCmd, iFlags);
 }
