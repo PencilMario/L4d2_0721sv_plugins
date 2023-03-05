@@ -12,17 +12,20 @@
 #define NULL_MAP                "NULL_MAP"
 #define TRANSLATIONS            "mp_random.phrases"
 #define MIN_PLAYERS             1
+#define PATH_TO_MISSIONS        "addons/sourcemod/data/missions/"
+
+char sBuffer[128];
 
 public Plugin myinfo = { 
-	name = "MixMap",
+	name = "MixThirdMap",
 	author = "SirP",
-	description = "为mix添加mix地图功能",
+	description = "为mix添加随机选择三方地图功能",
 	version = "1.0"
 };
 
-
 ArrayList g_sOfficialMapsM1,g_sOfficialMapsM2,g_sOfficialMapsM3,g_sOfficialMapsM4,g_sOfficialMapsM5;
-ArrayList g_sMixMapQueue;
+ArrayList g_sMixMapQueue, g_sOfficialMissionFiles, g_sMapPools;
+ArrayList g_sMissionFiles;
 
 void InitTranslations()
 {
@@ -38,102 +41,115 @@ void InitTranslations()
 
 public void OnPluginStart()
 {
+    g_sMissionFiles = new ArrayList(128);
+    g_sOfficialMissionFiles = new ArrayList(128);
+    g_sMixMapQueue = new ArrayList(64);
     g_sOfficialMapsM1 = new ArrayList(64);
     g_sOfficialMapsM2 = new ArrayList(64);
     g_sOfficialMapsM3 = new ArrayList(64);
     g_sOfficialMapsM4 = new ArrayList(64);
     g_sOfficialMapsM5 = new ArrayList(64);
-    g_sMixMapQueue = new ArrayList(64);
+    g_sMapPools = new ArrayList(64);
 
     //InitTranslations();
 
-    // ========================官图m1========================
-    g_sOfficialMapsM1.PushString(NULL_MAP);
-    g_sOfficialMapsM1.PushString("c1m1_hotel");
-    g_sOfficialMapsM1.PushString("c2m1_highway");
-    g_sOfficialMapsM1.PushString("c3m1_plankcountry");
-    g_sOfficialMapsM1.PushString("c4m1_milltown_a");
-    g_sOfficialMapsM1.PushString("c5m1_waterfront");
-    g_sOfficialMapsM1.PushString("c6m1_riverbank");
-    g_sOfficialMapsM1.PushString("c7m1_docks");
-    g_sOfficialMapsM1.PushString("c8m1_apartment");
-    g_sOfficialMapsM1.PushString("c9m1_alleys");
-    g_sOfficialMapsM1.PushString("c10m1_caves");
-    g_sOfficialMapsM1.PushString("c11m1_greenhouse");
-    g_sOfficialMapsM1.PushString("c12m1_hilltop");
-    g_sOfficialMapsM1.PushString("c13m1_alpinecreek");
-    g_sOfficialMapsM1.PushString("c14m1_junkyard");
-
-    // ========================官图m2========================
-    g_sOfficialMapsM2.PushString(NULL_MAP);
-    g_sOfficialMapsM2.PushString("c1m2_streets");
-    g_sOfficialMapsM2.PushString("c2m2_fairgrounds");
-    g_sOfficialMapsM2.PushString("c3m2_swamp");
-    g_sOfficialMapsM2.PushString("c4m2_sugarmill_a");
-    g_sOfficialMapsM2.PushString("c5m2_park");
-    g_sOfficialMapsM2.PushString("c6m2_bedlam");
-    g_sOfficialMapsM2.PushString("c7m2_barge");
-    g_sOfficialMapsM2.PushString("c8m2_subway");
-    g_sOfficialMapsM2.PushString("c9m2_lots");
-    g_sOfficialMapsM2.PushString("c10m2_drainage");
-    g_sOfficialMapsM2.PushString("c11m2_offices");
-    g_sOfficialMapsM2.PushString("c12m2_traintunnel");
-    g_sOfficialMapsM2.PushString("c13m2_southpinestream");
-    g_sOfficialMapsM2.PushString("c14m2_lighthouse");
-    // ========================官图m3========================
-    g_sOfficialMapsM3.PushString(NULL_MAP);
-    g_sOfficialMapsM3.PushString("c1m3_mall");
-    g_sOfficialMapsM3.PushString("c2m3_coaster");
-    g_sOfficialMapsM3.PushString("c3m3_shantytown");
-    g_sOfficialMapsM3.PushString("c4m3_sugarmill_b");
-    g_sOfficialMapsM3.PushString("c5m3_cemetery");
-    g_sOfficialMapsM3.PushString("c6m3_port");
-    g_sOfficialMapsM3.PushString("c7m3_port");
-    g_sOfficialMapsM3.PushString("c8m3_sewers");
-    g_sOfficialMapsM3.PushString(NULL_MAP);
-    g_sOfficialMapsM3.PushString("c10m3_ranchhouse");
-    g_sOfficialMapsM3.PushString("c11m3_garage");
-    g_sOfficialMapsM3.PushString("c12m3_bridge");
-    g_sOfficialMapsM3.PushString("c13m3_memorialbridge");
-    g_sOfficialMapsM3.PushString(NULL_MAP);
-    // ========================官图m4========================
-    g_sOfficialMapsM4.PushString(NULL_MAP);
-    g_sOfficialMapsM4.PushString("c1m4_atrium");
-    g_sOfficialMapsM4.PushString("c2m4_barns");
-    g_sOfficialMapsM4.PushString("c3m4_plantation");
-    g_sOfficialMapsM4.PushString("c4m4_milltown_b");
-    g_sOfficialMapsM4.PushString("c5m4_quarter");
-    g_sOfficialMapsM4.PushString(NULL_MAP);
-    g_sOfficialMapsM4.PushString(NULL_MAP);
-    g_sOfficialMapsM4.PushString("c8m4_interior");
-    g_sOfficialMapsM4.PushString(NULL_MAP);
-    g_sOfficialMapsM4.PushString("c10m4_mainstreet");
-    g_sOfficialMapsM4.PushString("c11m4_terminal");
-    g_sOfficialMapsM4.PushString("c12m4_barn");
-    g_sOfficialMapsM4.PushString("c13m4_cutthroatcreek");
-    g_sOfficialMapsM4.PushString(NULL_MAP);
-    // ========================官图m5========================
-    g_sOfficialMapsM5.PushString(NULL_MAP);
-    g_sOfficialMapsM5.PushString(NULL_MAP);
-    g_sOfficialMapsM5.PushString("c2m5_concert");
-    g_sOfficialMapsM5.PushString(NULL_MAP);
-    g_sOfficialMapsM5.PushString("c4m5_milltown_escape");
-    g_sOfficialMapsM5.PushString("c5m5_bridge");
-    g_sOfficialMapsM5.PushString(NULL_MAP);
-    g_sOfficialMapsM5.PushString(NULL_MAP);
-    g_sOfficialMapsM5.PushString("c8m5_rooftop");
-    g_sOfficialMapsM5.PushString(NULL_MAP);
-    g_sOfficialMapsM5.PushString("c10m5_houseboat");
-    g_sOfficialMapsM5.PushString("c11m5_runway");
-    g_sOfficialMapsM5.PushString("c12m5_cornfield");
-    g_sOfficialMapsM5.PushString(NULL_MAP);
-    g_sOfficialMapsM5.PushString(NULL_MAP);
+    // ========================官图========================
+    g_sOfficialMissionFiles.PushString("campaign1.txt");
+    g_sOfficialMissionFiles.PushString("campaign2.txt");
+    g_sOfficialMissionFiles.PushString("campaign3.txt");
+    g_sOfficialMissionFiles.PushString("campaign4.txt");
+    g_sOfficialMissionFiles.PushString("campaign5.txt");
+    g_sOfficialMissionFiles.PushString("campaign6.txt");
+    g_sOfficialMissionFiles.PushString("campaign7.txt");
+    g_sOfficialMissionFiles.PushString("campaign8.txt");
+    g_sOfficialMissionFiles.PushString("campaign9.txt");
+    g_sOfficialMissionFiles.PushString("campaign10.txt");
+    g_sOfficialMissionFiles.PushString("campaign11.txt");
+    g_sOfficialMissionFiles.PushString("campaign12.txt");
+    g_sOfficialMissionFiles.PushString("campaign13.txt");
+    g_sOfficialMissionFiles.PushString("campaign14.txt");
+    g_sOfficialMissionFiles.PushString("credits.txt");
+    g_sOfficialMissionFiles.PushString("parishdash.txt");
+    g_sOfficialMissionFiles.PushString("shootzones.txt");
+    g_sOfficialMissionFiles.PushString("jtsm.txt");
+    InitMaps();
 
     // ====================查询指令=========================
-    RegConsoleCmd("sm_mixmaps", Cmd_ShowMixedMaps);
-    //RegAdminCmd("sm_removemixmaps")
+    
+    RegConsoleCmd("sm_mixmaplist", Cmd_ShowMixedMaps, "显示当前地图序列");
+    RegConsoleCmd("sm_mixthirdmap", Cmd_StartMixMap, "开始mixmap");
 }
+public void InitMaps(){
+    // 遍历文件
+    DirectoryListing dirList = OpenDirectory("missions", true, NULL_STRING);
+	if (dirList != null)
+	{
+        FileType type;
+        while (dirList.GetNext(sBuffer, sizeof(sBuffer), type))
+		{
+            if (type == FileType_File)
+		    {
+                g_sMissionFiles.PushString(sBuffer);
+                PrintToConsoleAll(sBuffer);
+		    }
+        }
+    }
+    delete dirList;
+    // 读取文件信息
+    for(int i=0; i<g_sMissionFiles.Length-1;i++){
+        char sg_file[128];
+        char sNum[8];
+        KeyValues hGM = new KeyValues("missions");
+        g_sMissionFiles.GetString(i, sBuffer, sizeof(sBuffer));
+        if (g_sOfficialMissionFiles.FindString(sBuffer) != -1){
+            continue;
+        }
+	    Format(sg_file, sizeof(sg_file), "missions/%s", sBuffer);
+	    hGM.ImportFromFile(sg_file);
+    
+	    char sDisplayTitle[256];
+	    hGM.GetString("DisplayTitle", sDisplayTitle, sizeof(sDisplayTitle));
 
+
+	    if (hGM.JumpToKey("modes"))
+	    {
+	    	if (hGM.JumpToKey("versus")){
+			{
+                g_sMapPools.PushString(sDisplayTitle);
+                PrintToConsoleAll(sDisplayTitle);
+				int i = 1;
+				int l = 1;
+				while (i <= l)
+				{
+					Format(sNum, sizeof(sNum), "%i", i);
+					if (hGM.JumpToKey(sNum))
+					{
+						l += 1;
+						char sMapText[256];
+						hGM.GetString("Map", sBuffer, sizeof(sBuffer)-1, "");
+                        PrintToConsoleAll(sBuffer);
+                        PrintToConsoleAll("%i", l);
+                        switch (i){
+                            case 1:
+                                g_sOfficialMapsM1.PushString(sBuffer);
+                            case 2:
+                                g_sOfficialMapsM2.PushString(sBuffer);
+                            case 3:
+                                g_sOfficialMapsM3.PushString(sBuffer);
+                            case 4:
+                                g_sOfficialMapsM4.PushString(sBuffer);
+                            case 5:
+                                g_sOfficialMapsM5.PushString(sBuffer);
+                        }					
+						hGM.GoBack();
+					}
+					i += 1;
+				}
+            }
+        }
+        delete hGM;
+    }} 
+    }
 public void OnRoundIsLive(){
     int mapfinded;
     char currmap[MAP_NAME_MAX_LENGTH];
@@ -146,6 +162,9 @@ public void OnRoundIsLive(){
     }
     
 }
+public Action Cmd_ShowMapPool(int iClient, int iArgs){
+    CPrintToChat(iClient, "以下为服务器支持的三方图列表");
+}
 
 public Action Cmd_ShowMixedMaps(int iClient, int iArgs){
     //PrintToChatAll("start sm_mixmaps");
@@ -155,8 +174,11 @@ public Action Cmd_ShowMixedMaps(int iClient, int iArgs){
     CPrintToChat(iClient, message);
     
 }
+public Action Cmd_StartMixMap(int iClient, int iArgs){
+    OnMixStart();
+}
 public void OnAllPluginsLoaded() {
-	AddMixType("randmap", MIN_PLAYERS);
+	AddMixType("ranthirdmap", MIN_PLAYERS);
 }
 
 public void GetRandomMap(ArrayList maplist, char[] buffer, int maxlen){
@@ -245,9 +267,9 @@ public void OnMixStart()
     
     GetAnnounceString(message, sizeof(message));
     
-	CallEndMix();
+	//CallEndMix();
     CPrintToChatAll(message);
-    CPrintToChatAll("使用!mixmaps再次展示");  //  LMCCore.inc
+    CPrintToChatAll("使用!mixthirdmaps再次展示");  //  LMCCore.inc
     CPrintToChatAll("即将切换到第一张地图");  //  LMCCore.inc
     CreateTimer(5.0, ChangeToFirstMap, _,TIMER_FLAG_NO_MAPCHANGE);
 

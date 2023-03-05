@@ -67,7 +67,7 @@ public void OnPluginStart() {
 }
 
 public void OnAllPluginsLoaded() {
-	AddMixType("capitan", 1);
+	AddMixType("capitan", (FindConVar("survivor_limit").IntValue * 2));
 }
 
 public void GetVoteTitle(int iClient, char[] sTitle) {

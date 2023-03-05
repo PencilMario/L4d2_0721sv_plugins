@@ -516,17 +516,12 @@ void InitCmds()
 {
     AddCommandListener(Cmd_OnPlayerJoinTeam, "jointeam");
     RegConsoleCmd("sm_mix", Cmd_MixTeam, "Vote for a team mix.");
-    RegConsoleCmd("sm_cancelmix", Cmd_CancelMix, "取消mix");
-    RegConsoleCmd("sm_mixtakebot", Cmd_DebugTakeOver);
-}
-public Action Cmd_DebugTakeOver(int iClient, int iArgs){
-    SetClientTeam(iClient, L4D2Team_Survivor);
-    //L4D_TakeOverBot()
+    RegConsoleCmd("sm_cancelmix", Cmd_CancelMix, "cancel mix");
 }
 public Action Cmd_CancelMix(int iClient, int iArgs)
 {
-    PrintToChatAll("MIX被取消!");
     CanceclMix();
+    CPrintToChatAll("%t", "CANCEL_MIX");
     return Plugin_Handled;
 }
 
@@ -542,7 +537,7 @@ public Action Cmd_OnPlayerJoinTeam(int iClient, const char[] sCmd, int iArgs)
 {
     if (g_iMixState != STATE_NONE)
     {
-        CPrintToChat(iClient, "%T", "CANT_CHANGE_TEAM", iClient);
+        CPrintToChat(iClient, "%t", "CANT_CHANGE_TEAM", iClient);
         return Plugin_Stop;
     }
 

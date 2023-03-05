@@ -55,4 +55,8 @@
 	{
 		"en" 			"This poll type is not supported!"
 	}
+	"CANCEL_MIX"
+	{
+		"en"			"Canceled mix!"
+	}
 }
