@@ -3,7 +3,7 @@
 
 #include <sourcemod>
 #include <colors>
-#include <mix_team>
+//#include <mix_team>
 #include <mp_transiation>
 #include <readyup>
 
@@ -12,7 +12,7 @@
 #define NULL_MAP                "NULL_MAP"
 #define TRANSLATIONS            "mp_random.phrases"
 #define MIN_PLAYERS             1
-#define PATH_TO_MISSIONS        "addons/sourcemod/data/missions/"
+
 
 char sBuffer[128];
 
@@ -26,6 +26,7 @@ public Plugin myinfo = {
 ArrayList g_sOfficialMapsM1,g_sOfficialMapsM2,g_sOfficialMapsM3,g_sOfficialMapsM4,g_sOfficialMapsM5;
 ArrayList g_sMixMapQueue, g_sOfficialMissionFiles, g_sMapPools;
 ArrayList g_sMissionFiles;
+StringMap g_sMaptoMx;
 
 void InitTranslations()
 {
@@ -41,6 +42,7 @@ void InitTranslations()
 
 public void OnPluginStart()
 {
+    g_sMaptoMx = new StringMap();
     g_sMissionFiles = new ArrayList(128);
     g_sOfficialMissionFiles = new ArrayList(128);
     g_sMixMapQueue = new ArrayList(64);
@@ -140,7 +142,10 @@ public void InitMaps(){
                                 g_sOfficialMapsM4.PushString(sBuffer);
                             case 5:
                                 g_sOfficialMapsM5.PushString(sBuffer);
-                        }					
+                        }
+                        char sDisplayTitleMx[256];
+                        Format(sDisplayTitleMx, sizeof(sDisplayTitleMx), "%s(m%i)", sDisplayTitle, i);
+                        g_sMaptoMx.SetString(sBuffer, sDisplayTitleMx);					
 						hGM.GoBack();
 					}
 					i += 1;
@@ -177,9 +182,9 @@ public Action Cmd_ShowMixedMaps(int iClient, int iArgs){
 public Action Cmd_StartMixMap(int iClient, int iArgs){
     OnMixStart();
 }
-public void OnAllPluginsLoaded() {
-	AddMixType("ranthirdmap", MIN_PLAYERS);
-}
+//public void OnAllPluginsLoaded() {
+//	AddMixType("ranthirdmap", MIN_PLAYERS);
+//}
 
 public void GetRandomMap(ArrayList maplist, char[] buffer, int maxlen){
     int randm = 0;
@@ -188,20 +193,20 @@ public void GetRandomMap(ArrayList maplist, char[] buffer, int maxlen){
     Format(buffer, maxlen, NULL_MAP);
     //PrintToConsoleAll("maplist.Length - %i", maplist.Length);
     while(StrEqual(buffer, NULL_MAP)){
-        randm = GetRandomInt(1, maplist.Length-1);
+        randm = GetRandomInt(0, maplist.Length-1);
         copednum = maplist.GetString(randm, buffer, maxlen);
         maplist.GetString(randm, selectedmap, sizeof(selectedmap));
        // PrintToConsoleAll("randommap - %s, %i", selectedmap, copednum);
     }
 }
 
-public void GetVoteTitle(int iClient, char[] sTitle) {
+/*public void GetVoteTitle(int iClient, char[] sTitle) {
 	Format(sTitle, VOTE_TITLE_SIZE, "开始随机MixMap", iClient);
-}
+}*/
 
-public void GetVoteMessage(int iClient, char[] sMsg) {
+/*public void GetVoteMessage(int iClient, char[] sMsg) {
 	Format(sMsg, VOTE_MSG_SIZE, "即将切换至m1...", iClient);
-}
+}*/
 stock int GetSeriousClientCount(bool inGame = false)
 {
 	int clients = 0;
@@ -269,14 +274,15 @@ public void OnMixStart()
     
 	//CallEndMix();
     CPrintToChatAll(message);
-    CPrintToChatAll("使用!mixthirdmaps再次展示");  //  LMCCore.inc
+    CPrintToChatAll("使用!mixmaplist再次展示");  //  LMCCore.inc
     CPrintToChatAll("即将切换到第一张地图");  //  LMCCore.inc
     CreateTimer(5.0, ChangeToFirstMap, _,TIMER_FLAG_NO_MAPCHANGE);
 
 }
+
 public void GetAnnounceString(char[] buffer, int maxlen){
     char sPrefix[96];
-    Format(sPrefix, sizeof(sPrefix),"Mix地图序列:");
+    Format(sPrefix, sizeof(sPrefix),"Mix地图序列:\n");
     char sMap1[MAP_NAME_MAX_LENGTH], sMap2[MAP_NAME_MAX_LENGTH], sMap3[MAP_NAME_MAX_LENGTH], sMap4[MAP_NAME_MAX_LENGTH], sMap5[MAP_NAME_MAX_LENGTH];
     if (g_sMixMapQueue.Length == 5){
         g_sMixMapQueue.GetString(0, sMap1, sizeof(sMap1));
