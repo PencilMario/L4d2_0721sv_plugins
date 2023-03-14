@@ -19,7 +19,7 @@
 #include <lerpmonitor>
 #include <witch_and_tankifier>
 
-#define PLUGIN_VERSION	"3.5.9"
+#define PLUGIN_VERSION	"3.8.4"
 
 public Plugin myinfo = 
 {
@@ -34,23 +34,18 @@ public Plugin myinfo =
 //  Macros
 // ======================================================================
 #define SPECHUD_DRAW_INTERVAL   0.5
+#define TRANSLATION_FILE "spechud.phrases"
 
 // ======================================================================
 //  Plugin Vars
 // ======================================================================
-enum L4D2Gamemode
-{
-	L4D2Gamemode_None,
-	L4D2Gamemode_Versus,
-	L4D2Gamemode_Scavenge
-};
-L4D2Gamemode g_Gamemode;
+int g_Gamemode;
 
 //int storedClass[MAXPLAYERS+1];
 
 // Game Var
-ConVar survivor_limit, z_max_player_zombies, versus_boss_buffer, mp_gamemode, mp_roundlimit, sv_maxplayers, tank_burn_duration;
-int iSurvivorLimit, iMaxPlayerZombies, iMaxPlayers, iRoundLimit, iSurvivorDistanceScore;
+ConVar survivor_limit, versus_boss_buffer, mp_roundlimit, sv_maxplayers, tank_burn_duration;
+int iSurvivorLimit, iMaxPlayers, iRoundLimit;
 float fVersusBossBuffer, fTankBurnDuration;
 
 // Plugin Cvar
@@ -58,11 +53,7 @@ ConVar l4d_tank_percent, l4d_witch_percent, hServerNamer, l4d_ready_cfg_name;
 
 // Plugin Var
 char sReadyCfgName[64], sHostname[64];
-bool bRoundLive, bPendingArrayRefresh;
-int iSurvivorArray[MAXPLAYERS/2+1], iInfectedArray[MAXPLAYERS/2+1];
-
-// Plugin Handle
-ArrayList hSpecHudViewers, hTankHudViewers;
+bool bRoundLive;
 
 // Boss Spawn Scheme
 StringMap hFirstTankSpawningScheme, hSecondTankSpawningScheme;		// eq_finale_tanks (Zonemod, Acemod, etc.)
@@ -71,7 +62,8 @@ StringMap hCustomTankScriptMaps;									// Handled by this plugin
 
 // Flow Bosses
 int iTankCount, iWitchCount;
-bool bRoundHasFlowTank, bRoundHasFlowWitch, bFlowTankActive;
+int iTankFlow, iWitchFlow;
+bool bRoundHasFlowTank, bRoundHasFlowWitch, bFlowTankActive, bCustomBossSys;
 
 // Score & Scoremod
 //int iFirstHalfScore;
@@ -96,10 +88,10 @@ bool bSpecHudHintShown[MAXPLAYERS+1], bTankHudHintShown[MAXPLAYERS+1];
 // ======================================================================
 public void OnPluginStart()
 {
+	LoadPluginTranslations();
+	
 	(	survivor_limit			= FindConVar("survivor_limit")			).AddChangeHook(GameConVarChanged);
-	(	z_max_player_zombies	= FindConVar("z_max_player_zombies")	).AddChangeHook(GameConVarChanged);
 	(	versus_boss_buffer		= FindConVar("versus_boss_buffer")		).AddChangeHook(GameConVarChanged);
-	(	mp_gamemode				= FindConVar("mp_gamemode")				).AddChangeHook(GameConVarChanged);
 	(	mp_roundlimit			= FindConVar("mp_roundlimit")			).AddChangeHook(GameConVarChanged);
 	(	sv_maxplayers			= FindConVar("sv_maxplayers")			).AddChangeHook(GameConVarChanged);
 	(	tank_burn_duration		= FindConVar("tank_burn_duration")		).AddChangeHook(GameConVarChanged);
@@ -129,11 +121,6 @@ public void OnPluginStart()
 		bTankHudHintShown[i] = false;
 	}
 	
-	hSpecHudViewers = new ArrayList();
-	hTankHudViewers = new ArrayList();
-	
-	bPendingArrayRefresh = true;
-	
 	CreateTimer(SPECHUD_DRAW_INTERVAL, HudDrawTimer, _, TIMER_REPEAT);
 }
 
@@ -145,9 +132,7 @@ public void OnPluginStart()
 void GetGameCvars()
 {
 	iSurvivorLimit		= survivor_limit.IntValue;
-	iMaxPlayerZombies	= z_max_player_zombies.IntValue;
 	fVersusBossBuffer	= versus_boss_buffer.FloatValue;
-	GetCurrentGameMode();
 	iRoundLimit			= L4D2Util_Clamp(mp_roundlimit.IntValue, 1, 5);
 	iMaxPlayers			= sv_maxplayers.IntValue;
 	fTankBurnDuration	= tank_burn_duration.FloatValue;
@@ -155,22 +140,7 @@ void GetGameCvars()
 
 void GetCurrentGameMode()
 {
-	char sGameMode[32];
-	GetConVarString(mp_gamemode, sGameMode, sizeof(sGameMode));
-	
-	if (strcmp(sGameMode, "scavenge") == 0)
-	{
-		g_Gamemode = L4D2Gamemode_Scavenge;
-	}
-	else if (strcmp(sGameMode, "versus") == 0
-		|| strcmp(sGameMode, "mutation12") == 0) // realism versus
-	{
-		g_Gamemode = L4D2Gamemode_Versus;
-	}
-	else
-	{
-		g_Gamemode = L4D2Gamemode_None; // Unsupported
-	}
+	g_Gamemode = L4D_GetGameModeType();
 }
 
 // ======================================================================
@@ -188,29 +158,28 @@ void FillServerNamer()
 	if ((convar = FindConVar("l4d_ready_server_cvar")) != null)
 	{
 		char buffer[64];
-		convar.GetString(buffer, sizeof buffer);
+		convar.GetString(buffer, sizeof(buffer));
 		convar = FindConVar(buffer);
 	}
 	
 	if (convar == null)
 	{
-		convar = FindConVar("sp_hostname");
+		convar = FindConVar("hostname");
 	}
 	
 	if (hServerNamer == null)
 	{
 		hServerNamer = convar;
+		hServerNamer.AddChangeHook(ServerCvarChanged);
 	}
 	else if (hServerNamer != convar)
 	{
 		hServerNamer.RemoveChangeHook(ServerCvarChanged);
 		hServerNamer = convar;
+		hServerNamer.AddChangeHook(ServerCvarChanged);
 	}
 	
-	hServerNamer.AddChangeHook(ServerCvarChanged);
 	hServerNamer.GetString(sHostname, sizeof(sHostname));
-	
-	delete convar;
 }
 
 void FillReadyConfig()
@@ -234,6 +203,17 @@ void FindTankSelection()
 void FindTankifier()
 {
 	bTankifier = LibraryExists("witch_and_tankifier");
+}
+
+void LoadPluginTranslations()
+{
+	char sPath[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, sPath, sizeof sPath, "translations/"...TRANSLATION_FILE... ".txt");
+	if (!FileExists(sPath))
+	{
+		SetFailState("Missing translation file \""...TRANSLATION_FILE...".txt\"");
+	}
+	LoadTranslations(TRANSLATION_FILE);
 }
 
 // ======================================================================
@@ -273,6 +253,11 @@ public void OnLibraryRemoved(const char[] name)
 	FindScoreMod();
 	FillBossPercents();
 	FindTankifier();
+}
+
+public void L4D_OnGameModeChange(int gamemode)
+{
+	GetCurrentGameMode();
 }
 
 // ======================================================================
@@ -335,25 +320,24 @@ public void OnClientDisconnect(int client)
 }
 
 public void OnMapStart() { bRoundLive = false; }
-public void OnMapEnd() { bPendingArrayRefresh = true; }
+public void OnMapEnd() {}
 public void OnRoundIsLive()
 {
 	FillReadyConfig();
 	
 	bRoundLive = true;
-	bPendingArrayRefresh = true;
 	
-	iSurvivorDistanceScore = L4D2Direct_GetVSCampaignScore(L4D2_AreTeamsFlipped());
-
 	GetCurrentGameMode();
 	
 	//for (int i = 1; i <= MaxClients; ++i) storedClass[i] = ZC_None;
 	
-	if (g_Gamemode == L4D2Gamemode_Versus)
+	if (g_Gamemode == GAMEMODE_VERSUS)
 	{
 		bRoundHasFlowTank = RoundHasFlowTank();
 		bRoundHasFlowWitch = RoundHasFlowWitch();
 		bFlowTankActive = bRoundHasFlowTank;
+		
+		bCustomBossSys = IsDarkCarniRemix();
 		
 		bStaticTank = bTankifier && IsStaticTankMap();
 		bStaticWitch = bTankifier && IsStaticWitchMap();
@@ -365,6 +349,11 @@ public void OnRoundIsLive()
 		
 		if (l4d_tank_percent != null && l4d_tank_percent.BoolValue)
 		{
+			if (GetFeatureStatus(FeatureType_Native, "GetStoredTankPercent") != FeatureStatus_Unknown)
+				iTankFlow = GetStoredTankPercent();
+			else
+				iTankFlow = GetRoundTankFlow();
+				
 			iTankCount = 1;
 			
 			char mapname[64];
@@ -374,7 +363,7 @@ public void OnRoundIsLive()
 			// TODO: individual plugin served as an interface to tank counts?
 			if (hCustomTankScriptMaps.GetValue(mapname, dummy)) iTankCount += 1;
 			
-			else if (!IsDarkCarniRemix() && L4D_IsMissionFinalMap())
+			else if (!bCustomBossSys && L4D_IsMissionFinalMap())
 			{
 				iTankCount = 3
 							- view_as<int>(hFirstTankSpawningScheme.GetValue(mapname, dummy))
@@ -386,6 +375,11 @@ public void OnRoundIsLive()
 		
 		if (l4d_witch_percent != null && l4d_witch_percent.BoolValue)
 		{
+			if (GetFeatureStatus(FeatureType_Native, "GetStoredWitchPercent") != FeatureStatus_Unknown)
+				iWitchFlow = GetStoredWitchPercent();
+			else
+				iWitchFlow = GetRoundWitchFlow();
+			
 			iWitchCount = 1;
 		}
 	}
@@ -399,7 +393,6 @@ public void OnRoundIsLive()
 public void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	bRoundLive = false;
-	bPendingArrayRefresh = true;
 }
 
 public void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
@@ -437,70 +430,10 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 		bTankHudActive[client] = true;
 	}
 	
-	bPendingArrayRefresh = true;
-	
 	//if (team == 3) storedClass[client] = ZC_None;
 }
 
 /**********************************************************************************************/
-
-// ======================================================================
-//  Player Arrays & Custom Sorting
-// ======================================================================
-stock void BuildPlayerArrays()
-{
-	hSpecHudViewers.Clear();
-	hTankHudViewers.Clear();
-	
-	int survivorCount = 0, infectedCount = 0;
-	for (int client = 1; client <= MaxClients; ++client) 
-	{
-		if (!IsClientInGame(client)) continue;
-		
-		switch (GetClientTeam(client))
-		{
-			case L4D2Team_Spectator:
-			{
-				if (!IsFakeClient(client))
-				{
-					if (bSpecHudActive[client])
-						hSpecHudViewers.Push(client);
-						
-					else if (bTankHudActive[client])
-						hTankHudViewers.Push(client);
-				}
-			}
-			case L4D2Team_Survivor:
-			{
-				if (survivorCount < iSurvivorLimit)
-					iSurvivorArray[survivorCount++] = client;
-			}
-			case L4D2Team_Infected:
-			{
-				if (infectedCount < iMaxPlayerZombies)
-					iInfectedArray[infectedCount++] = client;
-					
-				if (!IsFakeClient(client) && bTankHudActive[client])
-					hTankHudViewers.Push(client);
-			}
-		}
-	}
-	
-	iSurvivorArray[survivorCount] = 0;
-	iInfectedArray[infectedCount] = 0;
-	
-	SortCustom1D(iSurvivorArray, survivorCount, SortSurvArray);
-}
-
-public int SortSurvArray(int elem1, int elem2, const int[] array, Handle hndl)
-{
-	int sc1 = IdentifySurvivor(elem1);
-	int sc2 = IdentifySurvivor(elem2);
-	
-	if (sc1 > sc2) { return 1; }
-	else if (sc1 < sc2) { return -1; }
-	else { return 0; }
-}
 
 // ======================================================================
 //  HUD Command Callbacks
@@ -510,38 +443,9 @@ public Action ToggleSpecHudCmd(int client, int args)
 	if (GetClientTeam(client) != L4D2Team_Spectator)
 		return Plugin_Handled;
 	
-	if (bSpecHudActive[client])
-	{
-		bSpecHudActive[client] = false;
-		
-		int index = hSpecHudViewers.FindValue(client);
-		if (index != -1)
-			hSpecHudViewers.Erase(index);
-		
-		if (bTankHudActive[client])
-		{
-			index = hTankHudViewers.FindValue(client);
-			if (index == -1)
-				hTankHudViewers.Push(client);
-		}
-	}
-	else
-	{
-		bSpecHudActive[client] = true;
-		
-		int index = hSpecHudViewers.FindValue(client);
-		if (index == -1)
-			hSpecHudViewers.Push(client);
-			
-		if (bTankHudActive[client])
-		{
-			index = hTankHudViewers.FindValue(client);
-			if (index != -1)
-				hTankHudViewers.Erase(index);
-		}
-	}
+	bSpecHudActive[client] = !bSpecHudActive[client];
 	
-	CPrintToChat(client, "<{olive}HUD{default}> Spectator HUD is now %s.", (bSpecHudActive[client] ? "{blue}on{default}" : "{red}off{default}"));
+	CPrintToChat(client, "%t", "Notify_SpechudState", (bSpecHudActive[client] ? "on" : "off"));
 	return Plugin_Handled;
 }
 
@@ -551,28 +455,9 @@ public Action ToggleTankHudCmd(int client, int args)
 	if (team == L4D2Team_Survivor)
 		return Plugin_Handled;
 	
-	if (bTankHudActive[client])
-	{
-		bTankHudActive[client] = false;
-		
-		int index = hTankHudViewers.FindValue(client);
-		if (index != -1)
-			hTankHudViewers.Erase(index);
-	}
-	else
-	{
-		bTankHudActive[client] = true;
-		
-		if (!bSpecHudActive[client] || team == L4D2Team_Infected)
-		{
-			int index = hTankHudViewers.FindValue(client);
-			if (index == -1)
-				hTankHudViewers.Push(client);
-		}
-	}
+	bTankHudActive[client] = !bTankHudActive[client];
 	
-	CPrintToChat(client, "<{olive}HUD{default}> Tank HUD is now %s.", (bTankHudActive[client] ? "{blue}on{default}" : "{red}off{default}"));
-
+	CPrintToChat(client, "%t", "Notify_TankhudState", (bTankHudActive[client] ? "on" : "off"));
 	return Plugin_Handled;
 }
 
@@ -586,14 +471,41 @@ public Action HudDrawTimer(Handle hTimer)
 	if (IsInReady() || IsInPause())
 		return Plugin_Continue;
 
-	if (bPendingArrayRefresh)
+	int tankHud_total = 0;
+	int[] tankHud_clients = new int[MaxClients];
+	int specHud_total = 0;
+	int[] specHud_clients = new int[MaxClients];
+	
+	for (int i = 1; i <= MaxClients; ++i)
 	{
-		bPendingArrayRefresh = false;
-		BuildPlayerArrays();
+		if (!IsClientInGame(i))
+			continue;
+		
+		if (IsClientSourceTV(i))
+		{
+			specHud_clients[specHud_total++] = i;
+			continue;
+		}
+		
+		int team = GetClientTeam(i);
+		switch (team)
+		{
+		case 3:
+			{
+				if (bTankHudActive[i])
+					tankHud_clients[tankHud_total++] = i;
+			}
+		case 1:
+			{
+				if (bSpecHudActive[i])
+					specHud_clients[specHud_total++] = i;
+				else if (bTankHudActive[i])
+					tankHud_clients[tankHud_total++] = i;
+			}
+		}
 	}
-
-	int arraysize = hSpecHudViewers.Length;
-	if (arraysize) // Only bother if someone's watching us
+	
+	if (specHud_total) // Only bother if someone's watching us
 	{
 		Panel specHud = new Panel();
 		
@@ -604,33 +516,44 @@ public Action HudDrawTimer(Handle hTimer)
 		if (!FillTankInfo(specHud))
 			FillGameInfo(specHud);
 
-		for (int i = 0; i < arraysize; ++i)
+		for (int i = 0; i < specHud_total; ++i)
 		{
-			int client = hSpecHudViewers.Get(i);
-			SendPanelToClient(specHud, client, DummySpecHudHandler, 3);
+			int client = specHud_clients[i];
+			
+			switch (GetClientMenu(client))
+			{
+				case MenuSource_External, MenuSource_Normal: continue;
+			}
+			
+			specHud.Send(client, DummySpecHudHandler, 3);
 			if (!bSpecHudHintShown[client])
 			{
 				bSpecHudHintShown[client] = true;
-				CPrintToChat(client, "<{olive}HUD{default}> Type {green}!spechud{default} into chat to toggle the {blue}Spectator HUD{default}.");
+				CPrintToChat(client, "%t", "Notify_SpechudUsage");
 			}
 		}
 		delete specHud;
 	}
 	
-	arraysize = hTankHudViewers.Length;
-	if (!arraysize) return Plugin_Continue;
+	if (!tankHud_total) return Plugin_Continue;
 	
 	Panel tankHud = new Panel();
 	if (FillTankInfo(tankHud, true)) // No tank -- no HUD
 	{
-		for (int i = 0; i < arraysize; ++i)
+		for (int i = 0; i < tankHud_total; ++i)
 		{
-			int client = hTankHudViewers.Get(i);
-			SendPanelToClient(tankHud, client, DummyTankHudHandler, 3);
+			int client = tankHud_clients[i];
+			
+			switch (GetClientMenu(client))
+			{
+				case MenuSource_External, MenuSource_Normal: continue;
+			}
+			
+			tankHud.Send(client, DummyTankHudHandler, 3);
 			if (!bTankHudHintShown[client])
 			{
 				bTankHudHintShown[client] = true;
-				CPrintToChat(client, "<{olive}HUD{default}> Type {green}!tankhud{default} into chat to toggle the {red}Tank HUD{default}.");
+				CPrintToChat(client, "%t", "Notify_TankhudUsage");
 			}
 		}
 	}
@@ -647,7 +570,7 @@ public int DummyTankHudHandler(Menu hMenu, MenuAction action, int param1, int pa
 // ======================================================================
 //  HUD Content
 // ======================================================================
-void FillHeaderInfo(Panel &hSpecHud)
+void FillHeaderInfo(Panel hSpecHud)
 {
 	static int iTickrate = 0;
 	if (iTickrate == 0 && IsServerProcessing())
@@ -661,10 +584,11 @@ void FillHeaderInfo(Panel &hSpecHud)
 void GetMeleePrefix(int client, char[] prefix, int length)
 {
 	int secondary = GetPlayerWeaponSlot(client, L4D2WeaponSlot_Secondary);
-	int secondaryWep = IdentifyWeapon(secondary);
-
+	if (secondary == -1)
+		return;
+	
 	static char buf[4];
-	switch (secondaryWep)
+	switch (IdentifyWeapon(secondary))
 	{
 		case WEPID_NONE: buf = "N";
 		case WEPID_PISTOL: buf = (GetEntProp(secondary, Prop_Send, "m_isDualWielding") ? "DP" : "P");
@@ -740,21 +664,31 @@ void GetWeaponInfo(int client, char[] info, int length)
 	}
 }
 
-void FillSurvivorInfo(Panel &hSpecHud)
+int SortSurvByCharacter(int elem1, int elem2, const int[] array, Handle hndl)
+{
+	int sc1 = IdentifySurvivor(elem1);
+	int sc2 = IdentifySurvivor(elem2);
+
+	if (sc1 > sc2) { return 1; }
+	else if (sc1 < sc2) { return -1; }
+	else { return 0; }
+}
+
+void FillSurvivorInfo(Panel hSpecHud)
 {
 	static char info[100];
 	static char name[MAX_NAME_LENGTH];
 
-	int SurvivorTeamIndex = L4D2_AreTeamsFlipped();
+	int SurvivorTeamIndex = GameRules_GetProp("m_bAreTeamsFlipped");
 
 	switch (g_Gamemode)
 	{
-		case L4D2Gamemode_Scavenge:
+		case GAMEMODE_SCAVENGE:
 		{
 			int score = GetScavengeMatchScore(SurvivorTeamIndex);
-			FormatEx(info, sizeof info, "->1. Survivors [%d of %d]", score, iRoundLimit);
+			FormatEx(info, sizeof(info), "->1. Survivors [%d of %d]", score, iRoundLimit);
 		}
-		case L4D2Gamemode_Versus:
+		case GAMEMODE_VERSUS:
 		{
 			if (bRoundLive)
 			{
@@ -772,10 +706,21 @@ void FillSurvivorInfo(Panel &hSpecHud)
 	DrawPanelText(hSpecHud, " ");
 	DrawPanelText(hSpecHud, info);
 	
-	for (int i = 0; i < iSurvivorLimit; ++i)
+	int total = 0;
+	int[] clients = new int[MaxClients];
+	for (int i = 1; i <= MaxClients; ++i)
 	{
-		int client = iSurvivorArray[i];
-		if (!client) continue;
+		if (!IsClientInGame(i) || GetClientTeam(i) != 2)
+			continue;
+		
+		clients[total++] = i;
+	}
+	
+	SortCustom1D(clients, total, SortSurvByCharacter);
+	
+	for (int i = 0; i < total; ++i)
+	{
+		int client = clients[i];
 		
 		GetClientFixedName(client, name, sizeof(name));
 		if (!IsPlayerAlive(client))
@@ -822,23 +767,23 @@ void FillSurvivorInfo(Panel &hSpecHud)
 	}
 }
 
-void FillScoreInfo(Panel &hSpecHud)
+void FillScoreInfo(Panel hSpecHud)
 {
 	static char info[64];
 	
 	switch (g_Gamemode)
 	{
-		case L4D2Gamemode_Scavenge:
+		case GAMEMODE_SCAVENGE:
 		{
 			bool bSecondHalf = InSecondHalfOfRound();
-			bool bTeamFlipped = L4D2_AreTeamsFlipped();
+			bool bTeamFlipped = !!GameRules_GetProp("m_bAreTeamsFlipped");
 			
 			float fDuration = GetScavengeRoundDuration(bTeamFlipped);
 			int iMinutes = RoundToFloor(fDuration / 60);
 			
 			DrawPanelText(hSpecHud, " ");
 				
-			FormatEx(info, sizeof info, "> Accumulated Time [%02d:%02.0f]", iMinutes, fDuration - 60 * iMinutes);
+			FormatEx(info, sizeof(info), "> Accumulated Time [%02d:%02.0f]", iMinutes, fDuration - 60 * iMinutes);
 			DrawPanelText(hSpecHud, info);
 			
 			if (bSecondHalf)
@@ -846,12 +791,12 @@ void FillScoreInfo(Panel &hSpecHud)
 				fDuration = GetScavengeRoundDuration(!bTeamFlipped);
 				iMinutes = RoundToFloor(fDuration / 60);
 				
-				FormatEx(info, sizeof info, "> Opponent Duration [%02d:%05.2f]", iMinutes, fDuration - 60 * iMinutes);
+				FormatEx(info, sizeof(info), "> Opponent Duration [%02d:%05.2f]", iMinutes, fDuration - 60 * iMinutes);
 				DrawPanelText(hSpecHud, info);
 			}
 		}
 		
-		case L4D2Gamemode_Versus:
+		case GAMEMODE_VERSUS:
 		{
 			if (bHybridScoremod)
 			{
@@ -871,10 +816,10 @@ void FillScoreInfo(Panel &hSpecHud)
 				
 				FormatEx(	info,
 							sizeof(info),
-							"♞<HB: %.0f%% | DB: %.0f%% | PB: %i(%i%)>",
+							"♞<HB: %.0f%% | DB: %.0f%% | PB: %i>",
 							L4D2Util_IntToPercentFloat(healthBonus, maxHealthBonus),
 							L4D2Util_IntToPercentFloat(damageBonus, maxDamageBonus),
-							pillsBonus, L4D2Util_IntToPercentFloat(damageBonus, maxDamageBonus));
+							pillsBonus);
 				DrawPanelText(hSpecHud, info);
 				
 				FormatEx(info, sizeof(info), "♞<Total Score: %i>", totalBonus);
@@ -944,24 +889,24 @@ void FillScoreInfo(Panel &hSpecHud)
 	}
 }
 
-void FillInfectedInfo(Panel &hSpecHud)
+void FillInfectedInfo(Panel hSpecHud)
 {
 	static char info[80];
 	static char buffer[16];
 	static char name[MAX_NAME_LENGTH];
 
-	int InfectedTeamIndex = !L4D2_AreTeamsFlipped();
+	int InfectedTeamIndex = !GameRules_GetProp("m_bAreTeamsFlipped");
 	
 	switch (g_Gamemode)
 	{
-		case L4D2Gamemode_Scavenge:
+		case GAMEMODE_SCAVENGE:
 		{
 			int score = GetScavengeMatchScore(InfectedTeamIndex);
-			FormatEx(info, sizeof info, "->2. Infected [%d of %d]", score, iRoundLimit);
+			FormatEx(info, sizeof(info), "->2. Infected [%d of %d]", score, iRoundLimit);
 		}
-		case L4D2Gamemode_Versus:
+		case GAMEMODE_VERSUS:
 		{
-			FormatEx(info, sizeof info, "->2. Infected [%d]",
+			FormatEx(info, sizeof(info), "->2. Infected [%d]",
 						L4D2Direct_GetVSCampaignScore(InfectedTeamIndex));
 		}
 	}
@@ -970,10 +915,10 @@ void FillInfectedInfo(Panel &hSpecHud)
 	DrawPanelText(hSpecHud, info);
 
 	int infectedCount = 0;
-	for (int i = 0; i < iMaxPlayerZombies; ++i)
+	for (int client = 1; client <= MaxClients; ++client)
 	{
-		int client = iInfectedArray[i];
-		if (!client) continue;
+		if (!IsClientInGame(client) || GetClientTeam(client) != 3)
+			continue;
 		
 		GetClientFixedName(client, name, sizeof(name));
 		if (!IsPlayerAlive(client)) 
@@ -1007,7 +952,7 @@ void FillInfectedInfo(Panel &hSpecHud)
 				continue;
 				
 			char zClassName[10];
-			GetInfectedClassName(zClass, zClassName, sizeof zClassName);
+			GetInfectedClassName(zClass, zClassName, sizeof(zClassName));
 			
 			int iHP = GetClientHealth(client), iMaxHP = GetEntProp(client, Prop_Send, "m_iMaxHealth");
 			if (IsInfectedGhost(client))
@@ -1065,7 +1010,7 @@ void FillInfectedInfo(Panel &hSpecHud)
 	}
 }
 
-bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
+bool FillTankInfo(Panel hSpecHud, bool bTankHUD = false)
 {
 	int tank = FindTankClient(-1);
 	if (tank == -1 || !IsPlayerAlive(tank))
@@ -1077,6 +1022,7 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 	if (bTankHUD)
 	{
 		FormatEx(info, sizeof(info), "%s :: Tank HUD", sReadyCfgName);
+		ValvePanel_ShiftInvalidString(info, sizeof(info));
 		DrawPanelText(hSpecHud, info);
 		
 		int len = strlen(info);
@@ -1159,7 +1105,7 @@ bool FillTankInfo(Panel &hSpecHud, bool bTankHUD = false)
 	return true;
 }
 
-void FillGameInfo(Panel &hSpecHud)
+void FillGameInfo(Panel hSpecHud)
 {
 	// Turns out too much info actually CAN be bad, funny ikr
 	static char info[64];
@@ -1167,18 +1113,18 @@ void FillGameInfo(Panel &hSpecHud)
 
 	switch (g_Gamemode)
 	{
-		case L4D2Gamemode_Scavenge:
+		case GAMEMODE_SCAVENGE:
 		{
 			FormatEx(info, sizeof(info), "->3. %s (R#%i)", sReadyCfgName, GetScavengeRoundNumber());
 			
 			DrawPanelText(hSpecHud, " ");
 			DrawPanelText(hSpecHud, info);
 			
-			FormatEx(info, sizeof info, "Best of %i", iRoundLimit);
+			FormatEx(info, sizeof(info), "Best of %i", iRoundLimit);
 			DrawPanelText(hSpecHud, info);
 		}
 		
-		case L4D2Gamemode_Versus:
+		case GAMEMODE_VERSUS:
 		{
 			FormatEx(info, sizeof(info), "->3. %s (R#%d)", sReadyCfgName, 1 + view_as<int>(InSecondHalfOfRound()));
 			DrawPanelText(hSpecHud, " ");
@@ -1186,8 +1132,6 @@ void FillGameInfo(Panel &hSpecHud)
 			
 			if (l4d_tank_percent != null && l4d_witch_percent != null)
 			{
-				int tankPercent = GetStoredTankPercent();
-				int witchPercent = GetStoredWitchPercent();
 				int survivorFlow = GetHighestSurvivorFlow();
 				if (survivorFlow == -1)
 					survivorFlow = GetFurthestSurvivorFlow();
@@ -1198,9 +1142,9 @@ void FillGameInfo(Panel &hSpecHud)
 				if (iTankCount > 0)
 				{
 					bDivide = true;
-					FormatEx(buffer, sizeof(buffer), "%i%%", tankPercent);
+					FormatEx(buffer, sizeof(buffer), "%i%%", iTankFlow);
 					
-					if ((bFlowTankActive && bRoundHasFlowTank) || IsDarkCarniRemix())
+					if ((bFlowTankActive && bRoundHasFlowTank) || bCustomBossSys)
 					{
 						FormatEx(info, sizeof(info), "Tank: %s", buffer);
 					}
@@ -1213,13 +1157,13 @@ void FillGameInfo(Panel &hSpecHud)
 				// witch percent
 				if (iWitchCount > 0)
 				{
-					FormatEx(buffer, sizeof(buffer), "%i%%", witchPercent);
+					FormatEx(buffer, sizeof(buffer), "%i%%", iWitchFlow);
 					
 					if (bDivide) {
-						Format(info, sizeof(info), "%s | Witch: %s", info, ((bRoundHasFlowWitch || IsDarkCarniRemix()) ? buffer : (bStaticWitch ? "Static" : "Event")));
+						Format(info, sizeof(info), "%s | Witch: %s", info, ((bRoundHasFlowWitch || bCustomBossSys) ? buffer : (bStaticWitch ? "Static" : "Event")));
 					} else {
 						bDivide = true;
-						FormatEx(info, sizeof(info), "Witch: %s", ((bRoundHasFlowWitch || IsDarkCarniRemix()) ? buffer : (bStaticWitch ? "Static" : "Event")));
+						FormatEx(info, sizeof(info), "Witch: %s", ((bRoundHasFlowWitch || bCustomBossSys) ? buffer : (bStaticWitch ? "Static" : "Event")));
 					}
 				}
 				
@@ -1308,14 +1252,7 @@ stock void GetClientFixedName(int client, char[] name, int length)
 {
 	GetClientName(client, name, length);
 
-	if (name[0] == '[')
-	{
-		char temp[MAX_NAME_LENGTH];
-		strcopy(temp, sizeof(temp), name);
-		temp[sizeof(temp)-2] = 0;
-		strcopy(name[1], length-1, temp);
-		name[0] = ' ';
-	}
+	ValvePanel_ShiftInvalidString(name, length);
 
 	if (strlen(name) > 18)
 	{
@@ -1324,9 +1261,30 @@ stock void GetClientFixedName(int client, char[] name, int length)
 	}
 }
 
+stock bool ValvePanel_ShiftInvalidString(char[] str, int maxlen)
+{
+	switch (str[0])
+	{
+	case '[':
+		{
+			char[] temp = new char[maxlen];
+			strcopy(temp, maxlen, str) + 1;
+			
+			int size = strcopy(str[1], maxlen-1, temp) + 1;
+			
+			str[0] = ' ';
+			str[size < maxlen ? size : maxlen-1] = '\0';
+			
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 //stock int GetRealTeam(int team)
 //{
-//	return team ^ view_as<int>(InSecondHalfOfRound() != L4D2_AreTeamsFlipped());
+//	return team ^ view_as<int>(InSecondHalfOfRound() != GameRules_GetProp("m_bAreTeamsFlipped"));
 //}
 
 stock int GetRealClientCount() 
@@ -1379,7 +1337,7 @@ stock int FormatScavengeRoundTime(char[] buffer, int maxlen, int teamIndex, bool
 stock float GetScavengeRoundDuration(int teamIndex)
 {
 	float flRoundStartTime = GameRules_GetPropFloat("m_flRoundStartTime");
-	if (teamIndex == view_as<int>(L4D2_AreTeamsFlipped()) && flRoundStartTime != 0.0 && GameRules_GetPropFloat("m_flRoundEndTime") == 0.0)
+	if (teamIndex == view_as<int>(GameRules_GetProp("m_bAreTeamsFlipped")) && flRoundStartTime != 0.0 && GameRules_GetPropFloat("m_flRoundEndTime") == 0.0)
 	{
 		// Survivor team still playing round.
 		return GetGameTime() - flRoundStartTime;
@@ -1427,6 +1385,16 @@ stock int GetHighestSurvivorFlow()
 	}
 	
 	return flow < 100 ? flow : 100;
+}
+
+stock int GetRoundTankFlow()
+{
+	return RoundToNearest(L4D2Direct_GetVSTankFlowPercent(InSecondHalfOfRound()) + fVersusBossBuffer / L4D2Direct_GetMapMaxFlowDistance());
+}
+
+stock int GetRoundWitchFlow()
+{
+	return RoundToNearest(L4D2Direct_GetVSWitchFlowPercent(InSecondHalfOfRound()) + fVersusBossBuffer / L4D2Direct_GetMapMaxFlowDistance());
 }
 
 stock bool RoundHasFlowTank()

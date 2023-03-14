@@ -162,7 +162,7 @@ void FindServerNamer()
 	
 	if (serverNamerCvar == null)
 	{
-		serverNamerCvar = FindConVar("sp_hostname");
+		serverNamerCvar = FindConVar("hostname");
 	}
 }
 
