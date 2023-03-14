@@ -175,8 +175,14 @@ public void OnRoundIsLive()
 public void OnReadyUpInitiate()
 {
     ReadyEnable.IntValue = 2;
+
 }
 
+public void OnRoundLiveCountdownPre(){
+	for(int i=0;i < MaxClients + 1; i++){
+		Interrupt(i); 
+	}
+}
 
 public Action:sm_anim(client,args)
 {
@@ -408,6 +414,9 @@ Start(client)
 		else PrintToChat(client ,"Your model is not allow for climb");
 	}
 }
+
+
+
 /* 
 * jump from climb mode  
 */
