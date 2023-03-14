@@ -463,7 +463,7 @@ public Action Event_RoundStart(Event event, const char[] name, bool dontBroadcas
 		g_bRoundIsLive = true;
 
 		if (g_iMixState != STATE_NONE) {
-			CanceclMix();
+			CancelMix();
 		}
 	}
 
@@ -503,7 +503,7 @@ public Action Event_PlayerTeam(Event event, char[] event_name, bool dontBroadcas
 
 		if (iNewTeam == TEAM_NONE && g_hPlayers[iClient].member)
 		{
-			CanceclMix();
+			CancelMix();
 			CPrintToChatAll("%t", "CLIENT_LEAVE", iClient);
 		}
 	}
