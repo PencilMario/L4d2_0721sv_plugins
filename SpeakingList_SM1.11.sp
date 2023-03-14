@@ -78,13 +78,13 @@ public Action Timer_List(Handle timer)
 		{
 			Format(g_sPlayers, sizeof(g_sPlayers), "%s%s", "正在说话:", g_sPlayers);
 			PrintCenterText(g, g_sPlayers);
-			for( int z = 1; i <= sizeof(g_sPlayers); i++ )
-			{
-				if (g_sPlayers[z] != 0)
-				{
-					g_sPlayers[0] = 0;
-				}
-			}
+			//for( int z = 1; i <= sizeof(g_sPlayers); i++ )
+			//{
+			//	if (g_sPlayers[z] != 0)
+			//	{
+			g_sPlayers[0] = 0;
+			//	}
+			//}
 		}
 		
 	}
