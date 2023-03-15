@@ -168,7 +168,7 @@ void UpdatePanel()
 	{
 		infectedBuffer[bufLen] = '\0';
 		ReplaceString(infectedBuffer, sizeof(infectedBuffer), "#", "_");
-		Format(nameBuf, sizeof(nameBuf), "->%d. Infs♥%s - %d", ++textCount, isTeamReadyMode ? teamReadySymbol[infectedReady] : "", L4D2Direct_GetVSCampaignScore(L4D2_AreTeamsFlipped()));
+		Format(nameBuf, sizeof(nameBuf), "->%d. Infs♥%s - %d", ++textCount, isTeamReadyMode ? teamReadySymbol[infectedReady] : "", L4D2Direct_GetVSCampaignScore(!L4D2_AreTeamsFlipped()));
 		menuPanel.DrawText(nameBuf);
 		menuPanel.DrawText(infectedBuffer);
 	}
