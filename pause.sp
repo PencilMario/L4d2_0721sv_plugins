@@ -61,6 +61,7 @@ ConVar
 Handle
 	readyCountdownTimer,
 	deferredPauseTimer;
+	attackingPauseTimer;
 int
 	readyDelay,
 	pauseDelay;
@@ -205,6 +206,10 @@ public void OnMapEnd()
 public void RoundEnd_Event(Event event, const char[] name, bool dontBroadcast)
 {
 	if (deferredPauseTimer != null)
+	{
+		delete deferredPauseTimer;
+	}
+	if (attackingPauseTimer != null)
 	{
 		delete deferredPauseTimer;
 	}
@@ -429,6 +434,11 @@ void AttemptPause()
 		{
 			Pause();
 		}
+		else if (IsAnyInfectedSpawned())
+		{
+			CPrintToChatAll("{default}[{green}!{default}] {red}暂停将推迟到没有正在进攻的特感!");
+			attackingPauseTimer = CreateTimer(0.1, DeferredPause_Timer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		}
 		else
 		{
 			CPrintToChatAll("{default}[{green}!{default}] {red}暂停将推迟到扶人结束!");
@@ -436,7 +446,33 @@ void AttemptPause()
 		}
 	}
 }
-
+public bool IsAnyInfectedSpawned()
+{
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(IsInfected(i))
+		{
+			if(IsInfectedGhost(i) && IsPlayerAlive(i)) //特感为复活状态
+			{
+				if (GetInfectedClass(i) != L4D2Infected_Tank) //不是tank
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+public Action Timer_InfAttacking(Handle timer)
+{
+	if(!IsAnyInfectedSpawned())
+	{
+		attackingPauseTimer = null;
+		Pause();
+		return Plugin_Stop;
+	}
+	return Plugin_Continue;
+}
 public Action DeferredPause_Timer(Handle timer)
 {
 	if (!IsSurvivorReviving())
