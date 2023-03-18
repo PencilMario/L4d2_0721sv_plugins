@@ -60,7 +60,7 @@ ConVar
 // Pause Handle
 Handle
 	readyCountdownTimer,
-	deferredPauseTimer;
+	deferredPauseTimer,
 	attackingPauseTimer;
 int
 	readyDelay,
