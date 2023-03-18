@@ -26,4 +26,5 @@ public void OnMapStart()
 public void OnGameFrame()
 {
     SteamWorks_SetGameDescription(g_sName);
+    
 }

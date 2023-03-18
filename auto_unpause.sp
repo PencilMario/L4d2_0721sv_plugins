@@ -15,7 +15,7 @@ public Plugin myinfo =
     version     = "0.0.1",
     url         = ""
 }
-u
+
 public void OnMapStart(){
     //g_hPauseDetectTimer = CreateTimer(2.0, Timer_AutoUnpauseDetect, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
 }
