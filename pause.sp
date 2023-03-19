@@ -73,7 +73,8 @@ bool
 
 // Pause Info
 int
-	initiatorId;
+	initiatorId,
+	maxPauseTime;
 bool
 	adminPause,
 	teamReady[L4D2Team_Size],
@@ -430,19 +431,21 @@ void AttemptPause()
 {
 	if (deferredPauseTimer == null)
 	{
-		if (!IsSurvivorReviving())
-		{
-			Pause();
-		}
-		else if (IsAnyInfectedSpawned())
-		{
-			CPrintToChatAll("{default}[{green}!{default}] {red}暂停将推迟到没有正在进攻的特感!");
-			attackingPauseTimer = CreateTimer(0.1, DeferredPause_Timer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
-		}
-		else
+		if (IsSurvivorReviving())
 		{
 			CPrintToChatAll("{default}[{green}!{default}] {red}暂停将推迟到扶人结束!");
 			deferredPauseTimer = CreateTimer(0.1, DeferredPause_Timer, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+			
+		}
+		else if (IsAnyInfectedSpawned())
+		{
+			maxPauseTime = 160;
+			CPrintToChatAll("{default}[{green}!{default}] {red}暂停将推迟到没有正在进攻的特感/进攻超过16s!");
+			attackingPauseTimer = CreateTimer(0.1, Timer_InfAttacking, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
+		}
+		else
+		{
+			Pause();
 		}
 	}
 }
@@ -452,12 +455,17 @@ public bool IsAnyInfectedSpawned()
 	{
 		if(IsInfected(i))
 		{
-			if(IsInfectedGhost(i) && IsPlayerAlive(i)) //特感为复活状态
+			if(!IsInfectedGhost(i)) //特感为复活状态
 			{
-				if (GetInfectedClass(i) != L4D2Infected_Tank) //不是tank
+				if (!IsPlayerAlive(i))
 				{
-					return true;
+					continue;
 				}
+				if (GetInfectedClass(i) == L4D2Infected_Tank) //不是tank
+				{
+					continue;
+				}
+				return true;
 			}
 		}
 	}
@@ -465,13 +473,18 @@ public bool IsAnyInfectedSpawned()
 }
 public Action Timer_InfAttacking(Handle timer)
 {
-	if(!IsAnyInfectedSpawned())
+	if(IsAnyInfectedSpawned() && maxPauseTime>0)
+	{
+		maxPauseTime--;
+		return Plugin_Continue;
+	}
+	else
 	{
 		attackingPauseTimer = null;
 		Pause();
 		return Plugin_Stop;
 	}
-	return Plugin_Continue;
+	
 }
 public Action DeferredPause_Timer(Handle timer)
 {
