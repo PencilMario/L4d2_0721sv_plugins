@@ -29,12 +29,12 @@
 #define STATE_VOTING            0
 #define STATE_IN_PROGRESS       1
 
-#define MIX_TYPE_SIZE           16
-#define VOTE_TITLE_SIZE         128
-#define VOTE_MSG_SIZE           128
+#define MIX_NAME_SIZE           16
+#define DISPLAY_MSG_SIZE        128
+#define VOTEEND_MSG_SIZE        128
 
 
-native int AddMixType(char[] sName, int iMinPlayers);
+native int AddMixType(char[] sName, int iMinPlayers, int iTimeout);
 
 native int GetMixState();
 
