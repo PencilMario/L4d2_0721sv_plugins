@@ -1,150 +1,115 @@
-#pragma newdecls required
-
 #include <sourcemod>
-#include <sdktools>
-#include <left4dhooks>
 
-#define UNRESERVE_VERSION "1.2"
+#define PLUGIN_NAME				"[L4D2] Remove Lobby Reservation"
+#define PLUGIN_AUTHOR			"Downtown1, Anime4000, sorallll, lakwsh"
+#define PLUGIN_DESCRIPTION		"Removes lobby reservation when server is full"
+#define PLUGIN_VERSION			"2.1.2"
+#define PLUGIN_URL				"http://forums.alliedmods.net/showthread.php?t=87759"
 
-#define UNRESERVE_DEBUG 0
-#define UNRESERVE_DEBUG_LOG 0
+ConVar g_cvUnreserve, g_cvGameMode, g_cvCookie, g_cvLobbyOnly, g_cvMaxPlayers;
+bool g_bUnreserve;
 
-#define L4D_MAXCLIENTS MaxClients
-#define L4D_MAXCLIENTS_PLUS1 (L4D_MAXCLIENTS + 1)
+public Plugin myinfo = {
+	name = PLUGIN_NAME,
+	author = PLUGIN_AUTHOR,
+	description = PLUGIN_DESCRIPTION,
+	version = PLUGIN_VERSION,
+	url = PLUGIN_URL
+};
 
-#define L4D_MAXHUMANS_LOBBY_VERSUS 8
-#define L4D_MAXHUMANS_LOBBY_OTHER 4
+public void OnPluginStart() {
+	CreateConVar("l4d_unreserve_version", PLUGIN_VERSION, "Version of the Lobby Unreserve plugin.", FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	g_cvUnreserve = CreateConVar("l4d_unreserve_full", "1", "Automatically unreserve server after a full lobby joins", FCVAR_SPONLY|FCVAR_NOTIFY);
+	g_cvUnreserve.AddChangeHook(CvarChanged);
+	g_cvGameMode = FindConVar("mp_gamemode");
+	g_cvCookie = FindConVar("sv_lobby_cookie");
+	g_cvLobbyOnly = FindConVar("sv_allow_lobby_connect_only");
+	g_cvMaxPlayers = FindConVar("sv_maxplayers");
 
-ConVar cvarGameMode;
-ConVar cvarUnreserve;
+	HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
 
-public Plugin myinfo = 
-{
-	name = "L4D1/2 Remove Lobby Reservation",
-	author = "Downtown1",
-	description = "Removes lobby reservation when server is full",
-	version = UNRESERVE_VERSION,
-	url = "http://forums.alliedmods.net/showthread.php?t=87759"
+	RegAdminCmd("sm_unreserve", cmdUnreserve, ADMFLAG_BAN, "sm_unreserve - manually force removes the lobby reservation");
 }
 
-public void OnPluginStart()
-{
-	LoadTranslations("common.phrases");
-
-	RegAdminCmd("sm_unreserve", Command_Unreserve, ADMFLAG_BAN, "sm_unreserve - manually force removes the lobby reservation");
-
-	cvarUnreserve = CreateConVar("l4d_unreserve_full", "1", "Automatically unreserve server after a full lobby joins", FCVAR_NOTIFY);
-	CreateConVar("l4d_unreserve_version", UNRESERVE_VERSION, "Version of the Lobby Unreserve plugin.", FCVAR_NOTIFY);
-
-	cvarGameMode = FindConVar("mp_gamemode");
-}
-
-bool IsScavengeMode()
-{
-	char sGameMode[32];
-	cvarGameMode.GetString(sGameMode, sizeof(sGameMode));
-	if (StrContains(sGameMode, "scavenge") > -1)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool IsVersusMode()
-{
-	char sGameMode[32];
-	cvarGameMode.GetString(sGameMode, sizeof(sGameMode));
-	if (StrContains(sGameMode, "versus") > -1)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-int IsServerLobbyFull()
-{
-	int humans = GetHumanCount();
-
-	DebugPrintToAll("IsServerLobbyFull : humans = %d", humans);
-
-	if(IsVersusMode() || IsScavengeMode())
-	{
-		return humans >= L4D_MAXHUMANS_LOBBY_VERSUS;
-	}
-	return humans >= L4D_MAXHUMANS_LOBBY_OTHER;
-}
-
-public void OnClientPutInServer(int client)
-{
-	DebugPrintToAll("Client put in server %N", client);
-
-	if(cvarUnreserve.BoolValue && /*L4D_LobbyIsReserved() &&*/ IsServerLobbyFull())
-	{
-		PrintToServer("[SM] A full lobby has connected, automatically unreserving the server.");
-		L4D_LobbyUnreserve();
-	}
-}
-
-public Action Command_Unreserve(int client, int args)
-{
-	/*if(!L4D_LobbyIsReserved())
-	{
-		ReplyToCommand(client, "[SM] Server is already unreserved.");
-	}*/
-
-	L4D_LobbyUnreserve();
-	PrintToChatAll("[SM] Lobby reservation has been removed.");
-
+Action cmdUnreserve(int client, int args) {
+	ServerCommand("sv_cookie 0");
+	ReplyToCommand(client, "[UL] Lobby reservation has been removed.");
 	return Plugin_Handled;
 }
 
-
-//client is in-game and not a bot
-stock bool IsClientInGameHuman(int client)
-{
-	return IsClientInGame(client) && !IsFakeClient(client);
+public void OnConfigsExecuted() {
+	GetCvars();
 }
 
-stock int GetHumanCount()
-{
-	int humans = 0;
+void CvarChanged(ConVar convar, const char[] oldValue, const char[] newValue) {
+	GetCvars();
+}
 
-	int i;
-	for(i = 1; i < L4D_MAXCLIENTS_PLUS1; i++)
+void GetCvars() {
+	g_bUnreserve = g_cvUnreserve.BoolValue;
+}
+
+public void OnClientAuthorized(int client, const char[] auth) {
+	if (!g_bUnreserve || g_cvMaxPlayers.IntValue == -1)
+		return;
+
+	if (IsFakeClient(client))
+		return;
+
+	if (!IsServerLobbyFull(-1))
+		return;
+
+	ServerCommand("sv_cookie 0");
+}
+
+//OnClientDisconnect will fired when changing map, issued by gH0sTy at http://docs.sourcemod.net/api/index.php?fastload=show&id=390&
+void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast) {
+	if (g_cvMaxPlayers.IntValue == -1)
+		return;
+
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (!client)
+		return;
+
+	if (IsFakeClient(client))
+		return;
+
+	if (!GetConnectedPlayer(client))
 	{
-		if(IsClientInGameHuman(i))
-		{
-			humans++
-		}
+		g_cvCookie.SetString("0");
+		g_cvLobbyOnly.SetInt(1);
+		return;
 	}
 
-	return humans;
+	if (IsServerLobbyFull(client))
+		return;
+
+	char sCookie[20];
+	g_cvCookie.GetString(sCookie, sizeof(sCookie));
+	if (StrEqual(sCookie, "0"))
+		return;
+
+	ServerCommand("sv_cookie %s", sCookie);
 }
 
-void DebugPrintToAll(const char[] format, any ...)
+bool IsServerLobbyFull(int client)
 {
-	#if UNRESERVE_DEBUG	|| UNRESERVE_DEBUG_LOG
-	char buffer[192];
+	int humans = GetConnectedPlayer(client);
 
-	VFormat(buffer, sizeof(buffer), format, 2);
+	char sGameMode[32];
+	g_cvGameMode.GetString(sGameMode, sizeof(sGameMode));
+	if (StrEqual(sGameMode, "versus") || StrEqual(sGameMode, "scavenge"))
+	{
+		return humans >= 8;
+	}
+	return humans >= 4;
+}
 
-	#if UNRESERVE_DEBUG
-	PrintToChatAll("[UNRESERVE] %s", buffer);
-	PrintToConsole(0, "[UNRESERVE] %s", buffer);
-	#endif
-
-	LogMessage("%s", buffer);
-	#else
-	//suppress "format" never used warning
-	if(format[0])
-		return;
-	else
-		return;
-	#endif
+int GetConnectedPlayer(int client) {
+	int count;
+	for (int i = 1; i <= MaxClients; i++) {
+		if (i != client && IsClientAuthorized(i) && !IsFakeClient(i))
+			count++;
+	}
+	return count;
 }
