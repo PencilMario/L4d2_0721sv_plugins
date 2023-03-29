@@ -9,6 +9,8 @@
 ConVar g_cvUnreserve, g_cvGameMode, g_cvCookie, g_cvLobbyOnly, g_cvMaxPlayers;
 bool g_bUnreserve;
 
+int g_iLobbySlot, g_iMaxPlayerJoin, g_iResetCount;
+
 public Plugin myinfo = {
 	name = PLUGIN_NAME,
 	author = PLUGIN_AUTHOR,
@@ -92,10 +94,23 @@ void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast) 
 	ServerCommand("sv_cookie %s", sCookie);
 }
 
-bool IsServerLobbyFull(int client)
-{
+void SetDefaultLobbySlot(){
 	int humans = GetConnectedPlayer(client);
 
+	char sGameMode[32];
+	g_cvGameMode.GetString(sGameMode, sizeof(sGameMode));
+	if (StrEqual(sGameMode, "versus") || StrEqual(sGameMode, "scavenge"))
+	{
+		g_iLobbySlot = 8;
+	}
+	g_iLobbySlot = 4;
+}
+
+bool IsServerLobbyFull(int client)
+{
+	
+	int humans = GetConnectedPlayer(client);
+	/*
 	char sGameMode[32];
 	g_cvGameMode.GetString(sGameMode, sizeof(sGameMode));
 	if (StrEqual(sGameMode, "versus") || StrEqual(sGameMode, "scavenge"))
@@ -103,6 +118,8 @@ bool IsServerLobbyFull(int client)
 		return humans >= 8;
 	}
 	return humans >= 4;
+	*/
+	return humans >= g_iLobbySlot;
 }
 
 int GetConnectedPlayer(int client) {

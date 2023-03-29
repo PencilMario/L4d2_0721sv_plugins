@@ -5,7 +5,7 @@
 #include <pause>
 #include <l4d2util>
 
-Handle g_hPauseTimer, g_hPauseDetectTimer;
+Handle g_hPauseTimer;
 int g_iLastTime;
 public Plugin myinfo =
 {
@@ -16,16 +16,7 @@ public Plugin myinfo =
     url         = ""
 }
 
-public void OnMapStart(){
-    //g_hPauseDetectTimer = CreateTimer(2.0, Timer_AutoUnpauseDetect, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
-}
-public Action Timer_AutoUnpauseDetect(Handle timer){
-    if(IsInPause()){
-        if (g_hPauseTimer == INVALID_HANDLE){
-        OnPause();
-        }
-    }
-}
+
 public void OnPause(){
     g_iLastTime = 30;
     g_hPauseTimer = CreateTimer(1.0, Timer_AutoUnpause, _, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);

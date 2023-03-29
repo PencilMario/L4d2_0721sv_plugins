@@ -265,21 +265,21 @@ public void OnPluginStart()
 	g_hCvarStyle.AddChangeHook(ConVarChanged_Cvars);
 	g_hCvarVocalize.AddChangeHook(ConVarChanged_Cvars);
 
-	RegConsoleCmd("sm_strike",	CmdAirstrikeMenu, "Displays a menu with options to show/save an airstrike and triggers.");
-	RegConsoleCmd("sm_strikes",	CmdAirstrikeMake, "Create an Airstrike. Usage: sm_strikes <#userid|name> <type: 1=Aim position. 2=On position> OR vector position <X> <Y> <Z> <angle>");
+	RegAdminCmd("sm_strike",	CmdAirstrikeMenu, ADMFLAG_BAN ,"Displays a menu with options to show/save an airstrike and triggers.");
+	RegAdminCmd("sm_strikes",	CmdAirstrikeMake,ADMFLAG_BAN ,"Create an Airstrike. Usage: sm_strikes <#userid|name> <type: 1=Aim position. 2=On position> OR vector position <X> <Y> <Z> <angle>");
 
 	Strike_Enabled = FindConVar("l4d2_airstrike_allow");
 }
 
-public void OnRoundIsLive()
-{
-    Strike_Enabled.IntValue = 0;
-}
-
-public void OnReadyUpInitiate()
-{
-    Strike_Enabled.IntValue = 1;
-}
+//public void OnRoundIsLive()
+//{
+//    Strike_Enabled.IntValue = 0;
+//}
+//
+//public void OnReadyUpInitiate()
+//{
+//    Strike_Enabled.IntValue = 1;
+//}
 
 
 public void OnPluginEnd()

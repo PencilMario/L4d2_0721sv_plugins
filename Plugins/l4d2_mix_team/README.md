@@ -10,3 +10,5 @@ mix插件，懂得都懂
 **random**  随机分队   
 **randmap** 随机地图  
 **ranthirdmap** 随机三方图  
+
+> 依赖项：nativevotes, ripext
