@@ -389,7 +389,14 @@ public Action ForceUnpause_Cmd(int client, int args)
 	if (isPaused)
 	{
 		adminPause = true;
-		CPrintToChatAll("{default}[{green}!{default}] {blue}管理员{default}({olive}%N{default})取消了{green}强制暂停", client);
+		if (client != 0){
+			CPrintToChatAll("{default}[{green}!{default}] {blue}管理员{default}({olive}%N{default})强制{green}取消暂停", client);
+		}
+		else{
+			char Svname[64];
+			GetConVarString(FindConVar("hostname"), Svname, sizeof(Svname));
+			CPrintToChatAll("{default}[{green}!{default}] {blue}管理员{default}({olive}%s{default})强制{green}取消暂停", Svname);
+		}
 		InitiateLiveCountdown();
 	}
 
