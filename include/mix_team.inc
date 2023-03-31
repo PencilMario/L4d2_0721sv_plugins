@@ -34,19 +34,64 @@
 #define VOTEEND_MSG_SIZE        128
 
 
+native void CallCancelMix();
+
+native void CallEndMix();
+
 native int AddMixType(char[] sName, int iMinPlayers, int iTimeout);
 
+/**
+ * @brief Returns the status of the mix
+ *
+ * @return              STATE_NONE | STATE_VOTING | STATE_IN_PROGRESS
+ **/
 native int GetMixState();
 
+/**
+ * @brief Returns the mix type
+ * @remarks The mix type is equal to the index of the element in the TypeList
+ *
+ * @return              TypeList Index or TYPE_NONE
+ **/
 native int GetMixType();
 
-native int CallCancelMix();
+/**
+ * @brief Returns whether the player is a member of the mix
+ *
+ * @param iClient       Client ID
+ *
+ * @return              true or false
+ **/
+native bool IsMixMember(int iClient);
 
-native int CallEndMix();
-
-native int IsMixMember(int iClient);
-
+/**
+ * @brief Returns the team the player was on after voting for the mix
+ *
+ * @param iClient       Client ID
+ *
+ * @return              Returns the command if the player was in the mix, otherwise -1
+ **/
 native int GetLastTeam(int iClient);
+
+/**
+ * @brief Called when the mix completes successfully
+ * @remarks The mix name is the same as the first argument AddMixType()
+ *
+ * @param sMixName      Mix name
+ *
+ * @noreturn
+ */
+forward void OnMixSuccess(const char[] sMixName);
+
+/**
+ * @brief Called when the mix is ​​interrupted
+ * @remarks The mix name is the same as the first argument AddMixType()
+ *
+ * @param sMixName      Mix name
+ *
+ * @noreturn
+ */
+forward void OnMixFailed(const char[] sMixName);
 
 public SharedPlugin __pl_mix_team =
 {
@@ -71,3 +116,77 @@ public void __pl_mix_team_SetNTVOptional()
 	MarkNativeAsOptional("GetLastTeam");
 }
 #endif
+
+
+#define TEAM_NONE               0
+#define TEAM_SPECTATOR          1
+#define TEAM_SURVIVOR           2
+#define TEAM_INFECTED           3
+
+// Macros
+#define IS_SURVIVOR(%1)         (GetClientTeam(%1) == TEAM_SURVIVOR)
+#define IS_SPECTATOR(%1)        (GetClientTeam(%1) == TEAM_SPECTATOR)
+#define IS_INFECTED(%1)         (GetClientTeam(%1) == TEAM_INFECTED)
+
+/**
+ * Sets the client team.
+ * 
+ * @param iClient     Client index
+ * @param iTeam       Param description
+ * @return            true if success
+ */
+stock bool SetClientTeam(int iClient, int iTeam)
+{
+	if (iClient <= 0 || iClient > MaxClients) {
+		return false;
+	}
+
+	if (GetClientTeam(iClient) == iTeam) {
+		return true;
+	}
+
+	if (iTeam != TEAM_SURVIVOR) {
+		ChangeClientTeam(iClient, iTeam);
+		return true;
+	}
+
+	else if (FindSurvivorBot() > 0)
+	{
+		CheatCommand(iClient, "sb_takecontrol");
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Hack to execute cheat commands.
+ * 
+ * @noreturn
+ */
+stock void CheatCommand(int iClient, const char[] sCmd, const char[] sArgs = "")
+{
+	int iFlags = GetCommandFlags(sCmd);
+	SetCommandFlags(sCmd, iFlags & ~FCVAR_CHEAT);
+	FakeClientCommand(iClient, "%s %s", sCmd, sArgs);
+	SetCommandFlags(sCmd, iFlags);
+}
+
+/**
+ * Finds a free bot.
+ * 
+ * @return     Bot index or -1
+ */
+stock int FindSurvivorBot()
+{
+	for (int iClient = 1; iClient <= MaxClients; iClient++)
+	{
+		if (!IsClientInGame(iClient) || !IsFakeClient(iClient) || GetClientTeam(iClient) != TEAM_SURVIVOR) {
+			continue;
+		}
+
+		return iClient;
+	}
+
+	return -1;
+}
