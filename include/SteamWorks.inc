@@ -279,7 +279,7 @@ typeset SteamWorksHTTPBodyCallback
 {
 	function void(const char[] sData);
 	function void(const char[] sData, any value);
-	function void(const int data[], any value, int datalen);
+	function void(const int[] data, any value, int datalen);
 };
 
 native bool SteamWorks_GetHTTPResponseBodyCallback(Handle hRequest, SteamWorksHTTPBodyCallback fCallback, any data = 0, Handle hPlugin = INVALID_HANDLE);

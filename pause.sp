@@ -174,7 +174,7 @@ void FindServerNamer()
 
 public void OnCedapugStarted(int regionArg)
 {
-    isCedapug = true;
+	isCedapug = true;
 }
 
 public void OnClientPutInServer(int client)
@@ -285,9 +285,15 @@ public Action ForcePause_Cmd(int client, int args)
 	if (!isPaused)
 	{
 		adminPause = true;
-		initiatorId = GetClientUserId(client);
-		GetClientName(client, initiatorName, sizeof(initiatorName));
-		CPrintToChatAll("{default}[{green}!{default}] {blue}管理员{default}发起了{green}强制暂停{default}({olive}%N{default})", client);
+		if (client == 0){
+			ConVar host = FindConVar("hostname")
+			GetConVarString(host, initiatorName, sizeof(initiatorName))
+			initiatorId = 0;
+		}else{
+			initiatorId = GetClientUserId(client);
+			GetClientName(client, initiatorName, sizeof(initiatorName));
+		}
+		CPrintToChatAll("{default}[{green}!{default}] {blue}管理员{default}发起了{green}强制暂停{default}({olive}%s{default})", initiatorName);
 		Pause();
 	}
 

@@ -73,6 +73,7 @@
 #include <sourcemod>
 #include <sdktools>
 #include <clientprefs>
+#include <readyup>
 
 public Plugin myinfo =
 {
@@ -156,6 +157,14 @@ public void OnPluginStart()
 	GetCvars();
 	
 	SetRandomSeed(GetTime());
+}
+
+public void OnRoundIsLive(){
+	for (int i = 1; i <= MaxClients; i++){
+		if (IsClientInGame(i)){
+			StopCurrentSound(i);
+		}
+	}
 }
 
 public void OnPluginEnd()
