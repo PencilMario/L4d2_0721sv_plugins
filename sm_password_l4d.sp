@@ -3,8 +3,9 @@
 #define PWDTIME 45
 
 ConVar pwd;
+Handle tm;
 bool ClientPassed[MAXPLAYERS];
-int ClientLastTime[MAXPLAYERS];
+int ClientLastTime[MAXPLAYERS] = {PWDTIME};
 public Plugin myinfo = {
     name = "PWD",
     author = "sp",
@@ -16,12 +17,19 @@ public Plugin myinfo = {
 public void OnPluginStart(){
     pwd = CreateConVar("sm_pwd_var", "0", "服务器密码");
     RegConsoleCmd("sm_pwd", Cmd_InputPwd, "输入密码");
-}
+    HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
 
+}
+public void OnPluginEnd()
+{
+    KillTimer(tm);
+}
 public void OnMapStart()
 {  
-    if (pwd.IntValue) CreateTimer(1.0, Timer_Check, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+    if (pwd.IntValue) tm = CreateTimer(1.0, Timer_Check, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 }
+
+
 
 public bool OnClientConnect(int client, char[] rejectmsg, int maxlen){
     ClientLastTime[client] = 999;
@@ -33,7 +41,13 @@ public void OnClientPutInServer(int client)
     ClientLastTime[client] = PWDTIME;
 }
 
-public void OnClientDisconnect(int client){
+void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast) {
+    int client = GetClientOfUserId(event.GetInt("userid"));
+    if (!client)
+        return;
+
+    if (IsFakeClient(client))
+        return;
     ClientPassed[client] = false;
 }
 
