@@ -3,7 +3,7 @@
 #define PWDTIME 45
 
 ConVar pwd;
-Handle tm;
+Handle tm = INVALID_HANDLE;
 bool ClientPassed[MAXPLAYERS];
 int ClientLastTime[MAXPLAYERS] = {PWDTIME};
 public Plugin myinfo = {
@@ -18,6 +18,7 @@ public void OnPluginStart(){
     pwd = CreateConVar("sm_pwd_var", "0", "服务器密码");
     RegConsoleCmd("sm_pwd", Cmd_InputPwd, "输入密码");
     HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
+    HookConVarChange(pwd, KillTimer(tm);)
 
 }
 public void OnPluginEnd()
@@ -26,7 +27,9 @@ public void OnPluginEnd()
 }
 public void OnMapStart()
 {  
-    if (pwd.IntValue) tm = CreateTimer(1.0, Timer_Check, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+    if (tm == INVALID_HANDLE){
+        if (pwd.IntValue) tm = CreateTimer(1.0, Timer_Check, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+    }
 }
 
 
