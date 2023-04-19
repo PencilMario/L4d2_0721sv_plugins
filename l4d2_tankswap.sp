@@ -52,9 +52,9 @@ public OnPluginStart()
     
     PrepSDKCalls();
 
-    CreateConVar("l4d2_tankswap_version", PLUGIN_VERSION, " Version of L4D2 Tank Swap on this server ", FCVAR_PLUGIN|FCVAR_NOTIFY|FCVAR_SPONLY|FCVAR_DONTRECORD);
-    cvar_SurrenderTimeLimit = CreateConVar("l4d2_tankswap_timelimit", "10", " How many seconds can a primary Tank Player surrender control ", FCVAR_PLUGIN|FCVAR_NOTIFY);
-    cvar_SurrenderChoiceType = CreateConVar("l4d2_tankswap_choicetype", "2", " 0 - Disabled; 1 - press Button to call Menu; 2 - Menu appears for every Tank ", FCVAR_PLUGIN|FCVAR_NOTIFY);
+    CreateConVar("l4d2_tankswap_version", PLUGIN_VERSION, " Version of L4D2 Tank Swap on this server ", FCVAR_NOTIFY|FCVAR_SPONLY|FCVAR_DONTRECORD);
+    cvar_SurrenderTimeLimit = CreateConVar("l4d2_tankswap_timelimit", "10", " How many seconds can a primary Tank Player surrender control ", FCVAR_NOTIFY);
+    cvar_SurrenderChoiceType = CreateConVar("l4d2_tankswap_choicetype", "2", " 0 - Disabled; 1 - press Button to call Menu; 2 - Menu appears for every Tank ", FCVAR_NOTIFY);
     
     RegAdminCmd("sm_taketank", TS_CMD_TakeTank, ADMFLAG_CHEATS, " Take over the current Tank ");
     
