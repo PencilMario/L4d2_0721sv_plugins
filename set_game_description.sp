@@ -19,12 +19,13 @@ public void OnMapStart()
 {   
     char cfgName[32];
     config = FindConVar("l4d_ready_cfg_name");
-    config.GetString(cfgName, sizeof(cfgName));
-    Format(g_sName, sizeof(g_sName), "%s", cfgName);
+    if (config != INVALID_HANDLE){
+        config.GetString(cfgName, sizeof(cfgName));
+        Format(g_sName, sizeof(g_sName), "%s", cfgName);
+    }
 }
 
 public void OnGameFrame()
 {
     SteamWorks_SetGameDescription(g_sName);
-    
 }
