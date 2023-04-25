@@ -5,5 +5,5 @@
         "**/*.rpymc": true,
         "**/cache/": true
     },
-    "SourcePawnLanguageServer.mainPath": "e:\\GithubKu\\L4d2_0721sv_plugins\\sm_password_l4d.sp"
+    "SourcePawnLanguageServer.mainPath": "e:\\GithubKu\\L4d2_0721sv_plugins\\l4d_laser_sp.sp"
 }

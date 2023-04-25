@@ -18,13 +18,8 @@ public void OnPluginStart(){
     pwd = CreateConVar("sm_pwd_var", "0", "服务器密码");
     RegConsoleCmd("sm_pwd", Cmd_InputPwd, "输入密码");
     HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
-    HookConVarChange(pwd, KillTimer(tm);)
+}
 
-}
-public void OnPluginEnd()
-{
-    KillTimer(tm);
-}
 public void OnMapStart()
 {  
     if (tm == INVALID_HANDLE){
@@ -52,6 +47,7 @@ void Event_PlayerDisconnect(Event event, const char[] name, bool dontBroadcast) 
     if (IsFakeClient(client))
         return;
     ClientPassed[client] = false;
+    ClientLastTime[client] = 999;
 }
 
 public Action Cmd_InputPwd(int client, int args)
@@ -85,7 +81,7 @@ public Action Timer_Check(Handle Timer)
                 ClientLastTime[i]--
                 if (ClientLastTime[i] < 0)
                 {
-                    KickClient(i, "输入密码超时!");
+                    if (pwd.IntValue) KickClient(i, "输入密码超时!");
                 }
                 else
                 {
