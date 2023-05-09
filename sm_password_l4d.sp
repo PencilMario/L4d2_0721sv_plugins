@@ -15,15 +15,23 @@ public Plugin myinfo = {
 };
 
 public void OnPluginStart(){
-    pwd = CreateConVar("sm_pwd_var", "0", "服务器密码");
+    pwd = CreateConVar("sm_pwd_var", "0", "服务器密码, 请确保为纯数字!");
     RegConsoleCmd("sm_pwd", Cmd_InputPwd, "输入密码");
     HookEvent("player_disconnect", Event_PlayerDisconnect, EventHookMode_Pre);
+    HookConVarChange(pwd, OnCvarChange)
+}
+
+public void OnCvarChange()
+{
+    if (tm == INVALID_HANDLE){
+        if (pwd.IntValue) tm = CreateTimer(1.0, Timer_Check, _, TIMER_REPEAT);
+    }
 }
 
 public void OnMapStart()
 {  
     if (tm == INVALID_HANDLE){
-        if (pwd.IntValue) tm = CreateTimer(1.0, Timer_Check, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+        if (pwd.IntValue) tm = CreateTimer(1.0, Timer_Check, _, TIMER_REPEAT);
     }
 }
 
@@ -57,6 +65,7 @@ public Action Cmd_InputPwd(int client, int args)
         return Plugin_Handled;
     }
     int pwds = GetCmdArgInt(1);
+    if (!pwds) ReplyToCommand(client, "密码只允许纯数字!");
     if (pwds == pwd.IntValue)
     {
         ClientPassed[client] = true;

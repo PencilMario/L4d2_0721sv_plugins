@@ -5,5 +5,5 @@
         "**/*.rpymc": true,
         "**/cache/": true
     },
-    "SourcePawnLanguageServer.mainPath": "e:\\GithubKu\\L4d2_0721sv_plugins\\set_game_description.sp"
+    "SourcePawnLanguageServer.mainPath": "e:\\GithubKu\\L4d2_0721sv_plugins\\l4d_fyzb_en_v20.sp"
 }

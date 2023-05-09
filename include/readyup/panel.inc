@@ -28,6 +28,7 @@ void InitPanel()
 		cmdFooter.Add("(●'◡'●) 	!dance ");
 		cmdFooter.Add("(●'◡'●)  !secondary");
 		cmdFooter.Add("(●'◡'●)  !forcestart / !fs");
+		cmdFooter.Add("(●'◡'●)  !fw :D");
 		cmdFooter.Add("(●'◡'●)  Good luck & Have Fun :D");
 	}
 	
