@@ -5,5 +5,5 @@
         "**/*.rpymc": true,
         "**/cache/": true
     },
-    "SourcePawnLanguageServer.mainPath": "e:\\GithubKu\\L4d2_0721sv_plugins\\l4d_fyzb_en_v20.sp"
+    "SourcePawnLanguageServer.mainPath": "e:\\GithubKu\\L4d2_0721sv_plugins\\Plugins\\Ast_SiSpawnSystem\\addons\\sourcemod\\scripting\\Si_SpawnSetting.sp"
 }

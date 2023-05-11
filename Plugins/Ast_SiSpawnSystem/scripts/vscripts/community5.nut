@@ -22,9 +22,12 @@ DirectorOptions <-
 	
 	LookTempo = true
 
-    RelaxMaxFlowTravel = 10
+	IntensityRelaxThreshold = 1.0
+    RelaxMaxFlowTravel = 2
     RelaxMaxInterval = 1
     RelaxMinInterval = 0
+	SustainPeakMinTime = 0
+	SustainPeakMaxTime = 1
 	
     DefaultItems =
  	[
@@ -98,3 +101,4 @@ function Update()
 }
 update_diff();
 g_ModeScript.update_diff();
+Director.ResetMobTimer();
