@@ -54,10 +54,8 @@ public Action Cmd_SetAiTime(int client, int args)
 	}
 	time = GetCmdArgInt(1);
 	SS_Time.IntValue = time;
-	char name[64];
-	GetClientName(client, name, sizeof(name));
-	CPrintToChatAll("{green}[{lightgreen}!{green}] {olive}%s{default}修改了特感刷新配置", name);
-	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}刷新配置：最高同屏{olive}%d ，单类限制{olive}%d{default}只，单SlotCD{olive}%d",	SS_1_SiNum.IntValue, SS_1_SiLim.IntValue, SS_Time.IntValue);
+	CPrintToChatAll("{green}[{lightgreen}!{green}] {olive}%N{default}修改了特感刷新配置", client);
+	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}刷新配置：最高同屏{olive}%d{default} ，单类至少{olive}%d{default}只，单SlotCD{olive}%ds{default}",	SS_1_SiNum.IntValue, SS_1_SiLim.IntValue, SS_Time.IntValue);
 	FakeClientCommand(client, "sm_reloadscript");
 	return Plugin_Continue;
 }
@@ -78,7 +76,7 @@ public Action Cmd_SetAiSpawns(int client, int args)
 	char name[64];
 	GetClientName(client, name, sizeof(name));
 	CPrintToChatAll("{green}[{lightgreen}!{green}] {olive}%s{default}修改了特感刷新配置", name);
-	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}刷新配置：最高同屏{olive}%d ，单类限制{olive}%d{default}只，单SlotCD{olive}%d",	SS_1_SiNum.IntValue, SS_1_SiLim.IntValue, SS_Time.IntValue);
+	CPrintToChatAll("{green}[{lightgreen}!{green}] {default}刷新配置：最高同屏{olive}%d{default} ，单类至少{olive}%d{default}只，单SlotCD{olive}%ds{default}",	SS_1_SiNum.IntValue, SS_1_SiLim.IntValue, SS_Time.IntValue);
 	FakeClientCommand(client, "sm_reloadscript");
 	return Plugin_Continue;
 }
