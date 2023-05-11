@@ -37,20 +37,40 @@ MapData <-{
 	g_nTime = 3
 }
 
+function distribute(Si1p) {
+    local result = [];
+    local sum = 0;
+    foreach (i in 0..5) {
+        result[i] = 0;
+    }
+    foreach (i in 0..5) {
+        sum += result[i];
+    }
+    foreach (i in 0..5) {
+        result[i] = floor(Si1p / 6);
+        if (sum + result[i] < Si1p) {
+            result[i]++;
+        }
+        sum += result[i];
+    }
+    return result;
+}
+
 function update_diff()
 {
     local timer = (Convars.GetFloat("SS_Time")).tointeger()
     local Si1p = (Convars.GetFloat("sss_1P")).tointeger()
-    local Si1pl = (Convars.GetFloat("sss_1P_Lim")).tointeger()
+	local SpecialLimits = distribute(Si1p)
+
 
     DirectorOptions.cm_SpecialRespawnInterval = timer
     DirectorOptions.cm_SpecialSlotCountdownTime = timer
-    DirectorOptions.HunterLimit = Si1pl
-    DirectorOptions.BoomerLimit = Si1pl
-    DirectorOptions.JockeyLimit = Si1pl
-    DirectorOptions.SmokerLimit = Si1pl
-    DirectorOptions.ChargerLimit = Si1pl
-    DirectorOptions.SpitterLimit = Si1pl
+    DirectorOptions.HunterLimit = SpecialLimits[0]
+    DirectorOptions.JockeyLimit = SpecialLimits[1]
+    DirectorOptions.SmokerLimit = SpecialLimits[2]
+    DirectorOptions.ChargerLimit = SpecialLimits[3]
+    DirectorOptions.SpitterLimit = SpecialLimits[4]
+	DirectorOptions.BoomerLimit = SpecialLimits[5]
     MapData.g_nSI = Si1p
     
     DirectorOptions.cm_BaseSpecialLimit = MapData.g_nSI
