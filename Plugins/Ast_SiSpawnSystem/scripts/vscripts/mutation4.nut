@@ -4,7 +4,7 @@ DirectorOptions <-
 	cm_AggressiveSpecials 			= true
 	cm_ShouldHurry 					= 1
 	cm_SpecialRespawnInterval 		= 15 //Time for an SI spawn slot to become available
-	cm_SpecialSlotCountdownTime 	= 0
+	cm_SpecialSlotCountdownTime 	= 3
 	
 	DominatorLimit 			= 3
 	cm_BaseSpecialLimit 	= 3
@@ -37,30 +37,20 @@ MapData <-{
 	g_nTime = 3
 }
 
-function distribute(Si1p) {
-    local result = [];
-    local sum = 0;
-    foreach (i in 0..5) {
-        result[i] = 0;
-    }
-    foreach (i in 0..5) {
-        sum += result[i];
-    }
-    foreach (i in 0..5) {
-        result[i] = floor(Si1p / 6);
-        if (sum + result[i] < Si1p) {
-            result[i]++;
-        }
-        sum += result[i];
-    }
-    return result;
-}
-
 function update_diff()
 {
     local timer = (Convars.GetFloat("SS_Time")).tointeger()
     local Si1p = (Convars.GetFloat("sss_1P")).tointeger()
-	local SpecialLimits = distribute(Si1p)
+	local SpecialLimits = [0,0,0,0,0,0];
+	local index = 0;
+	for(local a = 1; a <= Si1p; a+=1){
+		SpecialLimits[index] += 1;
+		index += 1;
+		if (index > 5){
+			index = 0;
+		}
+	}
+
 
 
     DirectorOptions.cm_SpecialRespawnInterval = timer
@@ -71,12 +61,11 @@ function update_diff()
     DirectorOptions.ChargerLimit = SpecialLimits[3]
     DirectorOptions.SpitterLimit = SpecialLimits[4]
 	DirectorOptions.BoomerLimit = SpecialLimits[5]
-    MapData.g_nSI = Si1p
+    MapData.g_nSI = Si1p + 2
     
-    DirectorOptions.cm_BaseSpecialLimit = MapData.g_nSI
-    DirectorOptions.cm_MaxSpecials      = MapData.g_nSI
-    DirectorOptions.DominatorLimit      = MapData.g_nSI
+    DirectorOptions.cm_BaseSpecialLimit = MapData.g_nSI + 2
+    DirectorOptions.cm_MaxSpecials      = MapData.g_nSI + 2
+    DirectorOptions.DominatorLimit      = MapData.g_nSI + 2
 }
 
 update_diff();
-g_ModeScript.update_diff();

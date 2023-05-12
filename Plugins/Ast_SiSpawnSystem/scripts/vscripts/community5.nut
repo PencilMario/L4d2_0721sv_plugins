@@ -73,30 +73,20 @@ MapData <-{
 	g_nTime = 3
 }
 
-function distribute(Si1p) {
-    local result = [];
-    local sum = 0;
-    foreach (i in 0..5) {
-        result[i] = 0;
-    }
-    foreach (i in 0..5) {
-        sum += result[i];
-    }
-    foreach (i in 0..5) {
-        result[i] = floor(Si1p / 6);
-        if (sum + result[i] < Si1p) {
-            result[i]++;
-        }
-        sum += result[i];
-    }
-    return result;
-}
+
 function update_diff()
 {
     local timer = (Convars.GetFloat("SS_Time")).tointeger()
     local Si1p = (Convars.GetFloat("sss_1P")).tointeger()
-	local SpecialLimits = distribute(Si1p)
-
+	local SpecialLimits = [0,0,0,0,0,0];
+	local index = 0;
+	for(local a = 1; a <= Si1p; a+=1){
+		SpecialLimits[index] += 1;
+		index += 1;
+		if (index > 5){
+			index = 0;
+		}
+	}
 
     DirectorOptions.cm_SpecialRespawnInterval = timer
     DirectorOptions.cm_SpecialSlotCountdownTime = timer
@@ -119,4 +109,4 @@ function Update()
 }
 update_diff();
 g_ModeScript.update_diff();
-Director.ResetMobTimer();
+
