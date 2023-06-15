@@ -41,17 +41,52 @@ function update_diff()
 {
     local timer = (Convars.GetFloat("SS_Time")).tointeger()
     local Si1p = (Convars.GetFloat("sss_1P")).tointeger()
+	local relax = (Convars.GetFloat("SS_Relax")).tointeger()
+	local dpslim = (Convars.GetFloat("SS_DPSSiLimit")).tointeger()
+
 	local SpecialLimits = [0,0,0,0,0,0];
 	local index = 0;
-	for(local a = 1; a <= Si1p; a+=1){
+	local Sifix = Si1p;
+	if (Si1p < 6){
+		Sifix = 6
+	}
+	for(local a = 1; a <= Sifix; a+=1){
 		SpecialLimits[index] += 1;
 		index += 1;
+		if (SpecialLimits[4]+SpecialLimits[5] >= dpslim){
+			if (index > 3){
+				index = 0;
+			}
+		}
 		if (index > 5){
 			index = 0;
 		}
 	}
 
-
+	if (relax != 1){
+		DirectorOptions.LookTempo <- true
+		DirectorOptions.IntensityRelaxThreshold <- 1.01
+    	DirectorOptions.RelaxMaxFlowTravel <- 0.0
+    	DirectorOptions.RelaxMaxInterval <- 0.5
+    	DirectorOptions.RelaxMinInterval <- 0.0
+		DirectorOptions.SustainPeakMinTime <- 0
+		DirectorOptions.SustainPeakMaxTime <- 0.1
+		Convars.SetValue("director_special_battlefield_respawn_interval",2)
+		Convars.SetValue("director_special_initial_spawn_delay_max", 1)
+		Convars.SetValue("director_special_initial_spawn_delay_max_extra", 2)
+		Convars.SetValue("director_special_initial_spawn_delay_min", 0)
+		Convars.SetValue("director_special_finale_offer_length", 1)
+		Convars.SetValue("director_special_original_offer_length", 1)
+	}
+	else
+	{
+		Convars.SetValue("director_special_battlefield_respawn_interval",10)
+		Convars.SetValue("director_special_initial_spawn_delay_max", 60)
+		Convars.SetValue("director_special_initial_spawn_delay_max_extra", 180)
+		Convars.SetValue("director_special_initial_spawn_delay_min", 30)
+		Convars.SetValue("director_special_finale_offer_length", 10)
+		Convars.SetValue("director_special_original_offer_length", 30)
+	}
 
     DirectorOptions.cm_SpecialRespawnInterval = timer
     DirectorOptions.cm_SpecialSlotCountdownTime = timer
@@ -61,11 +96,12 @@ function update_diff()
     DirectorOptions.ChargerLimit = SpecialLimits[3]
     DirectorOptions.SpitterLimit = SpecialLimits[4]
 	DirectorOptions.BoomerLimit = SpecialLimits[5]
-    MapData.g_nSI = Si1p + 2
+    MapData.g_nSI = Si1p
     
-    DirectorOptions.cm_BaseSpecialLimit = MapData.g_nSI + 2
-    DirectorOptions.cm_MaxSpecials      = MapData.g_nSI + 2
-    DirectorOptions.DominatorLimit      = MapData.g_nSI + 2
+    DirectorOptions.cm_BaseSpecialLimit = MapData.g_nSI
+    DirectorOptions.cm_MaxSpecials      = MapData.g_nSI
+    DirectorOptions.DominatorLimit      = MapData.g_nSI
 }
 
 update_diff();
+g_ModeScript.update_diff();

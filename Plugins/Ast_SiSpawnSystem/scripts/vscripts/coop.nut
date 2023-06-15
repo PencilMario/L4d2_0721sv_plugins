@@ -4,11 +4,7 @@ DirectorOptions <-
 	cm_AggressiveSpecials 			= true
 	cm_ShouldHurry 					= 1
 	cm_SpecialRespawnInterval 		= 15 //Time for an SI spawn slot to become available
-	cm_SpecialSlotCountdownTime 	= 0
-	
-	cm_AllowPillConversion = 0
-	cm_AllowSurvivorRescue = 0
-	SurvivorMaxIncapacitatedCount = 0
+	cm_SpecialSlotCountdownTime 	= 3
 	
 	DominatorLimit 			= 3
 	cm_BaseSpecialLimit 	= 3
@@ -19,9 +15,6 @@ DirectorOptions <-
 	JockeyLimit 			= 1
 	ChargerLimit 			= 1
 	SmokerLimit 			= 0
-	
-
-	
     DefaultItems =
  	[
  		"weapon_smg",
@@ -37,35 +30,12 @@ DirectorOptions <-
  		}
  		return 0;
  	}
- 	weaponsToConvert =
-	{
-		weapon_first_aid_kit =	"weapon_pain_pills_spawn"
-		weapon_adrenaline =	"weapon_pain_pills_spawn"
-	}
-
-	function ConvertWeaponSpawn( classname )
-	{
-		if ( classname in weaponsToConvert )
-		{
-			return weaponsToConvert[classname];
-		}
-		return 0;
-	}
-	TempHealthDecayRate = 0.001
-	function RecalculateHealthDecay()
-	{
-		if ( Director.HasAnySurvivorLeftSafeArea() )
-		{
-			TempHealthDecayRate = 0.27 // pain_pills_decay_rate default
-		}
-	}
 }
 
 MapData <-{
 	g_nSI 	= 3
 	g_nTime = 3
 }
-
 
 function update_diff()
 {
@@ -92,7 +62,6 @@ function update_diff()
 			index = 0;
 		}
 	}
-
 	if (relax != 1){
 		DirectorOptions.LookTempo <- true
 		DirectorOptions.IntensityRelaxThreshold <- 1.01
@@ -133,10 +102,5 @@ function update_diff()
     DirectorOptions.DominatorLimit      = MapData.g_nSI
 }
 
-function Update()
-{
-	DirectorOptions.RecalculateHealthDecay();
-}
 update_diff();
 g_ModeScript.update_diff();
-

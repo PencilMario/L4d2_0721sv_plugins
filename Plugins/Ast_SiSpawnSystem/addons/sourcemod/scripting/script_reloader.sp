@@ -15,23 +15,28 @@ public void OnPluginStart()
 
 public Action Cmd_Reload(int client, int args)
 {
-	CheatCommand("script_reload_code", "versus.nut");
-	CheatCommand("script_reload_code", "realism.nut");
-	CheatCommand("script_reload_code", "coop.nut");
-	CheatCommand("script_reload_code", "mutation4.nut");
+	ConVar gamemode = FindConVar("mp_gamemode");
+	char modestr[64];
+	gamemode.GetString(modestr, 64);  //  convars.inc
+	char file[64];
+	Format(file, 64, "%s.nut", modestr);
+	CheatCommand("script_reload_code", file);
+	PrintToServer("Script %s.nut Reloaded", modestr);
+	return Plugin_Handled;
 }
 
 public void CheatCommand(char[] strCommand, char[] strParam1)
 {
-	for (int client = 1; client <= MaxClients; ++client)
-	{
-		if (IsClientInGame(client))
-		{
-			int flags = GetCommandFlags(strCommand);
-			SetCommandFlags(strCommand, flags & ~FCVAR_CHEAT);
-			FakeClientCommand(client, "%s %s", strCommand, strParam1);
-			SetCommandFlags(strCommand, flags);
-			return;
-		}
-	}
+	int flags = GetCommandFlags(strCommand);
+	SetCommandFlags(strCommand, flags & ~FCVAR_CHEAT);
+	ServerCommand("%s %s", strCommand, strParam1);
+	//SetCommandFlags(strCommand, flags);
+	CreateTimer(0.5, RestoreCheatFlag);
+}
+
+public Action RestoreCheatFlag(Handle timer)
+{
+	int flags = GetCommandFlags("script_reload_code");
+	SetCommandFlags("script_reload_code", flags | FCVAR_CHEAT);
+	return Plugin_Stop;
 }
